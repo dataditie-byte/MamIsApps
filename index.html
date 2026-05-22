@@ -1,98 +1,403 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Sanggar Mam Is Apps</title>
+  <title>Sanggar Mam Is Apps Pro</title>
 
-<style>
-
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:linear-gradient(135deg,#1f4e79,#2f80ed);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-text-align:center;
-}
-
-.box{
-background:rgba(255,255,255,0.12);
-padding:40px;
-border-radius:24px;
-width:90%;
-max-width:500px;
-backdrop-filter:blur(10px);
-}
-
-img{
-width:90px;
-background:white;
-padding:10px;
-border-radius:20px;
-margin-bottom:20px;
-}
-
-h1{
-margin:0;
-font-size:32px;
-}
-
-p{
-margin-top:10px;
-opacity:0.95;
-line-height:1.6;
-}
-
-.btn{
-display:inline-block;
-margin-top:25px;
-padding:14px 24px;
-background:white;
-color:#1f4e79;
-border-radius:14px;
-text-decoration:none;
-font-weight:bold;
-}
-
-</style>
-
-<script>
-
-setTimeout(function(){
-
-window.location.href =
-"https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
-
-},3000);
-
-</script>
-
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:#f3f7fb;
+      color:#172554;
+      padding-bottom:72px;
+    }
+    .top{
+      background:linear-gradient(135deg,#1f4e79,#2f80ed);
+      color:white;
+      padding:20px 16px 28px;
+      border-radius:0 0 26px 26px;
+      box-shadow:0 4px 16px rgba(0,0,0,.16);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:54px;height:54px;border-radius:16px;background:white;padding:6px;object-fit:contain
+    }
+    h1{font-size:22px;margin:0}
+    .sub{margin:4px 0 0;font-size:13px;opacity:.9}
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:18px;
+    }
+    .card{
+      background:white;
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 3px 12px rgba(15,23,42,.08);
+      margin-bottom:12px;
+    }
+    .top .card{background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.22)}
+    .label{font-size:12px;opacity:.82}
+    .num{font-size:24px;font-weight:bold;margin-top:5px}
+    .wrap{padding:14px;max-width:900px;margin:auto}
+    .section{display:none}
+    .section.active{display:block}
+    h2{font-size:20px;margin:8px 0 12px}
+    input,select,textarea{
+      width:100%;padding:12px;margin:6px 0 10px;border:1px solid #cbd5e1;border-radius:14px;font-size:15px;background:white;
+    }
+    textarea{min-height:70px}
+    button,.btn{
+      border:0;border-radius:14px;padding:12px 14px;font-weight:bold;cursor:pointer;
+      background:#1f4e79;color:white;text-decoration:none;display:inline-block
+    }
+    .btn-green{background:#16a34a}
+    .btn-light{background:#e8f1ff;color:#1f4e79}
+    .grid{display:grid;gap:10px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left}
+    th{background:#f8fafc}
+    .msg{font-weight:bold;color:#166534;margin-top:8px}
+    .bottom{
+      position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(5,1fr);
+      box-shadow:0 -4px 14px rgba(0,0,0,.12);z-index:10
+    }
+    .navbtn{
+      background:white;color:#475569;border-radius:0;padding:10px 4px;font-size:11px
+    }
+    .navbtn.active{color:#1f4e79;background:#e8f1ff}
+    .small{font-size:12px;color:#64748b}
+  </style>
 </head>
 
 <body>
+  <div class="top">
+    <div class="brand">
+      <img src="logo-mam-is.png" class="logo" onerror="this.style.display='none'">
+      <div>
+        <h1>Sanggar Mam Is Apps Pro</h1>
+        <p class="sub">Mobile dashboard untuk siswa, kelas, absensi, dan pembayaran</p>
+      </div>
+    </div>
 
-<div class="box">
+    <div class="summary">
+      <div class="card"><div class="label">Siswa Aktif</div><div class="num" id="sSiswa">0</div></div>
+      <div class="card"><div class="label">Kelas Aktif</div><div class="num" id="sKelas">0</div></div>
+      <div class="card"><div class="label">Pembayaran Bulan Ini</div><div class="num" id="sBayar">Rp0</div></div>
+      <div class="card"><div class="label">Tunggakan</div><div class="num" id="sTunggakan">Rp0</div></div>
+    </div>
+  </div>
 
-<img src="logo-mam-is.png">
+  <div class="wrap">
+    <section id="home" class="section active">
+      <h2>Dashboard</h2>
+      <div class="card">
+        <button onclick="loadData()">Refresh Data</button>
+        <div class="msg" id="msgHome"></div>
+      </div>
+      <div class="card">
+        <h3>Data Cepat</h3>
+        <div id="quickData" class="small">Memuat data...</div>
+      </div>
+    </section>
 
-<h1>Sanggar Mam Is Apps</h1>
+    <section id="siswa" class="section">
+      <h2>Tambah Siswa</h2>
+      <div class="card">
+        <input id="namaSiswa" placeholder="Nama siswa">
+        <select id="jenjangSiswa">
+          <option value="">Pilih jenjang</option>
+          <option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option>
+        </select>
+        <input id="namaOrtu" placeholder="Nama orang tua/wali">
+        <input id="noWaSiswa" placeholder="No WA">
+        <textarea id="alamatSiswa" placeholder="Alamat"></textarea>
+        <button class="btn-green" onclick="addSiswa()">Simpan Siswa</button>
+        <div class="msg" id="msgSiswa"></div>
+      </div>
+      <div class="card"><h3>Daftar Siswa</h3><div id="listSiswa"></div></div>
+    </section>
 
-<p>
-Monitoring siswa, kelas, pengajar,
-absensi, dan pembayaran.
-</p>
+    <section id="kelas" class="section">
+      <h2>Tambah Kelas</h2>
+      <div class="card">
+        <input id="namaKelas" placeholder="Nama kelas">
+        <select id="jenjangKelas"><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select>
+        <select id="kategoriKelas"><option>Bahasa Inggris</option><option>Mapel</option><option>Matematika</option><option>Kelas Baca</option><option>Paket Lain</option></select>
+        <select id="selectPengajar"></select>
+        <input type="number" id="biayaKelas" placeholder="Biaya bulanan">
+        <button class="btn-green" onclick="addKelas()">Simpan Kelas</button>
+        <div class="msg" id="msgKelas"></div>
+      </div>
 
-<a class="btn"
-href="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec">
-Buka Aplikasi
-</a>
+      <div class="card">
+        <h3>Tambah Pengajar</h3>
+        <input id="namaPengajar" placeholder="Nama pengajar">
+        <input id="waPengajar" placeholder="No WA">
+        <textarea id="alamatPengajar" placeholder="Alamat"></textarea>
+        <button onclick="addPengajar()">Simpan Pengajar</button>
+        <div class="msg" id="msgPengajar"></div>
+      </div>
 
-</div>
+      <div class="card"><h3>Daftar Kelas</h3><div id="listKelas"></div></div>
+    </section>
 
+    <section id="absensi" class="section">
+      <h2>Absensi</h2>
+      <div class="card">
+        <select id="kelasAbsensi" onchange="loadPesertaAbsensi()"></select>
+        <input type="date" id="tanggalAbsensi">
+        <div id="formAbsensi"></div>
+        <button class="btn-green" onclick="simpanAbsensi()">Simpan Absensi</button>
+        <div class="msg" id="msgAbsensi"></div>
+      </div>
+    </section>
+
+    <section id="bayar" class="section">
+      <h2>Pembayaran</h2>
+      <div class="card">
+        <select id="siswaBayar"></select>
+        <select id="kelasBayar" onchange="setTagihan()"></select>
+        <input type="month" id="bulanBayar">
+        <input type="number" id="tagihan" placeholder="Tagihan">
+        <input type="number" id="dibayar" placeholder="Dibayar">
+        <select id="metode"><option>Cash</option><option>Transfer</option><option>QRIS</option></select>
+        <textarea id="ketBayar" placeholder="Keterangan"></textarea>
+        <button class="btn-green" onclick="simpanPembayaran()">Simpan Pembayaran</button>
+        <div class="msg" id="msgBayar"></div>
+      </div>
+      <div class="card"><h3>Riwayat Pembayaran</h3><div id="listBayar"></div></div>
+    </section>
+  </div>
+
+  <div class="bottom">
+    <button class="navbtn active" onclick="show('home',this)">Home</button>
+    <button class="navbtn" onclick="show('siswa',this)">Siswa</button>
+    <button class="navbtn" onclick="show('kelas',this)">Kelas</button>
+    <button class="navbtn" onclick="show('absensi',this)">Absensi</button>
+    <button class="navbtn" onclick="show('bayar',this)">Bayar</button>
+  </div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
+const API_KEY = "MAMIS-2026";
+
+let db = {siswa:[], pengajar:[], kelas:[], peserta:[], pembayaran:[], absensi:[]};
+let pesertaAbsensi = [];
+
+function rupiah(n){
+  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0));
+}
+
+function api(action, params={}){
+  return new Promise((resolve,reject)=>{
+    const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random()*9999);
+    window[cb] = (data) => {
+      resolve(data);
+      delete window[cb];
+      script.remove();
+    };
+
+    params.action = action;
+    params.key = API_KEY;
+    params.callback = cb;
+
+    const qs = new URLSearchParams(params).toString();
+    const script = document.createElement("script");
+    script.src = API_URL + "?" + qs;
+    script.onerror = () => reject(new Error("Gagal koneksi API"));
+    document.body.appendChild(script);
+  });
+}
+
+function show(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function today(){
+  return new Date().toISOString().split('T')[0];
+}
+
+function monthNow(){
+  return today().slice(0,7);
+}
+
+async function loadData(){
+  document.getElementById('msgHome').innerText = 'Memuat data...';
+  const data = await api('bootstrap');
+
+  if(!data.status){
+    document.getElementById('msgHome').innerText = data.message || 'Gagal memuat data';
+    return;
+  }
+
+  db = data;
+
+  document.getElementById('sSiswa').innerText = data.summary.jumlahSiswaAktif || 0;
+  document.getElementById('sKelas').innerText = data.summary.jumlahKelasAktif || 0;
+  document.getElementById('sBayar').innerText = rupiah(data.summary.totalPembayaranBulanIni || 0);
+  document.getElementById('sTunggakan').innerText = rupiah(data.summary.totalTunggakan || 0);
+
+  renderAll();
+  fillDropdowns();
+
+  document.getElementById('msgHome').innerText = 'Data berhasil diperbarui.';
+}
+
+function renderAll(){
+  document.getElementById('quickData').innerHTML =
+    `Pengajar: ${db.summary.jumlahPengajarAktif} | Peserta kelas: ${db.summary.jumlahPesertaKelas}`;
+
+  document.getElementById('listSiswa').innerHTML = table(db.siswa.slice(-15).reverse(), ['Nama Siswa','Jenjang','No WA','Status Aktif']);
+  document.getElementById('listKelas').innerHTML = table(db.kelas.slice(-15).reverse(), ['Nama Kelas','Jenjang','Kategori','Nama Pengajar','Biaya Bulanan']);
+  document.getElementById('listBayar').innerHTML = table(db.pembayaran.slice(-20).reverse(), ['Bulan Pembayaran','Nama Siswa','Nama Kelas','Dibayar','Sisa','Status Pembayaran']);
+}
+
+function table(rows, cols){
+  if(!rows.length) return '<p class="small">Belum ada data.</p>';
+  let h = '<table><tr>' + cols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+  rows.forEach(r=>{
+    h += '<tr>' + cols.map(c=>`<td>${r[c] || ''}</td>`).join('') + '</tr>';
+  });
+  return h + '</table>';
+}
+
+function fillDropdowns(){
+  const siswaAktif = db.siswa.filter(x => String(x['Status Aktif']).toLowerCase()==='aktif');
+  const pengajarAktif = db.pengajar.filter(x => String(x['Status Aktif']).toLowerCase()==='aktif');
+  const kelasAktif = db.kelas.filter(x => String(x['Status Kelas']).toLowerCase()==='aktif');
+
+  fill('siswaBayar', siswaAktif, 'ID Siswa', r => r['Nama Siswa']);
+  fill('selectPengajar', pengajarAktif, 'ID Pengajar', r => r['Nama Pengajar']);
+  fill('kelasBayar', kelasAktif, 'ID Kelas', r => r['Nama Kelas']);
+  fill('kelasAbsensi', kelasAktif, 'ID Kelas', r => r['Nama Kelas']);
+}
+
+function fill(id, arr, key, textFn){
+  const el = document.getElementById(id);
+  el.innerHTML = '<option value="">Pilih</option>';
+  arr.forEach(r => el.innerHTML += `<option value="${r[key]}">${textFn(r)}</option>`);
+}
+
+async function addSiswa(){
+  const data = {
+    namaSiswa: val('namaSiswa'),
+    jenjang: val('jenjangSiswa'),
+    namaOrtu: val('namaOrtu'),
+    noWa: val('noWaSiswa'),
+    alamat: val('alamatSiswa')
+  };
+  const res = await api('addSiswa', {data: JSON.stringify(data)});
+  document.getElementById('msgSiswa').innerText = res.message;
+  loadData();
+}
+
+async function addPengajar(){
+  const data = {
+    namaPengajar: val('namaPengajar'),
+    noWa: val('waPengajar'),
+    alamat: val('alamatPengajar')
+  };
+  const res = await api('addPengajar', {data: JSON.stringify(data)});
+  document.getElementById('msgPengajar').innerText = res.message;
+  loadData();
+}
+
+async function addKelas(){
+  const pg = db.pengajar.find(x => x['ID Pengajar'] === val('selectPengajar'));
+  const data = {
+    namaKelas: val('namaKelas'),
+    jenjang: val('jenjangKelas'),
+    kategori: val('kategoriKelas'),
+    idPengajar: val('selectPengajar'),
+    namaPengajar: pg ? pg['Nama Pengajar'] : '',
+    biayaBulanan: val('biayaKelas')
+  };
+  const res = await api('addKelas', {data: JSON.stringify(data)});
+  document.getElementById('msgKelas').innerText = res.message;
+  loadData();
+}
+
+async function loadPesertaAbsensi(){
+  const idKelas = val('kelasAbsensi');
+  if(!idKelas) return;
+  pesertaAbsensi = await api('getPesertaByKelas', {idKelas});
+  let h = '';
+  pesertaAbsensi.forEach((p,i)=>{
+    h += `<div class="card">
+      <b>${p['Nama Siswa']}</b>
+      <select id="hadir_${i}">
+        <option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alfa</option>
+      </select>
+      <input id="ket_${i}" placeholder="Keterangan">
+    </div>`;
+  });
+  document.getElementById('formAbsensi').innerHTML = h || '<p class="small">Belum ada peserta.</p>';
+}
+
+async function simpanAbsensi(){
+  const kl = db.kelas.find(x => x['ID Kelas'] === val('kelasAbsensi'));
+  if(!kl) return alert('Pilih kelas dulu');
+
+  const items = pesertaAbsensi.map((p,i)=>({
+    idSiswa: p['ID Siswa'],
+    namaSiswa: p['Nama Siswa'],
+    kehadiran: val('hadir_'+i),
+    keterangan: val('ket_'+i)
+  }));
+
+  const data = {
+    tanggal: val('tanggalAbsensi'),
+    idKelas: kl['ID Kelas'],
+    namaKelas: kl['Nama Kelas'],
+    items
+  };
+
+  const res = await api('addAbsensiBatch', {data: JSON.stringify(data)});
+  document.getElementById('msgAbsensi').innerText = res.message;
+  loadData();
+}
+
+function setTagihan(){
+  const kl = db.kelas.find(x => x['ID Kelas'] === val('kelasBayar'));
+  if(kl) document.getElementById('tagihan').value = String(kl['Biaya Bulanan']).replace(/[^0-9]/g,'');
+}
+
+async function simpanPembayaran(){
+  const sw = db.siswa.find(x => x['ID Siswa'] === val('siswaBayar'));
+  const kl = db.kelas.find(x => x['ID Kelas'] === val('kelasBayar'));
+  if(!sw || !kl) return alert('Pilih siswa dan kelas');
+
+  const data = {
+    bulanPembayaran: val('bulanBayar'),
+    idSiswa: sw['ID Siswa'],
+    namaSiswa: sw['Nama Siswa'],
+    idKelas: kl['ID Kelas'],
+    namaKelas: kl['Nama Kelas'],
+    tagihan: val('tagihan'),
+    dibayar: val('dibayar'),
+    metodeBayar: val('metode'),
+    keterangan: val('ketBayar')
+  };
+
+  const res = await api('addPembayaran', {data: JSON.stringify(data)});
+  document.getElementById('msgBayar').innerText = res.message + ' - ' + res.statusPembayaran;
+  loadData();
+}
+
+function val(id){return document.getElementById(id).value;}
+
+document.getElementById('tanggalAbsensi').value = today();
+document.getElementById('bulanBayar').value = monthNow();
+loadData();
+</script>
 </body>
 </html>
