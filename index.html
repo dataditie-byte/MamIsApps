@@ -1,118 +1,45 @@
-<!-- ===== PATCH HTML TAHAP 6D ===== -->
-
-<!-- 1. Di select jenjang kelas, tambahkan TK:
-<option>TK</option>
-<option>SD</option>
-<option>SMP</option>
-<option>SMA</option>
-<option>Umum</option>
--->
-
-<!-- 2. Tambahkan input pencarian siswa sebelum list siswa: -->
-<input id="searchSiswa" placeholder="Ketik nama siswa..." onkeyup="renderAll()" />
-
-<!-- 3. Ganti fungsi renderSiswaTable() dengan ini: -->
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Sanggar Mam Is Apps Pro</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f7fb;color:#172554;padding-bottom:76px}.top{background:linear-gradient(135deg,#1f4e79,#2f80ed);color:white;padding:20px 16px 28px;border-radius:0 0 26px 26px;box-shadow:0 4px 16px #0003}.brand{display:flex;gap:12px;align-items:center}.logo{width:54px;height:54px;border-radius:16px;background:white;padding:6px;object-fit:contain}h1{font-size:22px;margin:0}.sub{margin:4px 0 0;font-size:13px;opacity:.9}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}.card{background:white;border-radius:18px;padding:14px;box-shadow:0 3px 12px #0f172a14;margin-bottom:12px}.top .card{background:#ffffff24;color:white;border:1px solid #ffffff38}.label{font-size:12px;opacity:.82}.num{font-size:24px;font-weight:bold;margin-top:5px}.wrap{padding:14px;max-width:980px;margin:auto}.section{display:none}.section.active{display:block}h2{font-size:20px;margin:8px 0 12px}input,select,textarea{width:100%;padding:12px;margin:6px 0 10px;border:1px solid #cbd5e1;border-radius:14px;font-size:15px;background:white}textarea{min-height:70px}button,.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:bold;cursor:pointer;background:#1f4e79;color:white;text-decoration:none;display:inline-block}.btn-green{background:#16a34a}.btn-light{background:#e8f1ff;color:#1f4e79}.btn-red{background:#dc2626;color:white}.wa{background:#16a34a}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}th{background:#f8fafc}.msg{font-weight:bold;color:#166534;margin-top:8px}.small{font-size:12px;color:#64748b}.bottom{position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(6,1fr);box-shadow:0 -4px 14px #0002;z-index:10}.navbtn{background:white;color:#475569;border-radius:0;padding:10px 2px;font-size:10.5px}.navbtn.active{color:#1f4e79;background:#e8f1ff}.pill{display:inline-block;background:#e8f1ff;color:#1f4e79;border-radius:999px;padding:5px 8px;margin:2px;font-size:12px}@media(min-width:760px){.summary{grid-template-columns:repeat(4,1fr)}.bottom{max-width:980px;left:50%;transform:translateX(-50%);border-radius:22px 22px 0 0}}
+</style></head><body>
+<div class="top"><div class="brand"><img src="logo-mam-is.png" class="logo" onerror="this.style.display='none'"><div><h1>Sanggar Mam Is Apps Pro</h1><p class="sub">Mobile dashboard untuk siswa, kelas, peserta, absensi, pembayaran, dan WA reminder</p></div></div><div class="summary"><div class="card"><div class="label">Siswa Aktif</div><div class="num" id="sSiswa">0</div></div><div class="card"><div class="label">Kelas Aktif</div><div class="num" id="sKelas">0</div></div><div class="card"><div class="label">Pembayaran Bulan Ini</div><div class="num" id="sBayar">Rp0</div></div><div class="card"><div class="label">Tunggakan</div><div class="num" id="sTunggakan">Rp0</div></div></div></div>
+<div class="wrap">
+<section id="home" class="section active"><h2>Dashboard</h2><div class="card"><button onclick="loadData()">Refresh Data</button><div class="msg" id="msgHome"></div></div><div class="card"><h3>Data Cepat</h3><div id="quickData" class="small">Memuat data...</div></div></section>
+<section id="siswa" class="section"><h2>Data Siswa</h2><div class="card"><input type="hidden" id="idSiswaEdit"><input id="namaSiswa" placeholder="Nama siswa"><select id="jenjangSiswa"><option value="">Pilih jenjang</option><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select><input id="namaOrtu" placeholder="Nama orang tua/wali"><input id="noWaSiswa" placeholder="No WA orang tua"><textarea id="alamatSiswa" placeholder="Alamat"></textarea><select id="statusSiswa"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanSiswa()">Simpan Siswa</button> <button class="btn-light" onclick="resetSiswa()">Reset</button><div class="msg" id="msgSiswa"></div></div><div class="card"><h3>Daftar Siswa</h3><input id="searchSiswa" placeholder="Ketik nama siswa..." onkeyup="renderAll()"><div id="listSiswa"></div></div></section>
+<section id="kelas" class="section"><h2>Kelas & Pengajar</h2><div class="card"><input type="hidden" id="idKelasEdit"><input id="namaKelas" placeholder="Nama kelas"><select id="jenjangKelas"><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select><select id="kategoriKelas"><option>Bahasa Inggris</option><option>Mapel</option><option>Matematika</option><option>Kelas Baca</option><option>Paket Lain</option></select><label>Pengajar kelas bisa lebih dari satu</label><select id="selectPengajar" multiple size="4"></select><input type="number" id="biayaKelas" placeholder="Biaya bulanan"><select id="statusKelas"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanKelas()">Simpan Kelas</button> <button class="btn-light" onclick="resetKelas()">Reset</button><div class="msg" id="msgKelas"></div></div><div class="card"><h3>Tambah Pengajar</h3><input type="hidden" id="idPengajarEdit"><input id="namaPengajar" placeholder="Nama pengajar"><input id="waPengajar" placeholder="No WA"><textarea id="alamatPengajar" placeholder="Alamat"></textarea><select id="statusPengajar"><option>Aktif</option><option>Nonaktif</option></select><button onclick="simpanPengajar()">Simpan Pengajar</button> <button class="btn-light" onclick="resetPengajar()">Reset</button><div class="msg" id="msgPengajar"></div></div><div class="card"><h3>Daftar Kelas</h3><div id="listKelas"></div></div><div class="card"><h3>Daftar Pengajar</h3><div id="listPengajar"></div></div></section>
+<section id="peserta" class="section"><h2>Peserta Kelas</h2><div class="card"><input type="hidden" id="idPesertaEdit"><select id="siswaPeserta"></select><select id="kelasPeserta"></select><input type="date" id="tanggalMasuk"><select id="statusPeserta"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanPeserta()">Simpan Peserta</button> <button class="btn-light" onclick="resetPeserta()">Reset</button><div class="msg" id="msgPeserta"></div></div><div class="card"><h3>Daftar Peserta Kelas</h3><div id="listPeserta"></div></div></section>
+<section id="absensi" class="section"><h2>Absensi</h2><div class="card"><select id="kelasAbsensi" onchange="loadPesertaAbsensi()"></select><input type="date" id="tanggalAbsensi"><div id="formAbsensi"></div><button class="btn-green" onclick="simpanAbsensi()">Simpan Absensi</button><div class="msg" id="msgAbsensi"></div></div></section>
+<section id="bayar" class="section"><h2>Pembayaran</h2><div class="card"><select id="siswaBayar" onchange="loadTagihanSiswa()"></select><input type="date" id="tanggalBayar"><input type="month" id="bulanBayar" onchange="loadTagihanSiswa()"><div id="rincianTagihan" class="small"></div><input type="number" id="tagihan" placeholder="Total tagihan" readonly><input type="number" id="dibayar" placeholder="Dibayar"><select id="metode"><option>Cash</option><option>Transfer</option><option>QRIS</option></select><textarea id="ketBayar" placeholder="Keterangan"></textarea><button class="btn-green" onclick="simpanPembayaran()">Simpan Pembayaran</button><div class="msg" id="msgBayar"></div></div><div class="card"><h3>Pelunasan Cicilan</h3><select id="pilihCicilan"></select><input type="date" id="tanggalPelunasan"><input type="number" id="jumlahPelunasan" placeholder="Nominal pelunasan"><select id="metodePelunasan"><option>Cash</option><option>Transfer</option><option>QRIS</option></select><textarea id="ketPelunasan" placeholder="Keterangan pelunasan"></textarea><button class="btn-green" onclick="simpanPelunasan()">Simpan Pelunasan</button><div class="msg" id="msgPelunasan"></div></div><div class="card"><h3>Reminder WhatsApp</h3><div id="waReminder"></div></div><div class="card"><h3>Riwayat Pembayaran</h3><div id="listBayar"></div></div></section>
+</div><div class="bottom"><button class="navbtn active" onclick="show('home',this)">Home</button><button class="navbtn" onclick="show('siswa',this)">Siswa</button><button class="navbtn" onclick="show('kelas',this)">Kelas</button><button class="navbtn" onclick="show('peserta',this)">Peserta</button><button class="navbtn" onclick="show('absensi',this)">Absensi</button><button class="navbtn" onclick="show('bayar',this)">Bayar</button></div>
 <script>
-function renderSiswaTable(){
-  const kw = (document.getElementById('searchSiswa')?.value || '').toLowerCase();
-
-  const rows = db.siswa.filter(r =>
-    String(r['Nama Siswa'] || '').toLowerCase().includes(kw) ||
-    String(r['Jenjang'] || '').toLowerCase().includes(kw) ||
-    String(r['No WA'] || '').toLowerCase().includes(kw)
-  );
-
-  let h='<table><tr><th>Siswa</th><th>WA</th><th>Aksi</th></tr>';
-
-  rows.forEach(r=>{
-    h+=`<tr>
-      <td>${r['Nama Siswa']||''}<br><span class="small">${r['Jenjang']||''}</span></td>
-      <td>${r['No WA']||''}</td>
-      <td><button class="btn-red" onclick="hapusData('deleteSiswa','${r['ID Siswa']}')">Hapus</button></td>
-    </tr>`;
-  });
-
-  return h+'</table>';
-}
-</script>
-
-<!-- 4. Di menu pembayaran, tambahkan tanggal bayar sebelum bulan bayar: -->
-<input type="date" id="tanggalBayar">
-
-<!-- 5. Di bagian script awal, set tanggal bayar: -->
-<script>
-document.getElementById('tanggalBayar').value = today();
-</script>
-
-<!-- 6. Pada fungsi simpanPembayaran(), tambahkan tanggalBayar: -->
-<script>
-/*
-const data = {
-  tanggalBayar: val('tanggalBayar'),
-  bulanPembayaran: val('bulanBayar'),
-  idSiswa: sw['ID Siswa'],
-  namaSiswa: sw['Nama Siswa'],
-  idKelas: 'MULTI',
-  namaKelas: 'Semua Kelas Aktif',
-  tagihan: val('tagihan'),
-  dibayar: val('dibayar'),
-  metodeBayar: val('metode'),
-  keterangan: val('ketBayar')
-};
-*/
-</script>
-
-<!-- 7. Tambahkan blok Pelunasan di menu pembayaran: -->
-<div class="card">
-  <h3>Pelunasan Cicilan</h3>
-  <select id="pilihCicilan"></select>
-  <input type="date" id="tanggalPelunasan">
-  <input type="number" id="jumlahPelunasan" placeholder="Nominal pelunasan">
-  <select id="metodePelunasan">
-    <option>Cash</option>
-    <option>Transfer</option>
-    <option>QRIS</option>
-  </select>
-  <textarea id="ketPelunasan" placeholder="Keterangan pelunasan"></textarea>
-  <button class="btn-green" onclick="simpanPelunasan()">Simpan Pelunasan</button>
-  <div class="msg" id="msgPelunasan"></div>
-</div>
-
-<script>
-function isiCicilan(){
-  const el = document.getElementById('pilihCicilan');
-  if(!el) return;
-
-  const rows = db.pembayaran.filter(r => Number(r['Sisa'] || 0) > 0);
-  el.innerHTML = '<option value="">Pilih cicilan belum lunas</option>';
-
-  rows.forEach(r=>{
-    el.innerHTML += `<option value="${r['ID Pembayaran']}">
-      ${r['Nama Siswa']} - ${r['Bulan Pembayaran']} - Sisa ${rupiah(r['Sisa'])}
-    </option>`;
-  });
-}
-
-// Panggil ini di akhir renderAll():
-// isiCicilan();
-
-async function simpanPelunasan(){
-  const id = val('pilihCicilan');
-  if(!id) return alert('Pilih cicilan dulu');
-
-  const data = {
-    idPembayaran: id,
-    tanggalBayar: val('tanggalPelunasan'),
-    dibayar: val('jumlahPelunasan'),
-    metodeBayar: val('metodePelunasan'),
-    keterangan: val('ketPelunasan')
-  };
-
-  const res = await api('addPelunasan', {data: JSON.stringify(data)});
-  document.getElementById('msgPelunasan').innerText = res.message + ' - ' + res.statusPembayaran;
-  loadData();
-}
-
-// Set default tanggal:
-// document.getElementById('tanggalPelunasan').value = today();
-</script>
+const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";const API_KEY="MAMIS-2026";let db={siswa:[],pengajar:[],kelas:[],peserta:[],pembayaran:[],absensi:[]},pesertaAbsensi=[],tagihanSiswa=null;
+function rupiah(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0))}function val(id){return document.getElementById(id).value}function setv(id,v){document.getElementById(id).value=v||''}function today(){return new Date().toISOString().split('T')[0]}function monthNow(){return today().slice(0,7)}function cleanPhone(no){let x=String(no||'').replace(/[^0-9]/g,'');if(x.startsWith('0'))x='62'+x.slice(1);if(!x.startsWith('62')&&x.length>8)x='62'+x;return x}
+function api(action,params={}){return new Promise((resolve,reject)=>{const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);window[cb]=data=>{resolve(data);delete window[cb];script.remove()};params.action=action;params.key=API_KEY;params.callback=cb;const script=document.createElement('script');script.src=API_URL+'?'+new URLSearchParams(params).toString();script.onerror=()=>reject(new Error('Gagal koneksi API'));document.body.appendChild(script)})}
+function show(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active')}function selectedPengajar(){return Array.from(document.getElementById('selectPengajar').selectedOptions).map(o=>({id:o.value,nama:o.textContent}))}
+async function loadData(){document.getElementById('msgHome').innerText='Memuat data...';const data=await api('bootstrap');if(!data.status){document.getElementById('msgHome').innerText=data.message||'Gagal memuat data';return}db=data;document.getElementById('sSiswa').innerText=data.summary.jumlahSiswaAktif||0;document.getElementById('sKelas').innerText=data.summary.jumlahKelasAktif||0;document.getElementById('sBayar').innerText=rupiah(data.summary.totalPembayaranBulanIni||0);document.getElementById('sTunggakan').innerText=rupiah(data.summary.totalTunggakan||0);renderAll();fillDropdowns();document.getElementById('msgHome').innerText='Data berhasil diperbarui.'}
+function renderAll(){document.getElementById('quickData').innerHTML=`Pengajar: ${db.summary.jumlahPengajarAktif} | Peserta kelas: ${db.summary.jumlahPesertaKelas}`;document.getElementById('listSiswa').innerHTML=renderSiswaTable();renderKelasList();renderPesertaList();renderPengajarList();renderPembayaran();isiCicilan();renderWaReminder()}
+function renderSiswaTable(){const kw=(document.getElementById('searchSiswa')?.value||'').toLowerCase();const rows=db.siswa.filter(r=>String(r['Nama Siswa']||'').toLowerCase().includes(kw)||String(r['Jenjang']||'').toLowerCase().includes(kw)||String(r['No WA']||'').toLowerCase().includes(kw));let h='<table><tr><th>Siswa</th><th>WA</th><th>Aksi</th></tr>';rows.forEach(r=>h+=`<tr><td>${r['Nama Siswa']||''}<br><span class="small">${r['Jenjang']||''}</span></td><td>${r['No WA']||''}</td><td><button class="btn-light" onclick="editSiswa('${r['ID Siswa']}')">Edit</button> <button class="btn-red" onclick="hapusData('deleteSiswa','${r['ID Siswa']}')">Hapus</button></td></tr>`);return h+'</table>'}
+function renderPengajarList(){let h='<table><tr><th>Pengajar</th><th>WA</th><th>Aksi</th></tr>';db.pengajar.forEach(r=>h+=`<tr><td>${r['Nama Pengajar']||''}</td><td>${r['No WA']||''}</td><td><button class="btn-light" onclick="editPengajar('${r['ID Pengajar']}')">Edit</button> <button class="btn-red" onclick="hapusData('deletePengajar','${r['ID Pengajar']}')">Hapus</button></td></tr>`);document.getElementById('listPengajar').innerHTML=h+'</table>'}
+function renderKelasList(){let h='<table><tr><th>Kelas</th><th>Pengajar</th><th>Biaya</th><th>Aksi</th></tr>';db.kelas.forEach(r=>h+=`<tr><td>${r['Nama Kelas']||''}<br><span class="small">${r['Jenjang']||''} - ${r['Kategori']||''}</span></td><td>${r['Nama Pengajar']||''}</td><td>${rupiah(r['Biaya Bulanan'])}</td><td><button class="btn-light" onclick="editKelas('${r['ID Kelas']}')">Edit</button> <button class="btn-red" onclick="hapusData('deleteKelas','${r['ID Kelas']}')">Hapus</button></td></tr>`);document.getElementById('listKelas').innerHTML=h+'</table>'}
+function renderPesertaList(){let h='<table><tr><th>Siswa</th><th>Kelas</th><th>Status</th><th>Aksi</th></tr>';db.peserta.forEach(r=>h+=`<tr><td>${r['Nama Siswa']||''}</td><td>${r['Nama Kelas']||''}</td><td>${r['Status Aktif']||''}</td><td><button class="btn-light" onclick="editPeserta('${r['ID Peserta']}')">Edit</button> <button class="btn-red" onclick="hapusData('deletePeserta','${r['ID Peserta']}')">Hapus</button></td></tr>`);document.getElementById('listPeserta').innerHTML=h+'</table>'}
+function renderPembayaran(){let h='<table><tr><th>Bulan</th><th>Siswa</th><th>Dibayar</th><th>Sisa</th><th>Status</th></tr>';db.pembayaran.slice(-30).reverse().forEach(r=>h+=`<tr><td>${r['Bulan Pembayaran']||''}</td><td>${r['Nama Siswa']||''}</td><td>${rupiah(r['Dibayar'])}</td><td>${rupiah(r['Sisa'])}</td><td>${r['Status Pembayaran']||''}</td></tr>`);document.getElementById('listBayar').innerHTML=h+'</table>'}
+function fillDropdowns(){const siswa=db.siswa.filter(x=>String(x['Status Aktif']).toLowerCase()==='aktif'),pengajar=db.pengajar.filter(x=>String(x['Status Aktif']).toLowerCase()==='aktif'),kelas=db.kelas.filter(x=>String(x['Status Kelas']).toLowerCase()==='aktif');fill('siswaBayar',siswa,'ID Siswa',r=>r['Nama Siswa']);fill('siswaPeserta',siswa,'ID Siswa',r=>r['Nama Siswa']);fill('selectPengajar',pengajar,'ID Pengajar',r=>r['Nama Pengajar']);fill('kelasAbsensi',kelas,'ID Kelas',r=>r['Nama Kelas']);fill('kelasPeserta',kelas,'ID Kelas',r=>r['Nama Kelas'])}function fill(id,arr,key,textFn){const el=document.getElementById(id);el.innerHTML='<option value="">Pilih</option>';arr.forEach(r=>el.innerHTML+=`<option value="${r[key]}">${textFn(r)}</option>`)}
+async function hapusData(action,id){if(!confirm('Hapus data ini?'))return;const r=await api(action,{id});alert(r.message);loadData()}
+async function simpanSiswa(){const id=val('idSiswaEdit'),data={idSiswa:id,namaSiswa:val('namaSiswa'),jenjang:val('jenjangSiswa'),namaOrtu:val('namaOrtu'),noWa:val('noWaSiswa'),alamat:val('alamatSiswa'),statusAktif:val('statusSiswa')};const res=await api(id?'updateSiswa':'addSiswa',{data:JSON.stringify(data)});document.getElementById('msgSiswa').innerText=res.message;resetSiswa();loadData()}
+function editSiswa(id){const r=db.siswa.find(x=>x['ID Siswa']===id);if(!r)return;setv('idSiswaEdit',id);setv('namaSiswa',r['Nama Siswa']);setv('jenjangSiswa',r['Jenjang']);setv('namaOrtu',r['Nama Orang Tua']);setv('noWaSiswa',r['No WA']);setv('alamatSiswa',r['Alamat']);setv('statusSiswa',r['Status Aktif']||'Aktif');window.scrollTo({top:0,behavior:'smooth'})}function resetSiswa(){['idSiswaEdit','namaSiswa','jenjangSiswa','namaOrtu','noWaSiswa','alamatSiswa'].forEach(id=>setv(id,''));setv('statusSiswa','Aktif')}
+async function simpanPengajar(){const id=val('idPengajarEdit'),data={idPengajar:id,namaPengajar:val('namaPengajar'),noWa:val('waPengajar'),alamat:val('alamatPengajar'),statusAktif:val('statusPengajar')};const res=await api(id?'updatePengajar':'addPengajar',{data:JSON.stringify(data)});document.getElementById('msgPengajar').innerText=res.message;resetPengajar();loadData()}
+function editPengajar(id){const r=db.pengajar.find(x=>x['ID Pengajar']===id);if(!r)return;setv('idPengajarEdit',id);setv('namaPengajar',r['Nama Pengajar']);setv('waPengajar',r['No WA']);setv('alamatPengajar',r['Alamat']);setv('statusPengajar',r['Status Aktif']||'Aktif')}function resetPengajar(){['idPengajarEdit','namaPengajar','waPengajar','alamatPengajar'].forEach(id=>setv(id,''));setv('statusPengajar','Aktif')}
+async function simpanKelas(){const list=selectedPengajar(),id=val('idKelasEdit'),data={idKelas:id,namaKelas:val('namaKelas'),jenjang:val('jenjangKelas'),kategori:val('kategoriKelas'),idPengajar:list.map(x=>x.id).join(', '),namaPengajar:list.map(x=>x.nama).join(', '),biayaBulanan:val('biayaKelas'),statusKelas:val('statusKelas')};const res=await api(id?'updateKelas':'addKelas',{data:JSON.stringify(data)});document.getElementById('msgKelas').innerText=res.message;resetKelas();loadData()}
+function editKelas(id){const r=db.kelas.find(x=>x['ID Kelas']===id);if(!r)return;setv('idKelasEdit',id);setv('namaKelas',r['Nama Kelas']);setv('jenjangKelas',r['Jenjang']);setv('kategoriKelas',r['Kategori']);setv('biayaKelas',String(r['Biaya Bulanan']).replace(/[^0-9]/g,''));setv('statusKelas',r['Status Kelas']||'Aktif');const ids=String(r['ID Pengajar']||'').split(',').map(x=>x.trim());Array.from(document.getElementById('selectPengajar').options).forEach(o=>o.selected=ids.includes(o.value));window.scrollTo({top:0,behavior:'smooth'})}function resetKelas(){['idKelasEdit','namaKelas','biayaKelas'].forEach(id=>setv(id,''));setv('statusKelas','Aktif');Array.from(document.getElementById('selectPengajar').options).forEach(o=>o.selected=false)}
+async function simpanPeserta(){const sw=db.siswa.find(x=>x['ID Siswa']===val('siswaPeserta')),kl=db.kelas.find(x=>x['ID Kelas']===val('kelasPeserta'));if(!sw||!kl)return alert('Pilih siswa dan kelas');const id=val('idPesertaEdit'),data={idPeserta:id,idSiswa:sw['ID Siswa'],namaSiswa:sw['Nama Siswa'],idKelas:kl['ID Kelas'],namaKelas:kl['Nama Kelas'],tanggalMasuk:val('tanggalMasuk'),statusAktif:val('statusPeserta')};const res=await api(id?'updatePeserta':'addPeserta',{data:JSON.stringify(data)});document.getElementById('msgPeserta').innerText=res.message;resetPeserta();loadData()}function editPeserta(id){const r=db.peserta.find(x=>x['ID Peserta']===id);if(!r)return;setv('idPesertaEdit',id);setv('siswaPeserta',r['ID Siswa']);setv('kelasPeserta',r['ID Kelas']);setv('tanggalMasuk',r['Tanggal Masuk']);setv('statusPeserta',r['Status Aktif']||'Aktif')}function resetPeserta(){setv('idPesertaEdit','');setv('siswaPeserta','');setv('kelasPeserta','');setv('tanggalMasuk',today());setv('statusPeserta','Aktif')}
+async function loadPesertaAbsensi(){const idKelas=val('kelasAbsensi');if(!idKelas)return;pesertaAbsensi=await api('getPesertaByKelas',{idKelas});let h='';pesertaAbsensi.forEach((p,i)=>h+=`<div class="card"><b>${p['Nama Siswa']}</b><select id="hadir_${i}"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alfa</option></select><input id="ket_${i}" placeholder="Keterangan"></div>`);document.getElementById('formAbsensi').innerHTML=h||'<p class="small">Belum ada peserta.</p>'}
+async function simpanAbsensi(){const kl=db.kelas.find(x=>x['ID Kelas']===val('kelasAbsensi'));if(!kl)return alert('Pilih kelas dulu');const items=pesertaAbsensi.map((p,i)=>({idSiswa:p['ID Siswa'],namaSiswa:p['Nama Siswa'],kehadiran:val('hadir_'+i),keterangan:val('ket_'+i)}));const data={tanggal:val('tanggalAbsensi'),idKelas:kl['ID Kelas'],namaKelas:kl['Nama Kelas'],items};const res=await api('addAbsensiBatch',{data:JSON.stringify(data)});document.getElementById('msgAbsensi').innerText=res.message;loadData()}
+async function loadTagihanSiswa(){const id=val('siswaBayar');if(!id)return;tagihanSiswa=await api('getTagihanSiswa',{idSiswa:id,bulan:val('bulanBayar')});document.getElementById('tagihan').value=tagihanSiswa.totalTagihan||0;let h=`<b>${tagihanSiswa.namaSiswa||''}</b> ikut ${tagihanSiswa.jumlahKelas||0} kelas<br>`;(tagihanSiswa.kelas||[]).forEach(k=>h+=`<span class="pill">${k.namaKelas}: ${rupiah(k.biaya)}</span>`);h+=`<br><b>Total tagihan: ${rupiah(tagihanSiswa.totalTagihan||0)}</b><br>Total dibayar bulan ini: ${rupiah(tagihanSiswa.totalDibayar||0)} | Sisa: ${rupiah(tagihanSiswa.sisa||0)}`;document.getElementById('rincianTagihan').innerHTML=h}
+async function simpanPembayaran(){const sw=db.siswa.find(x=>x['ID Siswa']===val('siswaBayar'));if(!sw)return alert('Pilih siswa');const data={tanggalBayar:val('tanggalBayar'),bulanPembayaran:val('bulanBayar'),idSiswa:sw['ID Siswa'],namaSiswa:sw['Nama Siswa'],idKelas:'MULTI',namaKelas:'Semua Kelas Aktif',tagihan:val('tagihan'),dibayar:val('dibayar'),metodeBayar:val('metode'),keterangan:val('ketBayar')};const res=await api('addPembayaran',{data:JSON.stringify(data)});document.getElementById('msgBayar').innerText=res.message+' - '+res.statusPembayaran;loadData()}
+function isiCicilan(){const el=document.getElementById('pilihCicilan');if(!el)return;const rows=db.pembayaran.filter(r=>Number(String(r['Sisa']||'0').replace(/[^0-9]/g,''))>0);el.innerHTML='<option value="">Pilih cicilan belum lunas</option>';rows.forEach(r=>el.innerHTML+=`<option value="${r['ID Pembayaran']}">${r['Nama Siswa']} - ${r['Bulan Pembayaran']} - Sisa ${rupiah(r['Sisa'])}</option>`)}
+async function simpanPelunasan(){const id=val('pilihCicilan');if(!id)return alert('Pilih cicilan dulu');const data={idPembayaran:id,tanggalBayar:val('tanggalPelunasan'),dibayar:val('jumlahPelunasan'),metodeBayar:val('metodePelunasan'),keterangan:val('ketPelunasan')};const res=await api('addPelunasan',{data:JSON.stringify(data)});document.getElementById('msgPelunasan').innerText=res.message+' - '+res.statusPembayaran;loadData()}
+function renderWaReminder(){const rows=db.pembayaran.filter(r=>Number(String(r['Sisa']||'0').replace(/[^0-9]/g,''))>0);let h='';rows.forEach(r=>{const sw=db.siswa.find(s=>s['ID Siswa']===r['ID Siswa'])||{},phone=cleanPhone(sw['No WA']),pesan=`Assalamu'alaikum Bapak/Ibu, kami dari Sanggar Mam Is mengingatkan pembayaran ananda ${r['Nama Siswa']} untuk bulan ${r['Bulan Pembayaran']}. Sisa pembayaran: ${rupiah(r['Sisa'])}. Terima kasih.`;h+=`<div class="card"><b>${r['Nama Siswa']}</b><br><span class="small">Sisa: ${rupiah(r['Sisa'])} | WA: ${sw['No WA']||'-'}</span><br><br><a class="btn wa" href="https://wa.me/${phone}?text=${encodeURIComponent(pesan)}" target="_blank">Kirim WA</a></div>`});document.getElementById('waReminder').innerHTML=h||'<p class="small">Tidak ada tunggakan.</p>'}
+document.getElementById('tanggalAbsensi').value=today();document.getElementById('tanggalMasuk').value=today();document.getElementById('tanggalBayar').value=today();document.getElementById('tanggalPelunasan').value=today();document.getElementById('bulanBayar').value=monthNow();loadData();
+</script></body></html>
