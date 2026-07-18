@@ -77,52 +77,123 @@
 </footer>
 
 <script>
+
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
 const BIAYA_PENDAFTARAN=30000;
 let kelas=[];
 
-function api(action,params={}){return new Promise((resolve,reject)=>{const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);const s=document.createElement("script");window[cb]=d=>{resolve(d);delete window[cb];s.remove()};params.action=action;params.callback=cb;s.src=API_URL+"?"+new URLSearchParams(params);s.onerror=()=>reject(new Error("Gagal terhubung ke server."));document.body.appendChild(s)})}
-function rupiah(n){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(Number(n||0))}
-function esc(x){return String(x??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function phone(x){let n=String(x||"").replace(/\D/g,"");if(n.startsWith("0"))n="62"+n.slice(1);return n}
-function v(id){return document.getElementById(id).value.trim()}
+function api(action,params={}){
+  return new Promise((resolve,reject)=>{
+    const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
+    const s=document.createElement("script");
+    window[cb]=d=>{resolve(d);delete window[cb];s.remove();};
+    params.action=action;
+    params.callback=cb;
+    s.src=API_URL+"?"+new URLSearchParams(params).toString();
+    s.onerror=()=>{delete window[cb];s.remove();reject(new Error("Gagal terhubung ke server."));};
+    document.body.appendChild(s);
+  });
+}
 
-async function load(){try{const r=await api("getPublicData");if(!r.status)throw new Error(r.message);kelas=r.kelas||[];render()}catch(e){document.getElementById("programList").innerHTML='<div class="empty">'+esc(e.message)+'</div>'}}
-function render(){document.getElementById("programList").innerHTML=kelas.length?kelas.map(k=>`<article class="card program"><h3>${esc(k.namaKelas)}</h3><span class="pill">${esc(k.jenjang)}</span><span class="pill">${esc(k.kategori||"Kelas")}</span><p>${esc(k.jadwal||"Jadwal dikonfirmasi admin")}</p><div class="price">${rupiah(k.biaya)}/bulan</div><button class="btn btn-primary" style="margin-top:12px" onclick="pilih('${esc(k.idKelas)}')">Pilih</button></article>`).join(""):'<div class="empty">Belum ada kelas aktif.</div>';
-document.getElementById("kelasChecklist").innerHTML=kelas.map(k=>`<label class="class-choice"><input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()"><span><b>${esc(k.namaKelas)}</b><br><small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small></span></label>`).join("")}
-function pilih(id){const c=document.querySelector(`input[name="kelas"][value="${CSS.escape(id)}"]`);if(c)c.checked=true;hitung();document.getElementById("daftar").scrollIntoView({behavior:"smooth"})}
-function terpilih(){return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value)}
+function rupiah(n){
+  return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(Number(n||0));
+}
+function esc(x){
+  return String(x??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function phone(x){
+  let n=String(x||"").replace(/\D/g,"");
+  if(n.startsWith("0")) n="62"+n.slice(1);
+  if(!n.startsWith("62") && n.length>=9) n="62"+n;
+  return n;
+}
+function v(id){return document.getElementById(id).value.trim();}
+
+async function load(){
+  const list=document.getElementById("programList");
+  try{
+    const r=await api("getPublicData");
+    if(!r.status) throw new Error(r.message||"Gagal memuat program.");
+    kelas=Array.isArray(r.kelas)?r.kelas:[];
+    render();
+  }catch(e){
+    list.innerHTML=`<div class="empty">Program belum dapat dimuat.<br><small>${esc(e.message)}</small></div>`;
+  }
+}
+
+function render(){
+  const programList=document.getElementById("programList");
+  const checklist=document.getElementById("kelasChecklist");
+
+  if(!kelas.length){
+    programList.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
+    checklist.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
+    return;
+  }
+
+  programList.innerHTML=kelas.map(k=>`
+    <article class="card program">
+      <h3>${esc(k.namaKelas)}</h3>
+      <span class="pill">${esc(k.jenjang||"")}</span>
+      <span class="pill">${esc(k.kategori||"Kelas")}</span>
+      <p>${esc(k.jadwal||"Jadwal dikonfirmasi admin")}</p>
+      <div class="price">${rupiah(k.biaya)}/bulan</div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="pilih('${esc(k.idKelas)}')">Pilih</button>
+    </article>
+  `).join("");
+
+  checklist.innerHTML=kelas.map(k=>`
+    <label class="class-choice">
+      <input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()">
+      <span><b>${esc(k.namaKelas)}</b><br><small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small></span>
+    </label>
+  `).join("");
+}
+
+function pilih(id){
+  const box=[...document.querySelectorAll('input[name="kelas"]')].find(x=>String(x.value)===String(id));
+  if(box) box.checked=true;
+  hitung();
+  document.getElementById("daftar").scrollIntoView({behavior:"smooth"});
+}
+function terpilih(){return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value);}
+
 function hitung(){
   const ids=terpilih();
   const items=kelas.filter(k=>ids.includes(String(k.idKelas)));
   const totalKelas=items.reduce((n,k)=>n+Number(k.biaya||0),0);
   const totalAwal=totalKelas+BIAYA_PENDAFTARAN;
 
-  document.getElementById("ringkasan").innerHTML=
-    `<div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>${rupiah(BIAYA_PENDAFTARAN)}</b></div>`+
-    (items.length
-      ? items.map(k=>`<div class="summary-row"><span>${esc(k.namaKelas)}</span><b>${rupiah(k.biaya)}/bulan</b></div>`).join("")
-      : '<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>'
-    )+
-    `<div class="summary-row summary-total"><span>Total pembayaran awal</span><span>${rupiah(totalAwal)}</span></div>`;
+  const rincian=items.length
+    ? items.map(k=>`<div class="summary-row"><span>${esc(k.namaKelas)}</span><b>${rupiah(k.biaya)}/bulan</b></div>`).join("")
+    : '<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>';
 
+  document.getElementById("ringkasan").innerHTML=`
+    <div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>${rupiah(BIAYA_PENDAFTARAN)}</b></div>
+    ${rincian}
+    <div class="summary-row summary-total"><span>Total pembayaran awal</span><span>${rupiah(totalAwal)}</span></div>
+  `;
   document.getElementById("nominalDibayar").value=totalAwal;
-}</span><b>${rupiah(k.biaya)}</b></div>`).join(""):'<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>')+`<div class="summary-row summary-total"><span>Total per bulan</span><span>${rupiah(total)}</span></div>`;document.getElementById("nominalDibayar").value=total}
-function file64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
-function status(msg,type){const e=document.getElementById("status");e.className="status "+type;e.textContent=msg}
+}
+
+function status(msg,type){
+  const e=document.getElementById("status");
+  e.className="status "+type;
+  e.textContent=msg;
+}
 
 async function kirim(ev){
   ev.preventDefault();
   const ids=terpilih();
-  if(!ids.length){status("Pilih minimal satu kelas.","err");return}
+  if(!ids.length){status("Pilih minimal satu kelas.","err");return;}
 
   const selected=kelas.filter(k=>ids.includes(String(k.idKelas)));
   const totalKelas=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
   const total=totalKelas+BIAYA_PENDAFTARAN;
 
   if(Number(v("nominalDibayar"))<total){
-    status("Nominal pembayaran kurang dari total biaya kelas.","err");
+    status("Nominal pembayaran kurang dari total pembayaran awal.","err");
     return;
   }
 
@@ -153,7 +224,7 @@ async function kirim(ev){
     };
 
     const r=await api("addPendaftaran",{data:JSON.stringify(data)});
-    if(!r.status) throw new Error(r.message);
+    if(!r.status) throw new Error(r.message||"Pendaftaran gagal.");
 
     status(`Pendaftaran berhasil disimpan. Nomor: ${r.idPendaftaran}. Silakan kirim bukti melalui WhatsApp.`,"ok");
 
@@ -173,12 +244,11 @@ Biaya Pendaftaran: ${rupiah(BIAYA_PENDAFTARAN)}
 Total Kelas Bulanan: ${rupiah(totalKelas)}
 Total Pembayaran Awal: ${rupiah(total)}
 Nominal Dibayar: ${rupiah(v("nominalDibayar"))}
-Nama Pengirim: ${v("namaPengirim") || "-"}
+Nama Pengirim: ${v("namaPengirim")||"-"}
 
 Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
 
     window.open(`https://wa.me/${WA_SANGGAR}?text=${encodeURIComponent(pesan)}`,"_blank","noopener");
-
     document.getElementById("formDaftar").reset();
     setDefaults();
     hitung();
@@ -189,7 +259,23 @@ Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
     btn.textContent="Kirim Pendaftaran";
   }
 }
-function setDefaults(){const d=new Date();document.getElementById("tanggalBayar").value=d.toISOString().slice(0,10);document.getElementById("bulanMulai").value=d.toISOString().slice(0,7)}
-document.getElementById("year").textContent=new Date().getFullYear();setDefaults();load();
+
+function setDefaults(){
+  const d=new Date();
+  document.getElementById("tanggalBayar").value=d.toISOString().slice(0,10);
+  document.getElementById("bulanMulai").value=d.toISOString().slice(0,7);
+}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+setDefaults();
+hitung();
+load();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+  });
+}
+
 </script>
 </body></html>
