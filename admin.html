@@ -545,6 +545,7 @@
       <button class="nav-btn" onclick="openPage('absensi',this)">🗓️ Absensi</button>
       <button class="nav-btn" onclick="openPage('pembayaran',this)">💳 Pembayaran</button>
       <button class="nav-btn" onclick="openPage('hasil',this)">📈 Hasil Latihan</button>
+      <a class="nav-btn" href="cbt.html" target="_blank">🧠 CBT Siswa</a>
     </div>
 
     <button class="btn btn-red btn-block" style="margin-top:18px" onclick="logoutAdmin()">Keluar</button>
@@ -633,6 +634,7 @@
           <select id="statusPendaftaranFilter" onchange="renderPendaftaran()">
             <option value="">Semua status</option>
             <option>Baru</option>
+            <option>Menunggu Verifikasi</option>
             <option>Dihubungi</option>
             <option>Diterima</option>
             <option>Ditolak</option>
@@ -889,7 +891,10 @@
           <tr>
             <td>${esc(r["Tanggal"])}</td>
             <td>${esc(r["Nama Siswa"])}</td>
-            <td>${esc(r["Program Dipilih"] || "-")}</td>
+            <td>${esc(r["Program Terpilih"] || r["Program Dipilih"] || "-")}</td>
+            <td>${rupiah(r["Total Tagihan"] || 0)}</td>
+            <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
+            <td>${r["Bukti Pembayaran"] ? `<a class="btn btn-light" href="${attr(r["Bukti Pembayaran"])}" target="_blank">Lihat Bukti</a>` : "-"}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
           </tr>
         `).join("")}</tbody>
@@ -928,7 +933,7 @@
         <thead>
           <tr>
             <th>Tanggal</th><th>Siswa</th><th>Orang Tua</th><th>WA</th>
-            <th>Program</th><th>Status</th><th>Aksi</th>
+            <th>Program</th><th>Total</th><th>Pembayaran</th><th>Bukti</th><th>Status</th><th>Aksi</th>
           </tr>
         </thead>
         <tbody>${rows.map(r=>`
@@ -940,7 +945,10 @@
             </td>
             <td>${esc(r["Nama Orang Tua"])}</td>
             <td>${esc(r["No WA"])}</td>
-            <td>${esc(r["Program Dipilih"] || "-")}</td>
+            <td>${esc(r["Program Terpilih"] || r["Program Dipilih"] || "-")}</td>
+            <td>${rupiah(r["Total Tagihan"] || 0)}</td>
+            <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
+            <td>${r["Bukti Pembayaran"] ? `<a class="btn btn-light" href="${attr(r["Bukti Pembayaran"])}" target="_blank">Lihat Bukti</a>` : "-"}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
             <td>
               <div class="actions">
@@ -1151,7 +1159,7 @@
   }
 
   async function terimaPendaftaran(id){
-    if(!confirm("Terima pendaftaran dan buat akun siswa?")) return;
+    if(!confirm("Verifikasi pembayaran, aktifkan seluruh kelas, dan buat akun bila siswa baru?")) return;
 
     try{
       const res = await jsonp("terimaPendaftaran",{
@@ -1695,7 +1703,7 @@ Sanggar Mam Is Learning Hub`;
     let cls="badge-blue";
 
     if(["aktif","lunas","hadir","diterima","selesai"].includes(s)) cls="badge-green";
-    else if(["baru","dihubungi","cicilan","izin","sakit"].includes(s)) cls="badge-orange";
+    else if(["baru","dihubungi","cicilan","izin","sakit","menunggu verifikasi","menunggu"].includes(s)) cls="badge-orange";
     else if(["ditolak","tidak aktif","belum bayar","alpa"].includes(s)) cls="badge-red";
     else if(["admin","siswa"].includes(s)) cls="badge-purple";
 
