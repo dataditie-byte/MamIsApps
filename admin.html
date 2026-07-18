@@ -886,7 +886,12 @@
     const p = [...db.pendaftaran].slice(-5).reverse();
     document.getElementById("dashboardPendaftaran").innerHTML = p.length ? `
       <table>
-        <thead><tr><th>Tanggal</th><th>Nama</th><th>Program</th><th>Status</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Tanggal</th><th>Nama</th><th>Program</th><th>Total</th>
+            <th>Pembayaran</th><th>Bukti</th><th>Status</th><th>Aksi</th>
+          </tr>
+        </thead>
         <tbody>${p.map(r=>`
           <tr>
             <td>${esc(r["Tanggal"])}</td>
@@ -894,8 +899,17 @@
             <td>${esc(r["Program Terpilih"] || r["Program Dipilih"] || "-")}</td>
             <td>${rupiah(r["Total Tagihan"] || 0)}</td>
             <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
-            <td>${r["Bukti Pembayaran"] ? `<a class="btn btn-light" href="${attr(r["Bukti Pembayaran"])}" target="_blank">Lihat Bukti</a>` : "-"}</td>
+            <td>${renderBuktiButton(r)}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
+            <td>
+              <div class="actions">
+                ${String(r["Status Pendaftaran"]).toLowerCase()==="diterima"
+                  ? `<button class="btn btn-light" disabled>Sudah Diterima</button>`
+                  : `<button class="btn btn-green" onclick="terimaPendaftaran('${attr(r["ID Pendaftaran"])}')">Terima</button>`
+                }
+                <button class="btn btn-light" onclick="hubungiPendaftar('${attr(r["ID Pendaftaran"])}')">WhatsApp</button>
+              </div>
+            </td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -948,7 +962,7 @@
             <td>${esc(r["Program Terpilih"] || r["Program Dipilih"] || "-")}</td>
             <td>${rupiah(r["Total Tagihan"] || 0)}</td>
             <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
-            <td>${r["Bukti Pembayaran"] ? `<a class="btn btn-light" href="${attr(r["Bukti Pembayaran"])}" target="_blank">Lihat Bukti</a>` : "-"}</td>
+            <td>${renderBuktiButton(r)}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
             <td>
               <div class="actions">
@@ -956,6 +970,7 @@
                   ? `<button class="btn btn-light" disabled>Sudah Diterima</button>`
                   : `<button class="btn btn-green" onclick="terimaPendaftaran('${attr(r["ID Pendaftaran"])}')">Terima</button>`
                 }
+                <button class="btn btn-light" onclick="hubungiPendaftar('${attr(r["ID Pendaftaran"])}')">WhatsApp</button>
                 <button class="btn btn-light" onclick="ubahStatusPendaftaran('${attr(r["ID Pendaftaran"])}','Dihubungi')">Dihubungi</button>
                 <button class="btn btn-red" onclick="ubahStatusPendaftaran('${attr(r["ID Pendaftaran"])}','Ditolak')">Tolak</button>
               </div>
@@ -1158,8 +1173,59 @@
     ` : empty("Belum ada hasil latihan.");
   }
 
+
+  function renderBuktiButton(r){
+    const bukti = String(r["Bukti Pembayaran"] || "").trim();
+
+    if(!bukti) return "-";
+
+    if(/^https?:\/\//i.test(bukti)){
+      return `<a class="btn btn-light" href="${attr(bukti)}" target="_blank">Lihat Bukti</a>`;
+    }
+
+    if(bukti.toUpperCase().includes("WHATSAPP")){
+      return `<button class="btn btn-light" onclick="hubungiPendaftar('${attr(r["ID Pendaftaran"])}')">Cek WhatsApp</button>`;
+    }
+
+    return `<span class="badge badge-blue">${esc(bukti)}</span>`;
+  }
+
+  function hubungiPendaftar(idPendaftaran){
+    const r = db.pendaftaran.find(x =>
+      String(x["ID Pendaftaran"]) === String(idPendaftaran)
+    );
+
+    if(!r){
+      alert("Data pendaftaran tidak ditemukan.");
+      return;
+    }
+
+    const nomor = formatNomorWhatsApp(r["No WA"]);
+    if(!nomor){
+      alert("Nomor WhatsApp orang tua belum tersedia.");
+      return;
+    }
+
+    const pesan = `Assalamu'alaikum Bapak/Ibu.
+
+Kami dari Sanggar Mam Is sedang memverifikasi pendaftaran:
+
+Nomor Pendaftaran: ${r["ID Pendaftaran"] || "-"}
+Nama Siswa: ${r["Nama Siswa"] || "-"}
+Program: ${r["Program Terpilih"] || r["Program Dipilih"] || "-"}
+Total Tagihan: ${rupiah(r["Total Tagihan"] || 0)}
+Nominal Dibayar: ${rupiah(r["Nominal Dibayar"] || 0)}
+
+Mohon kirimkan foto bukti pembayaran pada percakapan ini bila belum dikirim.
+
+Terima kasih.
+Sanggar Mam Is Learning Hub`;
+
+    window.open(`https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`,"_blank","noopener");
+  }
+
   async function terimaPendaftaran(id){
-    if(!confirm("Verifikasi pembayaran, aktifkan seluruh kelas, dan buat akun bila siswa baru?")) return;
+    if(!confirm("Pembayaran sudah diperiksa dan sesuai? Lanjutkan untuk mengaktifkan seluruh kelas serta membuat akun bila siswa baru.")) return;
 
     try{
       const res = await jsonp("terimaPendaftaran",{
