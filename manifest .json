@@ -1,0 +1,58 @@
+{
+  "name": "Sanggar Mam Is Learning Hub",
+  "short_name": "Mam Is",
+  "description": "Portal belajar, materi, latihan, absensi, pembayaran, dan informasi Sanggar Mam Is.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f8fc",
+  "theme_color": "#173b63",
+  "lang": "id-ID",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portal Siswa",
+      "short_name": "Siswa",
+      "description": "Masuk ke portal siswa",
+      "url": "./siswa.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard Admin",
+      "short_name": "Admin",
+      "description": "Masuk ke dashboard admin",
+      "url": "./admin.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
