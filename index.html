@@ -21,7 +21,7 @@
 <section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
-<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Unggah bukti pembayaran untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Tidak ada biaya pendaftaran.</b></p></aside>
+<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Tidak ada biaya pendaftaran.</b></p></aside>
 
 <div class="form-card"><form id="formDaftar" onsubmit="kirim(event)"><div class="form-grid">
 <div class="field"><label>Nama siswa *</label><input id="namaSiswa" required></div>
@@ -41,16 +41,16 @@
 <div class="field"><label>Nama pengirim</label><input id="namaPengirim"></div>
 <div class="field"><label>Tanggal pembayaran *</label><input id="tanggalBayar" type="date" required></div>
 <div class="field"><label>Nominal dibayar *</label><input id="nominalDibayar" type="number" min="0" required></div>
-<div class="field full"><label>Bukti pembayaran * (JPG/PNG/PDF, maks. 3 MB)</label><input id="bukti" type="file" accept="image/*,.pdf" required></div>
+<div class="field full"><div class="summary"><b>Bukti pembayaran dikirim melalui WhatsApp setelah formulir berhasil disimpan.</b><br><small>WhatsApp akan terbuka dengan pesan otomatis. Lampirkan foto bukti transfer pada percakapan tersebut.</small></div></div>
 <div class="field full"><label>Catatan kebutuhan belajar</label><textarea id="catatan"></textarea></div>
-<div class="field full"><button class="btn btn-primary" style="width:100%" id="btnKirim">Kirim Pendaftaran & Bukti</button><div class="status" id="status"></div></div>
+<div class="field full"><button class="btn btn-primary" style="width:100%" id="btnKirim">Kirim Pendaftaran</button><div class="status" id="status"></div></div>
 </div></form></div></div></section>
 
 <footer><div class="container">© <span id="year"></span> Sanggar Mam Is Learning Hub</div></footer>
-<iframe name="uploadFrame" id="uploadFrame" style="display:none"></iframe>
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
+const WA_SANGGAR="6281318997525";
 let kelas=[];
 
 function api(action,params={}){return new Promise((resolve,reject)=>{const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);const s=document.createElement("script");window[cb]=d=>{resolve(d);delete window[cb];s.remove()};params.action=action;params.callback=cb;s.src=API_URL+"?"+new URLSearchParams(params);s.onerror=()=>reject(new Error("Gagal terhubung ke server."));document.body.appendChild(s)})}
@@ -68,54 +68,79 @@ function hitung(){const ids=terpilih();const items=kelas.filter(k=>ids.includes(
 function file64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
 function status(msg,type){const e=document.getElementById("status");e.className="status "+type;e.textContent=msg}
 
+async function kirim(ev){
+  ev.preventDefault();
+  const ids=terpilih();
+  if(!ids.length){status("Pilih minimal satu kelas.","err");return}
 
-function postForm(action,data){
-  return new Promise((resolve,reject)=>{
-    const requestId="REQ-"+Date.now()+"-"+Math.floor(Math.random()*9999);
-    const timeout=setTimeout(()=>{
-      window.removeEventListener("message",handler);
-      reject(new Error("Server tidak memberi respons. Periksa deployment Apps Script."));
-    },60000);
+  const selected=kelas.filter(k=>ids.includes(String(k.idKelas)));
+  const total=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
 
-    function handler(event){
-      const msg=event.data||{};
-      if(msg.source!=="MAMIS_APPS_SCRIPT" || msg.requestId!==requestId) return;
-      clearTimeout(timeout);
-      window.removeEventListener("message",handler);
-      msg.status ? resolve(msg) : reject(new Error(msg.message||"Pengiriman gagal."));
-    }
-    window.addEventListener("message",handler);
+  if(Number(v("nominalDibayar"))<total){
+    status("Nominal pembayaran kurang dari total biaya kelas.","err");
+    return;
+  }
 
-    const form=document.createElement("form");
-    form.method="POST";
-    form.action=API_URL;
-    form.target="uploadFrame";
-    form.style.display="none";
+  const btn=document.getElementById("btnKirim");
+  btn.disabled=true;
+  btn.textContent="Mengirim...";
+  status("Menyimpan pendaftaran...","wait");
 
-    const fields={
-      action,
-      requestId,
-      origin:location.origin,
-      data:JSON.stringify(data)
+  try{
+    const data={
+      namaSiswa:v("namaSiswa"),
+      jenisKelamin:v("jenisKelamin"),
+      jenjang:v("jenjang"),
+      kelasSekolah:v("kelasSekolah"),
+      namaSekolah:v("namaSekolah"),
+      namaOrtu:v("namaOrtu"),
+      noWa:phone(v("noWa")),
+      alamat:v("alamat"),
+      idKelasList:ids,
+      bulanMulai:v("bulanMulai"),
+      metodeBayar:v("metodeBayar"),
+      namaPengirim:v("namaPengirim"),
+      tanggalBayar:v("tanggalBayar"),
+      nominalDibayar:v("nominalDibayar"),
+      catatan:v("catatan"),
+      buktiPembayaran:"DIKIRIM VIA WHATSAPP"
     };
-    Object.entries(fields).forEach(([name,value])=>{
-      const input=document.createElement("input");
-      input.type="hidden";
-      input.name=name;
-      input.value=value;
-      form.appendChild(input);
-    });
 
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(()=>form.remove(),1000);
-  });
+    const r=await api("addPendaftaran",{data:JSON.stringify(data)});
+    if(!r.status) throw new Error(r.message);
+
+    status(`Pendaftaran berhasil disimpan. Nomor: ${r.idPendaftaran}. Silakan kirim bukti melalui WhatsApp.`,"ok");
+
+    const daftarKelas=selected.map(k=>`- ${k.namaKelas}: ${rupiah(k.biaya)}`).join("\n");
+    const pesan=`Assalamu'alaikum Admin Sanggar Mam Is.
+
+Saya mengirim bukti pembayaran untuk pendaftaran:
+
+Nomor Pendaftaran: ${r.idPendaftaran}
+Nama Siswa: ${v("namaSiswa")}
+Bulan Mulai: ${v("bulanMulai")}
+
+Kelas yang dipilih:
+${daftarKelas}
+
+Total: ${rupiah(total)}
+Nominal Dibayar: ${rupiah(v("nominalDibayar"))}
+Nama Pengirim: ${v("namaPengirim") || "-"}
+
+Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
+
+    window.open(`https://wa.me/${WA_SANGGAR}?text=${encodeURIComponent(pesan)}`,"_blank","noopener");
+
+    document.getElementById("formDaftar").reset();
+    setDefaults();
+    hitung();
+  }catch(e){
+    status(e.message||"Pendaftaran gagal.","err");
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Kirim Pendaftaran";
+  }
 }
-
-async function kirim(ev){ev.preventDefault();const ids=terpilih();if(!ids.length){status("Pilih minimal satu kelas.","err");return}const file=document.getElementById("bukti").files[0];if(!file){status("Unggah bukti pembayaran.","err");return}if(file.size>3*1024*1024){status("Ukuran bukti maksimal 3 MB.","err");return}
-const total=kelas.filter(k=>ids.includes(String(k.idKelas))).reduce((n,k)=>n+Number(k.biaya||0),0);if(Number(v("nominalDibayar"))<total){status("Nominal pembayaran kurang dari total biaya kelas.","err");return}
-const btn=document.getElementById("btnKirim");btn.disabled=true;btn.textContent="Mengirim...";status("Mengunggah bukti dan menyimpan pendaftaran...","wait");
-try{const b64=await file64(file);const data={namaSiswa:v("namaSiswa"),jenisKelamin:v("jenisKelamin"),jenjang:v("jenjang"),kelasSekolah:v("kelasSekolah"),namaSekolah:v("namaSekolah"),namaOrtu:v("namaOrtu"),noWa:phone(v("noWa")),alamat:v("alamat"),idKelasList:ids,bulanMulai:v("bulanMulai"),metodeBayar:v("metodeBayar"),namaPengirim:v("namaPengirim"),tanggalBayar:v("tanggalBayar"),nominalDibayar:v("nominalDibayar"),buktiBase64:b64,buktiNama:file.name,catatan:v("catatan")};const r=await postForm("addPendaftaran",data);if(!r.status)throw new Error(r.message);status(`${r.message} Nomor pendaftaran: ${r.idPendaftaran}`,"ok");document.getElementById("formDaftar").reset();setDefaults();hitung()}catch(e){status(e.message||"Pendaftaran gagal.","err")}finally{btn.disabled=false;btn.textContent="Kirim Pendaftaran & Bukti"}}
 function setDefaults(){const d=new Date();document.getElementById("tanggalBayar").value=d.toISOString().slice(0,10);document.getElementById("bulanMulai").value=d.toISOString().slice(0,7)}
 document.getElementById("year").textContent=new Date().getFullYear();setDefaults();load();
 </script>
