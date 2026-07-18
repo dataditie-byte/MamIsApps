@@ -21,7 +21,7 @@
 <section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
-<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Tidak ada biaya pendaftaran.</b></p></aside>
+<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Biaya pendaftaran siswa baru: Rp30.000.</b></p></aside>
 
 <div class="form-card"><form id="formDaftar" onsubmit="kirim(event)"><div class="form-grid">
 <div class="field"><label>Nama siswa *</label><input id="namaSiswa" required></div>
@@ -35,7 +35,7 @@
 <div class="field full"><label>Alamat</label><textarea id="alamat"></textarea></div>
 
 <div class="field full"><label>Pilih kelas *</label><div class="class-list" id="kelasChecklist"><div class="empty">Memuat kelas...</div></div></div>
-<div class="field full"><div class="summary" id="ringkasan"><div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div><div class="summary-row summary-total"><span>Total per bulan</span><span id="totalText">Rp0</span></div></div></div>
+<div class="field full"><div class="summary" id="ringkasan"><div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>Rp30.000</b></div><div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div><div class="summary-row summary-total"><span>Total pembayaran awal</span><span id="totalText">Rp30.000</span></div></div></div>
 
 <div class="field"><label>Metode pembayaran</label><select id="metodeBayar"><option>Transfer Bank</option><option>QRIS</option><option>Tunai</option></select></div>
 <div class="field"><label>Nama pengirim</label><input id="namaPengirim"></div>
@@ -79,6 +79,7 @@
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
+const BIAYA_PENDAFTARAN=30000;
 let kelas=[];
 
 function api(action,params={}){return new Promise((resolve,reject)=>{const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);const s=document.createElement("script");window[cb]=d=>{resolve(d);delete window[cb];s.remove()};params.action=action;params.callback=cb;s.src=API_URL+"?"+new URLSearchParams(params);s.onerror=()=>reject(new Error("Gagal terhubung ke server."));document.body.appendChild(s)})}
@@ -92,7 +93,22 @@ function render(){document.getElementById("programList").innerHTML=kelas.length?
 document.getElementById("kelasChecklist").innerHTML=kelas.map(k=>`<label class="class-choice"><input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()"><span><b>${esc(k.namaKelas)}</b><br><small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small></span></label>`).join("")}
 function pilih(id){const c=document.querySelector(`input[name="kelas"][value="${CSS.escape(id)}"]`);if(c)c.checked=true;hitung();document.getElementById("daftar").scrollIntoView({behavior:"smooth"})}
 function terpilih(){return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value)}
-function hitung(){const ids=terpilih();const items=kelas.filter(k=>ids.includes(String(k.idKelas)));const total=items.reduce((n,k)=>n+Number(k.biaya||0),0);document.getElementById("ringkasan").innerHTML=(items.length?items.map(k=>`<div class="summary-row"><span>${esc(k.namaKelas)}</span><b>${rupiah(k.biaya)}</b></div>`).join(""):'<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>')+`<div class="summary-row summary-total"><span>Total per bulan</span><span>${rupiah(total)}</span></div>`;document.getElementById("nominalDibayar").value=total}
+function hitung(){
+  const ids=terpilih();
+  const items=kelas.filter(k=>ids.includes(String(k.idKelas)));
+  const totalKelas=items.reduce((n,k)=>n+Number(k.biaya||0),0);
+  const totalAwal=totalKelas+BIAYA_PENDAFTARAN;
+
+  document.getElementById("ringkasan").innerHTML=
+    `<div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>${rupiah(BIAYA_PENDAFTARAN)}</b></div>`+
+    (items.length
+      ? items.map(k=>`<div class="summary-row"><span>${esc(k.namaKelas)}</span><b>${rupiah(k.biaya)}/bulan</b></div>`).join("")
+      : '<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>'
+    )+
+    `<div class="summary-row summary-total"><span>Total pembayaran awal</span><span>${rupiah(totalAwal)}</span></div>`;
+
+  document.getElementById("nominalDibayar").value=totalAwal;
+}</span><b>${rupiah(k.biaya)}</b></div>`).join(""):'<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>')+`<div class="summary-row summary-total"><span>Total per bulan</span><span>${rupiah(total)}</span></div>`;document.getElementById("nominalDibayar").value=total}
 function file64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
 function status(msg,type){const e=document.getElementById("status");e.className="status "+type;e.textContent=msg}
 
@@ -102,7 +118,8 @@ async function kirim(ev){
   if(!ids.length){status("Pilih minimal satu kelas.","err");return}
 
   const selected=kelas.filter(k=>ids.includes(String(k.idKelas)));
-  const total=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
+  const totalKelas=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
+  const total=totalKelas+BIAYA_PENDAFTARAN;
 
   if(Number(v("nominalDibayar"))<total){
     status("Nominal pembayaran kurang dari total biaya kelas.","err");
@@ -130,6 +147,7 @@ async function kirim(ev){
       namaPengirim:v("namaPengirim"),
       tanggalBayar:v("tanggalBayar"),
       nominalDibayar:v("nominalDibayar"),
+      biayaPendaftaran:BIAYA_PENDAFTARAN,
       catatan:v("catatan"),
       buktiPembayaran:"DIKIRIM VIA WHATSAPP"
     };
@@ -151,7 +169,9 @@ Bulan Mulai: ${v("bulanMulai")}
 Kelas yang dipilih:
 ${daftarKelas}
 
-Total: ${rupiah(total)}
+Biaya Pendaftaran: ${rupiah(BIAYA_PENDAFTARAN)}
+Total Kelas Bulanan: ${rupiah(totalKelas)}
+Total Pembayaran Awal: ${rupiah(total)}
 Nominal Dibayar: ${rupiah(v("nominalDibayar"))}
 Nama Pengirim: ${v("namaPengirim") || "-"}
 
