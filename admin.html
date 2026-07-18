@@ -748,7 +748,7 @@
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
+  const API_URL = "PASTE_URL_WEB_APP_TERBARU_DI_SINI";
   const API_KEY = "MAMIS-2026";
 
   let db = {
@@ -758,6 +758,7 @@
 
   let currentForm = null;
   let editingData = null;
+  let lastAccountResult = null;
 
   function jsonp(action, params = {}){
     return new Promise((resolve,reject)=>{
@@ -1461,19 +1462,135 @@
     const username = res.username || "";
     const pin = res.pin || res.pinBaru || "";
 
+    let noWa = res.noWa || "";
+
+    if(!noWa && res.idSiswa){
+      const siswa = db.siswa.find(x =>
+        String(x["ID Siswa"]) === String(res.idSiswa)
+      );
+      if(siswa) noWa = siswa["No WA"] || "";
+    }
+
+    if(!noWa && nama){
+      const siswa = db.siswa.find(x =>
+        String(x["Nama Siswa"]).toLowerCase() === String(nama).toLowerCase()
+      );
+      if(siswa) noWa = siswa["No WA"] || "";
+    }
+
+    lastAccountResult = {
+      namaSiswa:nama,
+      username,
+      pin,
+      noWa
+    };
+
     document.getElementById("resultContent").innerHTML = `
       <div class="code-box">
         <strong>${esc(res.message || "Akun berhasil dibuat.")}</strong>
-        ${nama ? `<p>Nama: <b>${esc(nama)}</b></p>` : ""}
+        ${nama ? `<p>Nama siswa: <b>${esc(nama)}</b></p>` : ""}
         <p>Username: <b>${esc(username)}</b></p>
         <p>PIN: <b>${esc(pin)}</b></p>
+        ${noWa ? `<p>WhatsApp orang tua: <b>${esc(noWa)}</b></p>` : ""}
       </div>
-      <p style="color:var(--muted);font-size:13px">
-        Salin username dan PIN ini sebelum menutup jendela.
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px">
+        <button class="btn btn-light" type="button" onclick="salinInformasiAkun()">
+          📋 Salin Akun
+        </button>
+
+        <button class="btn btn-green" type="button" onclick="kirimWhatsAppAkun()"
+          ${noWa ? "" : "disabled"}>
+          💬 Kirim WhatsApp
+        </button>
+      </div>
+
+      <p style="color:var(--muted);font-size:13px;margin-bottom:0">
+        ${noWa
+          ? "Klik Kirim WhatsApp untuk membuka pesan otomatis kepada orang tua/wali."
+          : "Nomor WhatsApp orang tua belum ditemukan. Gunakan tombol Salin Akun."
+        }
       </p>
     `;
 
     document.getElementById("resultModal").classList.add("open");
+  }
+
+  function formatNomorWhatsApp(no){
+    let nomor = String(no || "").replace(/[^0-9]/g,"");
+
+    if(nomor.startsWith("0")){
+      nomor = "62" + nomor.slice(1);
+    }else if(!nomor.startsWith("62") && nomor.length >= 9){
+      nomor = "62" + nomor;
+    }
+
+    return nomor;
+  }
+
+  function teksInformasiAkun(){
+    if(!lastAccountResult) return "";
+
+    const nama = lastAccountResult.namaSiswa || "Ananda";
+    const username = lastAccountResult.username || "-";
+    const pin = lastAccountResult.pin || "-";
+
+    const baseUrl = location.href.substring(0,location.href.lastIndexOf("/")+1);
+    const portalUrl = baseUrl + "siswa.html";
+
+    return `Assalamu'alaikum Bapak/Ibu.
+
+Pendaftaran Ananda ${nama} di Sanggar Mam Is telah diterima.
+
+Berikut akun Portal Siswa:
+
+Username: ${username}
+PIN: ${pin}
+
+Portal siswa:
+${portalUrl}
+
+Mohon simpan username dan PIN ini serta tidak membagikannya kepada pihak lain.
+
+Terima kasih.
+Sanggar Mam Is Learning Hub`;
+  }
+
+  async function salinInformasiAkun(){
+    const teks = teksInformasiAkun();
+    if(!teks){
+      alert("Informasi akun belum tersedia.");
+      return;
+    }
+
+    try{
+      await navigator.clipboard.writeText(teks);
+      alert("Informasi akun berhasil disalin.");
+    }catch(e){
+      const area = document.createElement("textarea");
+      area.value = teks;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      alert("Informasi akun berhasil disalin.");
+    }
+  }
+
+  function kirimWhatsAppAkun(){
+    if(!lastAccountResult){
+      alert("Informasi akun belum tersedia.");
+      return;
+    }
+
+    const nomor = formatNomorWhatsApp(lastAccountResult.noWa);
+    if(!nomor){
+      alert("Nomor WhatsApp orang tua belum tersedia.");
+      return;
+    }
+
+    const pesan = encodeURIComponent(teksInformasiAkun());
+    window.open(`https://wa.me/${nomor}?text=${pesan}`,"_blank","noopener");
   }
 
   function closeModal(){
