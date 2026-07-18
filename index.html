@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#173b63">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Mam Is Learning Hub</title>
@@ -13,7 +17,7 @@
 </style>
 </head>
 <body>
-<header class="top"><div class="container nav"><a class="brand" href="#"><img src="logo-mam-is.png" alt="Logo">Sanggar Mam Is</a><nav class="menu"><a href="#beranda">Beranda</a><a href="#keunggulan">Keunggulan</a><a href="#program">Program</a><a href="#cara-daftar">Cara Daftar</a><a href="#daftar">Pendaftaran</a><a class="btn btn-primary" href="siswa.html">Portal Siswa</a></nav></div></header>
+<header class="top"><div class="container nav"><a class="brand" href="#"><img src="logo-mam-is.png" alt="Logo">Sanggar Mam Is</a><nav class="menu"><a href="#beranda">Beranda</a><a href="#keunggulan">Keunggulan</a><a href="#program">Program</a><a href="#cara-daftar">Cara Daftar</a><a href="#daftar">Pendaftaran</a><button class="btn btn-green" id="installBtn" type="button" style="display:none">📲 Install Aplikasi</button><a class="btn btn-primary" href="siswa.html">Portal Siswa</a></nav></div></header>
 
 <section class="hero" id="beranda"><div class="container hero-grid"><div><div style="display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:16px">Belajar Lebih Terarah dan Menyenangkan</div><h1>Sanggar Mam Is Learning Hub</h1><p>Ruang belajar digital untuk siswa yang ingin memahami materi, berlatih soal, mengikuti kelas, dan memantau perkembangan belajar dalam satu aplikasi yang mudah digunakan.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-light" href="#daftar">Daftar Sekarang</a><a class="btn btn-green" href="siswa.html">Masuk Portal Siswa</a><a class="btn btn-light" href="#program">Lihat Program</a></div></div><div class="hero-card"><h3>Keunggulan Sanggar Mam Is</h3><ul><li>Materi terarah sesuai kelas dan jenjang</li><li>Latihan soal dan CBT bertahap</li><li>Pendampingan belajar yang ramah</li><li>Nilai, absensi, dan perkembangan tersimpan rapi</li><li>Dapat diakses melalui ponsel maupun komputer</li></ul></div></div></section>
 
@@ -81,83 +85,118 @@
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
 const BIAYA_PENDAFTARAN=30000;
+
 let kelas=[];
+let deferredPrompt=null;
 
 function api(action,params={}){
   return new Promise((resolve,reject)=>{
     const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
     const s=document.createElement("script");
-    window[cb]=d=>{resolve(d);delete window[cb];s.remove();};
+
+    window[cb]=data=>{
+      resolve(data);
+      delete window[cb];
+      s.remove();
+    };
+
     params.action=action;
     params.callback=cb;
     s.src=API_URL+"?"+new URLSearchParams(params).toString();
-    s.onerror=()=>{delete window[cb];s.remove();reject(new Error("Gagal terhubung ke server."));};
+
+    s.onerror=()=>{
+      delete window[cb];
+      s.remove();
+      reject(new Error("Gagal terhubung ke server."));
+    };
+
     document.body.appendChild(s);
   });
 }
 
 function rupiah(n){
-  return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",minimumFractionDigits:0}).format(Number(n||0));
+  return new Intl.NumberFormat("id-ID",{
+    style:"currency",
+    currency:"IDR",
+    minimumFractionDigits:0
+  }).format(Number(n||0));
 }
+
 function esc(x){
-  return String(x??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  return String(x??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
+
 function phone(x){
   let n=String(x||"").replace(/\D/g,"");
   if(n.startsWith("0")) n="62"+n.slice(1);
   if(!n.startsWith("62") && n.length>=9) n="62"+n;
   return n;
 }
-function v(id){return document.getElementById(id).value.trim();}
+
+function v(id){
+  return document.getElementById(id).value.trim();
+}
 
 async function load(){
-  const list=document.getElementById("programList");
   try{
     const r=await api("getPublicData");
     if(!r.status) throw new Error(r.message||"Gagal memuat program.");
     kelas=Array.isArray(r.kelas)?r.kelas:[];
     render();
   }catch(e){
-    list.innerHTML=`<div class="empty">Program belum dapat dimuat.<br><small>${esc(e.message)}</small></div>`;
+    document.getElementById("programList").innerHTML=
+      `<div class="empty">Program belum dapat dimuat.<br><small>${esc(e.message)}</small></div>`;
   }
 }
 
 function render(){
-  const programList=document.getElementById("programList");
-  const checklist=document.getElementById("kelasChecklist");
+  const list=document.getElementById("programList");
+  const checks=document.getElementById("kelasChecklist");
 
   if(!kelas.length){
-    programList.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
-    checklist.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
+    list.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
+    checks.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
     return;
   }
 
-  programList.innerHTML=kelas.map(k=>`
+  list.innerHTML=kelas.map(k=>`
     <article class="card program">
       <h3>${esc(k.namaKelas)}</h3>
       <span class="pill">${esc(k.jenjang||"")}</span>
       <span class="pill">${esc(k.kategori||"Kelas")}</span>
       <p>${esc(k.jadwal||"Jadwal dikonfirmasi admin")}</p>
       <div class="price">${rupiah(k.biaya)}/bulan</div>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="pilih('${esc(k.idKelas)}')">Pilih</button>
+      <button class="btn btn-primary" style="margin-top:12px"
+        onclick="pilih('${esc(k.idKelas)}')">Pilih</button>
     </article>
   `).join("");
 
-  checklist.innerHTML=kelas.map(k=>`
+  checks.innerHTML=kelas.map(k=>`
     <label class="class-choice">
       <input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()">
-      <span><b>${esc(k.namaKelas)}</b><br><small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small></span>
+      <span>
+        <b>${esc(k.namaKelas)}</b><br>
+        <small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small>
+      </span>
     </label>
   `).join("");
 }
 
 function pilih(id){
-  const box=[...document.querySelectorAll('input[name="kelas"]')].find(x=>String(x.value)===String(id));
+  const box=[...document.querySelectorAll('input[name="kelas"]')]
+    .find(x=>String(x.value)===String(id));
   if(box) box.checked=true;
   hitung();
   document.getElementById("daftar").scrollIntoView({behavior:"smooth"});
 }
-function terpilih(){return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value);}
+
+function terpilih(){
+  return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value);
+}
 
 function hitung(){
   const ids=terpilih();
@@ -166,14 +205,26 @@ function hitung(){
   const totalAwal=totalKelas+BIAYA_PENDAFTARAN;
 
   const rincian=items.length
-    ? items.map(k=>`<div class="summary-row"><span>${esc(k.namaKelas)}</span><b>${rupiah(k.biaya)}/bulan</b></div>`).join("")
+    ? items.map(k=>`
+        <div class="summary-row">
+          <span>${esc(k.namaKelas)}</span>
+          <b>${rupiah(k.biaya)}/bulan</b>
+        </div>
+      `).join("")
     : '<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>';
 
   document.getElementById("ringkasan").innerHTML=`
-    <div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>${rupiah(BIAYA_PENDAFTARAN)}</b></div>
+    <div class="summary-row">
+      <span>Biaya pendaftaran siswa baru</span>
+      <b>${rupiah(BIAYA_PENDAFTARAN)}</b>
+    </div>
     ${rincian}
-    <div class="summary-row summary-total"><span>Total pembayaran awal</span><span>${rupiah(totalAwal)}</span></div>
+    <div class="summary-row summary-total">
+      <span>Total pembayaran awal</span>
+      <span>${rupiah(totalAwal)}</span>
+    </div>
   `;
+
   document.getElementById("nominalDibayar").value=totalAwal;
 }
 
@@ -185,8 +236,12 @@ function status(msg,type){
 
 async function kirim(ev){
   ev.preventDefault();
+
   const ids=terpilih();
-  if(!ids.length){status("Pilih minimal satu kelas.","err");return;}
+  if(!ids.length){
+    status("Pilih minimal satu kelas.","err");
+    return;
+  }
 
   const selected=kelas.filter(k=>ids.includes(String(k.idKelas)));
   const totalKelas=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
@@ -226,7 +281,10 @@ async function kirim(ev){
     const r=await api("addPendaftaran",{data:JSON.stringify(data)});
     if(!r.status) throw new Error(r.message||"Pendaftaran gagal.");
 
-    status(`Pendaftaran berhasil disimpan. Nomor: ${r.idPendaftaran}. Silakan kirim bukti melalui WhatsApp.`,"ok");
+    status(
+      `Pendaftaran berhasil disimpan. Nomor: ${r.idPendaftaran}. Silakan kirim bukti melalui WhatsApp.`,
+      "ok"
+    );
 
     const daftarKelas=selected.map(k=>`- ${k.namaKelas}: ${rupiah(k.biaya)}`).join("\n");
     const pesan=`Assalamu'alaikum Admin Sanggar Mam Is.
@@ -248,7 +306,12 @@ Nama Pengirim: ${v("namaPengirim")||"-"}
 
 Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
 
-    window.open(`https://wa.me/${WA_SANGGAR}?text=${encodeURIComponent(pesan)}`,"_blank","noopener");
+    window.open(
+      `https://wa.me/${WA_SANGGAR}?text=${encodeURIComponent(pesan)}`,
+      "_blank",
+      "noopener"
+    );
+
     document.getElementById("formDaftar").reset();
     setDefaults();
     hitung();
@@ -266,16 +329,45 @@ function setDefaults(){
   document.getElementById("bulanMulai").value=d.toISOString().slice(0,7);
 }
 
+/* PWA INSTALL */
+window.addEventListener("beforeinstallprompt",event=>{
+  event.preventDefault();
+  deferredPrompt=event;
+  document.getElementById("installBtn").style.display="inline-flex";
+});
+
+document.getElementById("installBtn").addEventListener("click",async()=>{
+  if(!deferredPrompt){
+    alert("Di Chrome Android, buka menu ⋮ lalu pilih Tambahkan ke layar utama atau Instal aplikasi.");
+    return;
+  }
+
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById("installBtn").style.display="none";
+});
+
+window.addEventListener("appinstalled",()=>{
+  deferredPrompt=null;
+  document.getElementById("installBtn").style.display="none";
+});
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register("./service-worker.js",{scope:"./"});
+      reg.update();
+    }catch(err){
+      console.error("Service worker gagal:",err);
+    }
+  });
+}
+
 document.getElementById("year").textContent=new Date().getFullYear();
 setDefaults();
 hitung();
 load();
-
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("service-worker.js").catch(()=>{});
-  });
-}
 
 </script>
 </body></html>
