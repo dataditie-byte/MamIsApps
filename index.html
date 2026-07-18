@@ -1,134 +1,1044 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sanggar Mam Is Apps Pro</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f3f7fb;color:#172554;padding-bottom:88px}
-.top{background:linear-gradient(135deg,#1f4e79,#2f80ed);color:white;padding:18px 16px 22px;border-radius:0 0 28px 28px;box-shadow:0 5px 18px rgba(0,0,0,.16)}
-.brand{display:flex;gap:12px;align-items:center}.logo{width:56px;height:56px;border-radius:16px;background:white;padding:6px;object-fit:contain}
-h1{font-size:22px;margin:0}.sub{margin:4px 0 0;font-size:13px;opacity:.92}.wrap{padding:14px;max-width:980px;margin:auto}
-.section{display:none}.section.active{display:block}.card{background:white;border-radius:18px;padding:14px;box-shadow:0 3px 12px rgba(15,23,42,.08);margin-bottom:12px}
-.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.sumcard{color:white;border-radius:18px;padding:14px;box-shadow:0 3px 12px rgba(15,23,42,.14)}
-.s1{background:#2563eb}.s2{background:#059669}.s3{background:#f97316}.s4{background:#7c3aed}.label{font-size:12px;opacity:.9}.num{font-size:25px;font-weight:bold;margin-top:5px}
-h2{font-size:21px;margin:8px 0 12px}h3{margin:4px 0 12px}
-input,select,textarea{width:100%;padding:12px;margin:6px 0 10px;border:1px solid #cbd5e1;border-radius:14px;font-size:15px;background:white}textarea{min-height:70px}
-button,.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:bold;cursor:pointer;background:#1f4e79;color:white;text-decoration:none;display:inline-block}.btn-green{background:#16a34a}.btn-light{background:#e8f1ff;color:#1f4e79}.btn-red{background:#dc2626}.wa{background:#16a34a}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}th{background:#f8fafc}
-.msg{font-weight:bold;color:#166534;margin-top:8px}.small{font-size:12px;color:#64748b}.pill{display:inline-block;background:#e8f1ff;color:#1f4e79;border-radius:999px;padding:5px 8px;margin:2px;font-size:12px}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(6,1fr);box-shadow:0 -4px 16px rgba(0,0,0,.14);z-index:10;padding:6px 4px}
-.navbtn{background:white;color:#334155;border-radius:16px;padding:9px 2px;font-size:11px;line-height:1.25}.navbtn b{display:block;font-size:19px;margin-bottom:2px}
-.navbtn.active{color:white}.nav-home.active{background:#2563eb}.nav-siswa.active{background:#16a34a}.nav-kelas.active{background:#f97316}.nav-peserta.active{background:#7c3aed}.nav-absensi.active{background:#0891b2}.nav-bayar.active{background:#dc2626}
-@media(min-width:760px){.summary{grid-template-columns:repeat(4,1fr)}.bottom{max-width:980px;left:50%;transform:translateX(-50%);border-radius:24px 24px 0 0}.navbtn{font-size:12px}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1f4e79">
+  <meta name="description" content="Sanggar Mam Is Learning Hub - Belajar, berlatih, dan bertumbuh bersama.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="logo-mam-is.png">
+  <title>Sanggar Mam Is Learning Hub</title>
+
+  <style>
+    :root{
+      --navy:#173b63;
+      --blue:#2f80ed;
+      --sky:#eaf4ff;
+      --green:#16a34a;
+      --orange:#f97316;
+      --purple:#7c3aed;
+      --red:#dc2626;
+      --ink:#14213d;
+      --muted:#64748b;
+      --line:#dbe4ef;
+      --white:#fff;
+      --shadow:0 10px 30px rgba(23,59,99,.12);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--ink);
+      background:#f6f9fc;
+      line-height:1.6;
+    }
+
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+    button,input,select,textarea{font:inherit}
+
+    .container{width:min(1120px,calc(100% - 28px));margin:auto}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.95);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(219,228,239,.8);
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      min-height:72px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      color:var(--navy);
+    }
+
+    .brand img{
+      width:50px;
+      height:50px;
+      border-radius:14px;
+      object-fit:contain;
+      background:white;
+      padding:4px;
+      box-shadow:0 4px 14px rgba(23,59,99,.14);
+    }
+
+    .brand span small{
+      display:block;
+      font-size:11px;
+      font-weight:600;
+      color:var(--muted);
+      line-height:1.2;
+    }
+
+    .menu{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .menu a:hover{color:var(--blue)}
+
+    .menu-toggle{
+      display:none;
+      border:0;
+      background:var(--sky);
+      color:var(--navy);
+      border-radius:12px;
+      padding:10px 13px;
+      font-weight:800;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:0;
+      border-radius:14px;
+      padding:13px 18px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--navy),var(--blue));color:white}
+    .btn-light{background:white;color:var(--navy);box-shadow:var(--shadow)}
+    .btn-green{background:var(--green);color:white}
+    .btn-outline{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+    .btn-block{width:100%}
+
+    .hero{
+      background:
+        radial-gradient(circle at top right,rgba(47,128,237,.25),transparent 34%),
+        linear-gradient(135deg,#173b63,#2f80ed);
+      color:white;
+      padding:74px 0 64px;
+      border-radius:0 0 42px 42px;
+      overflow:hidden;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:38px;
+      align-items:center;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.22);
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:18px;
+    }
+
+    .hero h1{
+      font-size:clamp(38px,6vw,68px);
+      line-height:1.04;
+      margin:0 0 16px;
+      letter-spacing:-1.5px;
+    }
+
+    .hero p{
+      font-size:18px;
+      max-width:670px;
+      margin:0 0 24px;
+      color:#e8f2ff;
+    }
+
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+
+    .hero-card{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:28px;
+      padding:22px;
+      box-shadow:0 20px 50px rgba(0,0,0,.2);
+    }
+
+    .hero-card-inner{
+      background:white;
+      color:var(--ink);
+      border-radius:22px;
+      padding:20px;
+    }
+
+    .hero-card h3{margin:0 0 12px;font-size:22px}
+    .hero-card ul{padding-left:20px;margin:0}
+    .hero-card li{margin:8px 0}
+
+    section{padding:64px 0}
+
+    .section-head{
+      text-align:center;
+      max-width:760px;
+      margin:0 auto 34px;
+    }
+
+    .section-head h2{
+      font-size:clamp(28px,4vw,42px);
+      line-height:1.15;
+      margin:0 0 12px;
+      color:var(--navy);
+    }
+
+    .section-head p{margin:0;color:var(--muted)}
+
+    .grid{display:grid;gap:18px}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+
+    .card{
+      background:white;
+      border:1px solid #edf2f7;
+      border-radius:22px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .icon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:24px;
+      margin-bottom:14px;
+    }
+
+    .i-blue{background:#e8f1ff}
+    .i-green{background:#e8f8ef}
+    .i-orange{background:#fff1e8}
+    .i-purple{background:#f1ebff}
+
+    .card h3{margin:0 0 8px;color:var(--navy)}
+    .card p{margin:0;color:var(--muted)}
+
+    .program-card{
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+
+    .program-card .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      margin:12px 0 16px;
+    }
+
+    .pill{
+      display:inline-block;
+      background:var(--sky);
+      color:var(--navy);
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .program-card .price{
+      margin-top:auto;
+      padding-top:12px;
+      font-size:20px;
+      font-weight:900;
+      color:var(--green);
+    }
+
+    .highlight{
+      background:linear-gradient(135deg,#eef6ff,#ffffff);
+      border-top:1px solid #e2edf8;
+      border-bottom:1px solid #e2edf8;
+    }
+
+    .steps{
+      counter-reset:step;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+
+    .step{
+      position:relative;
+      background:white;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:var(--shadow);
+    }
+
+    .step::before{
+      counter-increment:step;
+      content:counter(step);
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:var(--navy);
+      color:white;
+      font-weight:900;
+      margin-bottom:14px;
+    }
+
+    .registration{
+      display:grid;
+      grid-template-columns:.9fr 1.1fr;
+      gap:24px;
+      align-items:start;
+    }
+
+    .info-panel{
+      background:linear-gradient(135deg,var(--navy),var(--blue));
+      color:white;
+      border-radius:26px;
+      padding:28px;
+      position:sticky;
+      top:92px;
+    }
+
+    .info-panel h3{font-size:30px;margin:0 0 12px}
+    .info-panel p{color:#e8f2ff}
+    .info-panel ul{padding-left:20px}
+    .info-panel li{margin:9px 0}
+
+    .form-card{
+      background:white;
+      border-radius:26px;
+      padding:24px;
+      box-shadow:var(--shadow);
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+    }
+
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field.full{grid-column:1/-1}
+
+    label{
+      font-size:13px;
+      font-weight:800;
+      color:var(--navy);
+    }
+
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:13px 14px;
+      outline:none;
+      background:white;
+      color:var(--ink);
+    }
+
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--blue);
+      box-shadow:0 0 0 4px rgba(47,128,237,.1);
+    }
+
+    textarea{min-height:96px;resize:vertical}
+
+    .status{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      font-weight:700;
+    }
+
+    .status.ok{display:block;background:#e8f8ef;color:#166534}
+    .status.err{display:block;background:#fee2e2;color:#991b1b}
+    .status.wait{display:block;background:#fff7ed;color:#9a3412}
+
+    .cta{
+      background:linear-gradient(135deg,#0f2742,#244f7a);
+      color:white;
+      border-radius:28px;
+      padding:34px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:22px;
+    }
+
+    .cta h3{font-size:32px;margin:0 0 8px}
+    .cta p{margin:0;color:#dbeafe}
+
+    footer{
+      background:#0f2742;
+      color:#dbeafe;
+      padding:34px 0 24px;
+      margin-top:30px;
+    }
+
+    .footer-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr;
+      gap:22px;
+    }
+
+    footer h4{color:white;margin:0 0 10px}
+    footer p,footer li{font-size:14px}
+    footer ul{list-style:none;padding:0;margin:0}
+    footer li{margin:7px 0}
+    .copyright{
+      margin-top:26px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.12);
+      font-size:13px;
+      text-align:center;
+    }
+
+    .floating-wa{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:#16a34a;
+      color:white;
+      display:grid;
+      place-items:center;
+      font-size:28px;
+      box-shadow:0 12px 30px rgba(22,163,74,.35);
+      z-index:40;
+    }
+
+    .empty{
+      grid-column:1/-1;
+      text-align:center;
+      padding:30px;
+      color:var(--muted);
+      background:white;
+      border-radius:18px;
+      border:1px dashed var(--line);
+    }
+
+    @media(max-width:900px){
+      .menu{
+        display:none;
+        position:absolute;
+        top:72px;
+        left:14px;
+        right:14px;
+        background:white;
+        border-radius:18px;
+        padding:14px;
+        box-shadow:var(--shadow);
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .menu.open{display:flex}
+      .menu-toggle{display:block}
+      .hero-grid,.registration{grid-template-columns:1fr}
+      .grid-4,.steps{grid-template-columns:repeat(2,1fr)}
+      .grid-3{grid-template-columns:repeat(2,1fr)}
+      .info-panel{position:static}
+      .footer-grid{grid-template-columns:1fr}
+    }
+
+    @media(max-width:620px){
+      .hero{padding:54px 0 44px}
+      .hero h1{font-size:42px}
+      .hero-actions{flex-direction:column}
+      .hero-actions .btn{width:100%}
+      .grid-4,.grid-3,.steps,.form-grid{grid-template-columns:1fr}
+      section{padding:48px 0}
+      .cta{flex-direction:column;align-items:flex-start}
+      .field.full{grid-column:auto}
+      .brand span{font-size:14px}
+      .brand span small{font-size:10px}
+    }
+  </style>
 </head>
 <body>
-<div class="top">
-  <div class="brand">
-    <img src="logo-mam-is.png" class="logo" onerror="this.style.display='none'">
-    <div><h1>Sanggar Mam Is Apps Pro</h1><p class="sub">Monitoring siswa, kelas, peserta, absensi, pembayaran, dan WA reminder</p></div>
+
+<header class="topbar">
+  <div class="container nav">
+    <a class="brand" href="#beranda">
+      <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
+      <span>
+        Sanggar Mam Is
+        <small>Learning Hub</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰ Menu</button>
+
+    <nav class="menu" id="menu">
+      <a href="#beranda">Beranda</a>
+      <a href="#keunggulan">Keunggulan</a>
+      <a href="#program">Program</a>
+      <a href="#cara-daftar">Cara Daftar</a>
+      <a href="#pendaftaran">Pendaftaran</a>
+      <a class="btn btn-primary" href="siswa.html">Portal Siswa</a>
+    </nav>
   </div>
-</div>
+</header>
 
-<div class="wrap">
-<section id="home" class="section active">
-<h2>Dashboard</h2>
-<div class="summary">
-<div class="sumcard s1"><div class="label">Siswa Aktif</div><div class="num" id="sSiswa">0</div></div>
-<div class="sumcard s2"><div class="label">Kelas Aktif</div><div class="num" id="sKelas">0</div></div>
-<div class="sumcard s3"><div class="label">Pembayaran Bulan Ini</div><div class="num" id="sBayar">Rp0</div></div>
-<div class="sumcard s4"><div class="label">Tunggakan</div><div class="num" id="sTunggakan">Rp0</div></div>
-</div>
-<div class="card"><button onclick="loadData()">Refresh Data</button><div class="msg" id="msgHome"></div></div>
-<div class="card"><h3>Jumlah Peserta per Kelas</h3><div id="kelasStats"></div></div>
-<div class="card"><h3>Data Cepat</h3><div id="quickData" class="small">Memuat data...</div></div>
-</section>
+<main>
+  <section class="hero" id="beranda">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">Belajar Lebih Terarah dan Menyenangkan</span>
+        <h1>Sanggar Mam Is Learning Hub</h1>
+        <p>
+          Ruang belajar digital untuk siswa yang ingin memahami materi,
+          berlatih soal, mengikuti kelas, dan memantau perkembangan belajar
+          dalam satu aplikasi yang mudah digunakan.
+        </p>
 
-<section id="siswa" class="section">
-<h2>Data Siswa</h2>
-<div class="card"><input type="hidden" id="idSiswaEdit"><input id="namaSiswa" placeholder="Nama siswa"><select id="jenjangSiswa"><option value="">Pilih jenjang</option><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select><input id="namaOrtu" placeholder="Nama orang tua/wali"><input id="noWaSiswa" placeholder="No WA orang tua"><textarea id="alamatSiswa" placeholder="Alamat"></textarea><select id="statusSiswa"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanSiswa()">Simpan Siswa</button> <button class="btn-light" onclick="resetSiswa()">Reset</button><div class="msg" id="msgSiswa"></div></div>
-<div class="card"><h3>Daftar Siswa</h3><input id="searchSiswa" placeholder="Ketik nama siswa..." onkeyup="renderAll()"><div id="listSiswa"></div></div>
-</section>
+        <div class="hero-actions">
+          <a class="btn btn-light" href="#pendaftaran">Daftar Sekarang</a>
+          <a class="btn btn-green" href="siswa.html">Masuk Portal Siswa</a>
+          <a class="btn btn-outline" style="color:white;border-color:white" href="#program">Lihat Program</a>
+        </div>
+      </div>
 
-<section id="kelas" class="section">
-<h2>Kelas & Pengajar</h2>
-<div class="card"><input type="hidden" id="idKelasEdit"><input id="namaKelas" placeholder="Nama kelas"><select id="jenjangKelas"><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select><select id="kategoriKelas"><option>Bahasa Inggris</option><option>Mapel</option><option>Matematika</option><option>Kelas Baca</option><option>Paket Lain</option></select><label>Pengajar kelas bisa lebih dari satu</label><select id="selectPengajar" multiple size="4"></select><input type="number" id="biayaKelas" placeholder="Biaya bulanan"><select id="statusKelas"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanKelas()">Simpan Kelas</button> <button class="btn-light" onclick="resetKelas()">Reset</button><div class="msg" id="msgKelas"></div></div>
-<div class="card"><h3>Tambah Pengajar</h3><input type="hidden" id="idPengajarEdit"><input id="namaPengajar" placeholder="Nama pengajar"><input id="waPengajar" placeholder="No WA"><textarea id="alamatPengajar" placeholder="Alamat"></textarea><select id="statusPengajar"><option>Aktif</option><option>Nonaktif</option></select><button onclick="simpanPengajar()">Simpan Pengajar</button> <button class="btn-light" onclick="resetPengajar()">Reset</button><div class="msg" id="msgPengajar"></div></div>
-<div class="card"><h3>Daftar Kelas</h3><div id="listKelas"></div></div><div class="card"><h3>Daftar Pengajar</h3><div id="listPengajar"></div></div>
-</section>
+      <div class="hero-card">
+        <div class="hero-card-inner">
+          <h3>Dalam satu aplikasi</h3>
+          <ul>
+            <li>Materi sesuai kelas dan jenjang</li>
+            <li>Latihan soal dan hasil belajar</li>
+            <li>Informasi jadwal dan pengumuman</li>
+            <li>Absensi dan status pembayaran</li>
+            <li>Bisa dipasang di layar utama Android</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<section id="peserta" class="section">
-<h2>Peserta Kelas</h2>
-<div class="card"><input type="hidden" id="idPesertaEdit"><input id="searchPesertaSiswa" placeholder="Cari nama siswa..." onkeyup="filterSelectSiswaPeserta()"><select id="siswaPeserta"></select><select id="kelasPeserta"></select><input type="date" id="tanggalMasuk"><select id="statusPeserta"><option>Aktif</option><option>Nonaktif</option></select><button class="btn-green" onclick="simpanPeserta()">Simpan Peserta</button> <button class="btn-light" onclick="resetPeserta()">Reset</button><div class="msg" id="msgPeserta"></div></div>
-<div class="card"><h3>Jumlah Peserta per Kelas</h3><div id="kelasStatsPeserta"></div></div>
-<div class="card"><h3>Daftar Peserta Kelas</h3><div id="listPeserta"></div></div>
-</section>
+  <section id="keunggulan">
+    <div class="container">
+      <div class="section-head">
+        <h2>Belajar bukan sekadar mengerjakan soal</h2>
+        <p>
+          Sanggar Mam Is membantu siswa membangun pemahaman, kebiasaan belajar,
+          kepercayaan diri, dan kesiapan menghadapi berbagai tantangan akademik.
+        </p>
+      </div>
 
-<section id="absensi" class="section"><h2>Absensi</h2><div class="card"><select id="kelasAbsensi" onchange="loadPesertaAbsensi()"></select><input type="date" id="tanggalAbsensi"><div id="formAbsensi"></div><button class="btn-green" onclick="simpanAbsensi()">Simpan Absensi</button><div class="msg" id="msgAbsensi"></div></div></section>
+      <div class="grid grid-4">
+        <article class="card">
+          <div class="icon i-blue">📚</div>
+          <h3>Materi Terarah</h3>
+          <p>Materi disusun sesuai jenjang, kelas, dan kebutuhan belajar siswa.</p>
+        </article>
 
-<section id="bayar" class="section">
-<h2>Pembayaran</h2>
-<div class="card"><select id="siswaBayar" onchange="loadTagihanSiswa()"></select><input type="date" id="tanggalBayar"><input type="month" id="bulanBayar" onchange="loadTagihanSiswa()"><div id="rincianTagihan" class="small"></div><input type="number" id="tagihan" placeholder="Total tagihan" readonly><input type="number" id="dibayar" placeholder="Dibayar"><select id="metode"><option>Cash</option><option>Transfer</option><option>QRIS</option></select><textarea id="ketBayar" placeholder="Keterangan"></textarea><button class="btn-green" onclick="simpanPembayaran()">Simpan Pembayaran</button><div class="msg" id="msgBayar"></div></div>
-<div class="card"><h3>Pelunasan Cicilan</h3><select id="pilihCicilan"></select><input type="date" id="tanggalPelunasan"><input type="number" id="jumlahPelunasan" placeholder="Nominal pelunasan"><select id="metodePelunasan"><option>Cash</option><option>Transfer</option><option>QRIS</option></select><textarea id="ketPelunasan" placeholder="Keterangan pelunasan"></textarea><button class="btn-green" onclick="simpanPelunasan()">Simpan Pelunasan</button><div class="msg" id="msgPelunasan"></div></div>
-<div class="card"><h3>Reminder WhatsApp</h3><div id="waReminder"></div></div><div class="card"><h3>Riwayat Pembayaran</h3><div id="listBayar"></div></div>
-</section>
-</div>
+        <article class="card">
+          <div class="icon i-green">🧠</div>
+          <h3>Latihan Bertahap</h3>
+          <p>Latihan soal dibuat dari tingkat dasar hingga tantangan lanjutan.</p>
+        </article>
 
-<div class="bottom">
-<button class="navbtn nav-home active" onclick="show('home',this)"><b>🏠</b>Home</button>
-<button class="navbtn nav-siswa" onclick="show('siswa',this)"><b>👦</b>Siswa</button>
-<button class="navbtn nav-kelas" onclick="show('kelas',this)"><b>🏫</b>Kelas</button>
-<button class="navbtn nav-peserta" onclick="show('peserta',this)"><b>🧾</b>Peserta</button>
-<button class="navbtn nav-absensi" onclick="show('absensi',this)"><b>✅</b>Absensi</button>
-<button class="navbtn nav-bayar" onclick="show('bayar',this)"><b>💳</b>Bayar</button>
-</div>
+        <article class="card">
+          <div class="icon i-orange">📈</div>
+          <h3>Perkembangan Terpantau</h3>
+          <p>Nilai, absensi, materi, dan aktivitas belajar tersimpan rapi.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon i-purple">📱</div>
+          <h3>Ramah Android</h3>
+          <p>Dapat dibuka melalui ponsel dan dipasang seperti aplikasi.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="highlight" id="program">
+    <div class="container">
+      <div class="section-head">
+        <h2>Program Belajar Sanggar Mam Is</h2>
+        <p>
+          Pilih program sesuai kebutuhan. Data kelas pada bagian ini diambil
+          langsung dari dashboard admin.
+        </p>
+      </div>
+
+      <div class="grid grid-3" id="programList">
+        <div class="empty">Memuat daftar program...</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cara-daftar">
+    <div class="container">
+      <div class="section-head">
+        <h2>Cara bergabung sangat mudah</h2>
+        <p>Orang tua cukup mengisi formulir, kemudian admin akan menindaklanjuti.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <h3>Pilih Program</h3>
+          <p>Lihat kelas dan program belajar yang paling sesuai.</p>
+        </div>
+
+        <div class="step">
+          <h3>Isi Data Siswa</h3>
+          <p>Lengkapi data siswa dan orang tua melalui formulir.</p>
+        </div>
+
+        <div class="step">
+          <h3>Konfirmasi Admin</h3>
+          <p>Admin Sanggar Mam Is akan menghubungi melalui WhatsApp.</p>
+        </div>
+
+        <div class="step">
+          <h3>Akun Diaktifkan</h3>
+          <p>Siswa menerima username dan PIN untuk masuk portal belajar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pendaftaran">
+    <div class="container registration">
+      <aside class="info-panel">
+        <h3>Pendaftaran Siswa Baru</h3>
+        <p>
+          Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.
+        </p>
+        <ul>
+          <li>Data tersimpan langsung di dashboard admin.</li>
+          <li>Program dapat dipilih sesuai kelas yang tersedia.</li>
+          <li>Username dan PIN diberikan setelah pendaftaran diterima.</li>
+          <li>Informasi pembayaran dikonfirmasi melalui WhatsApp.</li>
+        </ul>
+
+        <a class="btn btn-light" href="siswa.html">Sudah Punya Akun? Masuk</a>
+      </aside>
+
+      <div class="form-card">
+        <form id="formPendaftaran" onsubmit="kirimPendaftaran(event)">
+          <div class="form-grid">
+
+            <div class="field">
+              <label for="namaSiswa">Nama lengkap siswa *</label>
+              <input id="namaSiswa" required placeholder="Nama siswa">
+            </div>
+
+            <div class="field">
+              <label for="jenisKelamin">Jenis kelamin</label>
+              <select id="jenisKelamin">
+                <option value="">Pilih</option>
+                <option>Laki-laki</option>
+                <option>Perempuan</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="tempatLahir">Tempat lahir</label>
+              <input id="tempatLahir" placeholder="Kota kelahiran">
+            </div>
+
+            <div class="field">
+              <label for="tanggalLahir">Tanggal lahir</label>
+              <input id="tanggalLahir" type="date">
+            </div>
+
+            <div class="field">
+              <label for="jenjang">Jenjang *</label>
+              <select id="jenjang" required>
+                <option value="">Pilih jenjang</option>
+                <option>TK</option>
+                <option>SD</option>
+                <option>SMP</option>
+                <option>SMA</option>
+                <option>Umum</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="kelasSekolah">Kelas sekolah</label>
+              <input id="kelasSekolah" placeholder="Contoh: Kelas X">
+            </div>
+
+            <div class="field">
+              <label for="namaSekolah">Nama sekolah</label>
+              <input id="namaSekolah" placeholder="Nama sekolah asal">
+            </div>
+
+            <div class="field">
+              <label for="kelasPilihan">Program yang dipilih</label>
+              <select id="kelasPilihan" onchange="pilihProgram()">
+                <option value="">Pilih program</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="jadwalPilihan">Jadwal pilihan</label>
+              <input id="jadwalPilihan" placeholder="Jadwal akan terisi otomatis">
+            </div>
+
+            <div class="field">
+              <label for="namaOrtu">Nama orang tua/wali *</label>
+              <input id="namaOrtu" required placeholder="Nama orang tua atau wali">
+            </div>
+
+            <div class="field">
+              <label for="noWa">Nomor WhatsApp *</label>
+              <input id="noWa" required inputmode="numeric" placeholder="08xxxxxxxxxx">
+            </div>
+
+            <div class="field full">
+              <label for="alamat">Alamat</label>
+              <textarea id="alamat" placeholder="Alamat tempat tinggal"></textarea>
+            </div>
+
+            <div class="field full">
+              <label for="catatan">Catatan kebutuhan belajar</label>
+              <textarea id="catatan" placeholder="Contoh: membutuhkan pendampingan Matematika dasar"></textarea>
+            </div>
+
+            <div class="field full">
+              <button class="btn btn-primary btn-block" type="submit" id="btnDaftar">
+                Kirim Pendaftaran
+              </button>
+              <div class="status" id="statusForm"></div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="cta">
+        <div>
+          <h3>Sudah terdaftar di Sanggar Mam Is?</h3>
+          <p>Masuk ke portal siswa untuk membuka materi dan melihat perkembangan belajar.</p>
+        </div>
+        <a class="btn btn-light" href="siswa.html">Masuk Portal Siswa</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Sanggar Mam Is Learning Hub</h4>
+        <p>
+          Belajar, berlatih, dan bertumbuh bersama melalui pendampingan
+          yang ramah, terarah, dan mudah diakses.
+        </p>
+      </div>
+
+      <div>
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="#program">Program Belajar</a></li>
+          <li><a href="#pendaftaran">Pendaftaran</a></li>
+          <li><a href="siswa.html">Portal Siswa</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Kontak</h4>
+        <ul>
+          <li><a id="footerWa" href="#" target="_blank">WhatsApp Sanggar</a></li>
+          <li><a href="admin.html">Portal Admin</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="copyright">
+      © <span id="tahun"></span> Sanggar Mam Is. Semua hak dilindungi.
+    </div>
+  </div>
+</footer>
+
+<a class="floating-wa" id="floatingWa" href="#" target="_blank" title="Hubungi melalui WhatsApp">💬</a>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
-const API_KEY = "MAMIS-2026";
-let db={siswa:[],pengajar:[],kelas:[],peserta:[],pembayaran:[],absensi:[]}, pesertaAbsensi=[], tagihanSiswa=null;
-function rupiah(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0))}
-function val(id){return document.getElementById(id).value}function setv(id,v){document.getElementById(id).value=v||''}
-function today(){return new Date().toISOString().split('T')[0]}function monthNow(){return today().slice(0,7)}
-function cleanPhone(no){let x=String(no||'').replace(/[^0-9]/g,'');if(x.startsWith('0'))x='62'+x.slice(1);if(!x.startsWith('62')&&x.length>8)x='62'+x;return x}
-function api(action,params={}){return new Promise((resolve,reject)=>{const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);window[cb]=data=>{resolve(data);delete window[cb];script.remove()};params.action=action;params.key=API_KEY;params.callback=cb;const qs=new URLSearchParams(params).toString();const script=document.createElement("script");script.src=API_URL+"?"+qs;script.onerror=()=>reject(new Error("Gagal koneksi API"));document.body.appendChild(script)})}
-function show(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active')}
-function selectedPengajar(){return Array.from(document.getElementById('selectPengajar').selectedOptions).map(o=>({id:o.value,nama:o.textContent}))}
-async function loadData(){document.getElementById('msgHome').innerText='Memuat data...';const data=await api('bootstrap');if(!data.status){document.getElementById('msgHome').innerText=data.message||'Gagal memuat data';return}db=data;document.getElementById('sSiswa').innerText=data.summary.jumlahSiswaAktif||0;document.getElementById('sKelas').innerText=data.summary.jumlahKelasAktif||0;document.getElementById('sBayar').innerText=rupiah(data.summary.totalPembayaranBulanIni||0);document.getElementById('sTunggakan').innerText=rupiah(data.summary.totalTunggakan||0);renderAll();fillDropdowns();document.getElementById('msgHome').innerText='Data berhasil diperbarui.'}
-function renderAll(){document.getElementById('quickData').innerHTML=`Pengajar: ${db.summary.jumlahPengajarAktif} | Peserta kelas: ${db.summary.jumlahPesertaKelas}`;document.getElementById('listSiswa').innerHTML=renderSiswaTable();renderKelasList();renderPesertaList();renderPengajarList();renderPembayaran();renderKelasStats();isiCicilan();renderWaReminder()}
-function renderKelasStats(){let h='<table><tr><th>Kelas</th><th>Pengajar</th><th>Peserta</th></tr>';db.kelas.forEach(k=>{const j=db.peserta.filter(p=>p['ID Kelas']===k['ID Kelas']&&String(p['Status Aktif']).toLowerCase()==='aktif').length;h+=`<tr><td>${k['Nama Kelas']||''}</td><td>${k['Nama Pengajar']||''}</td><td><b>${j}</b> siswa</td></tr>`});h+='</table>';document.getElementById('kelasStats').innerHTML=h;document.getElementById('kelasStatsPeserta').innerHTML=h}
-function renderSiswaTable(){const kw=(document.getElementById('searchSiswa')?.value||'').toLowerCase();const rows=db.siswa.filter(r=>String(r['Nama Siswa']||'').toLowerCase().includes(kw)||String(r['Jenjang']||'').toLowerCase().includes(kw)||String(r['No WA']||'').toLowerCase().includes(kw));let h='<table><tr><th>Siswa</th><th>WA</th><th>Aksi</th></tr>';rows.forEach(r=>h+=`<tr><td>${r['Nama Siswa']||''}<br><span class="small">${r['Jenjang']||''}</span></td><td>${r['No WA']||''}</td><td><button class="btn-light" onclick="editSiswa('${r['ID Siswa']}')">Edit</button> <button class="btn-red" onclick="hapusData('deleteSiswa','${r['ID Siswa']}')">Hapus</button></td></tr>`);return h+'</table>'}
-function renderPengajarList(){let h='<table><tr><th>Pengajar</th><th>WA</th><th>Aksi</th></tr>';db.pengajar.forEach(r=>h+=`<tr><td>${r['Nama Pengajar']||''}</td><td>${r['No WA']||''}</td><td><button class="btn-light" onclick="editPengajar('${r['ID Pengajar']}')">Edit</button> <button class="btn-red" onclick="hapusData('deletePengajar','${r['ID Pengajar']}')">Hapus</button></td></tr>`);document.getElementById('listPengajar').innerHTML=h+'</table>'}
-function renderKelasList(){let h='<table><tr><th>Kelas</th><th>Pengajar</th><th>Biaya</th><th>Aksi</th></tr>';db.kelas.forEach(r=>h+=`<tr><td>${r['Nama Kelas']||''}<br><span class="small">${r['Jenjang']||''} - ${r['Kategori']||''}</span></td><td>${r['Nama Pengajar']||''}</td><td>${rupiah(r['Biaya Bulanan'])}</td><td><button class="btn-light" onclick="editKelas('${r['ID Kelas']}')">Edit</button> <button class="btn-red" onclick="hapusData('deleteKelas','${r['ID Kelas']}')">Hapus</button></td></tr>`);document.getElementById('listKelas').innerHTML=h+'</table>'}
-function renderPesertaList(){let h='<table><tr><th>Siswa</th><th>Kelas</th><th>Status</th><th>Aksi</th></tr>';db.peserta.forEach(r=>h+=`<tr><td>${r['Nama Siswa']||''}</td><td>${r['Nama Kelas']||''}</td><td>${r['Status Aktif']||''}</td><td><button class="btn-light" onclick="editPeserta('${r['ID Peserta']}')">Edit</button> <button class="btn-red" onclick="hapusData('deletePeserta','${r['ID Peserta']}')">Hapus</button></td></tr>`);document.getElementById('listPeserta').innerHTML=h+'</table>'}
-function renderPembayaran(){let h='<table><tr><th>Bulan</th><th>Siswa</th><th>Dibayar</th><th>Sisa</th><th>Status</th></tr>';db.pembayaran.slice(-30).reverse().forEach(r=>h+=`<tr><td>${r['Bulan Pembayaran']||''}</td><td>${r['Nama Siswa']||''}</td><td>${rupiah(r['Dibayar'])}</td><td>${rupiah(r['Sisa'])}</td><td>${r['Status Pembayaran']||''}</td></tr>`);document.getElementById('listBayar').innerHTML=h+'</table>'}
-function fillDropdowns(){const siswaAll=db.siswa;const siswaAktif=db.siswa.filter(x=>String(x['Status Aktif']).toLowerCase()==='aktif');const pengajar=db.pengajar.filter(x=>String(x['Status Aktif']).toLowerCase()==='aktif');const kelas=db.kelas.filter(x=>String(x['Status Kelas']).toLowerCase()==='aktif');fill('siswaBayar',siswaAktif,'ID Siswa',r=>r['Nama Siswa']);fillSiswaPeserta(siswaAll);fill('selectPengajar',pengajar,'ID Pengajar',r=>r['Nama Pengajar']);fill('kelasAbsensi',kelas,'ID Kelas',r=>r['Nama Kelas']);fill('kelasPeserta',kelas,'ID Kelas',r=>r['Nama Kelas'])}
-function fill(id,arr,key,textFn){const el=document.getElementById(id);el.innerHTML='<option value="">Pilih</option>';arr.forEach(r=>el.innerHTML+=`<option value="${r[key]}">${textFn(r)}</option>`)}
-function fillSiswaPeserta(rows){const el=document.getElementById('siswaPeserta');el.innerHTML='<option value="">Pilih siswa</option>';rows.forEach(r=>el.innerHTML+=`<option value="${r['ID Siswa']}">${r['Nama Siswa']} - ${r['Jenjang']||''}</option>`)}
-function filterSelectSiswaPeserta(){const kw=val('searchPesertaSiswa').toLowerCase();fillSiswaPeserta(db.siswa.filter(r=>String(r['Nama Siswa']||'').toLowerCase().includes(kw)||String(r['Jenjang']||'').toLowerCase().includes(kw)))}
-async function hapusData(action,id){if(!confirm('Hapus data ini?'))return;const r=await api(action,{id});alert(r.message);loadData()}
-async function simpanSiswa(){const id=val('idSiswaEdit');const data={idSiswa:id,namaSiswa:val('namaSiswa'),jenjang:val('jenjangSiswa'),namaOrtu:val('namaOrtu'),noWa:val('noWaSiswa'),alamat:val('alamatSiswa'),statusAktif:val('statusSiswa')};const res=await api(id?'updateSiswa':'addSiswa',{data:JSON.stringify(data)});document.getElementById('msgSiswa').innerText=res.message;resetSiswa();loadData()}
-function editSiswa(id){const r=db.siswa.find(x=>x['ID Siswa']===id);if(!r)return;setv('idSiswaEdit',id);setv('namaSiswa',r['Nama Siswa']);setv('jenjangSiswa',r['Jenjang']);setv('namaOrtu',r['Nama Orang Tua']);setv('noWaSiswa',r['No WA']);setv('alamatSiswa',r['Alamat']);setv('statusSiswa',r['Status Aktif']||'Aktif');show('siswa',document.querySelector('.nav-siswa'));window.scrollTo({top:0,behavior:'smooth'})}
-function resetSiswa(){['idSiswaEdit','namaSiswa','jenjangSiswa','namaOrtu','noWaSiswa','alamatSiswa'].forEach(id=>setv(id,''));setv('statusSiswa','Aktif')}
-async function simpanPengajar(){const id=val('idPengajarEdit');const data={idPengajar:id,namaPengajar:val('namaPengajar'),noWa:val('waPengajar'),alamat:val('alamatPengajar'),statusAktif:val('statusPengajar')};const res=await api(id?'updatePengajar':'addPengajar',{data:JSON.stringify(data)});document.getElementById('msgPengajar').innerText=res.message;resetPengajar();loadData()}
-function editPengajar(id){const r=db.pengajar.find(x=>x['ID Pengajar']===id);if(!r)return;setv('idPengajarEdit',id);setv('namaPengajar',r['Nama Pengajar']);setv('waPengajar',r['No WA']);setv('alamatPengajar',r['Alamat']);setv('statusPengajar',r['Status Aktif']||'Aktif')}
-function resetPengajar(){['idPengajarEdit','namaPengajar','waPengajar','alamatPengajar'].forEach(id=>setv(id,''));setv('statusPengajar','Aktif')}
-async function simpanKelas(){const list=selectedPengajar();const id=val('idKelasEdit');const data={idKelas:id,namaKelas:val('namaKelas'),jenjang:val('jenjangKelas'),kategori:val('kategoriKelas'),idPengajar:list.map(x=>x.id).join(', '),namaPengajar:list.map(x=>x.nama).join(', '),biayaBulanan:val('biayaKelas'),statusKelas:val('statusKelas')};const res=await api(id?'updateKelas':'addKelas',{data:JSON.stringify(data)});document.getElementById('msgKelas').innerText=res.message;resetKelas();loadData()}
-function editKelas(id){const r=db.kelas.find(x=>x['ID Kelas']===id);if(!r)return;setv('idKelasEdit',id);setv('namaKelas',r['Nama Kelas']);setv('jenjangKelas',r['Jenjang']);setv('kategoriKelas',r['Kategori']);setv('biayaKelas',String(r['Biaya Bulanan']).replace(/[^0-9]/g,''));setv('statusKelas',r['Status Kelas']||'Aktif');const ids=String(r['ID Pengajar']||'').split(',').map(x=>x.trim());Array.from(document.getElementById('selectPengajar').options).forEach(o=>o.selected=ids.includes(o.value));show('kelas',document.querySelector('.nav-kelas'));window.scrollTo({top:0,behavior:'smooth'})}
-function resetKelas(){['idKelasEdit','namaKelas','biayaKelas'].forEach(id=>setv(id,''));setv('statusKelas','Aktif');Array.from(document.getElementById('selectPengajar').options).forEach(o=>o.selected=false)}
-async function simpanPeserta(){const sw=db.siswa.find(x=>x['ID Siswa']===val('siswaPeserta'));const kl=db.kelas.find(x=>x['ID Kelas']===val('kelasPeserta'));if(!sw||!kl)return alert('Pilih siswa dan kelas');const id=val('idPesertaEdit');const data={idPeserta:id,idSiswa:sw['ID Siswa'],namaSiswa:sw['Nama Siswa'],idKelas:kl['ID Kelas'],namaKelas:kl['Nama Kelas'],tanggalMasuk:val('tanggalMasuk'),statusAktif:val('statusPeserta')};const res=await api(id?'updatePeserta':'addPeserta',{data:JSON.stringify(data)});document.getElementById('msgPeserta').innerText=res.message;resetPeserta();loadData()}
-function editPeserta(id){const r=db.peserta.find(x=>x['ID Peserta']===id);if(!r)return;setv('idPesertaEdit',id);setv('siswaPeserta',r['ID Siswa']);setv('kelasPeserta',r['ID Kelas']);setv('tanggalMasuk',r['Tanggal Masuk']);setv('statusPeserta',r['Status Aktif']||'Aktif')}
-function resetPeserta(){setv('idPesertaEdit','');setv('siswaPeserta','');setv('kelasPeserta','');setv('tanggalMasuk',today());setv('statusPeserta','Aktif')}
-async function loadPesertaAbsensi(){const idKelas=val('kelasAbsensi');if(!idKelas)return;pesertaAbsensi=await api('getPesertaByKelas',{idKelas});let h='';pesertaAbsensi.forEach((p,i)=>h+=`<div class="card"><b>${p['Nama Siswa']}</b><select id="hadir_${i}"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alfa</option></select><input id="ket_${i}" placeholder="Keterangan"></div>`);document.getElementById('formAbsensi').innerHTML=h||'<p class="small">Belum ada peserta.</p>'}
-async function simpanAbsensi(){const kl=db.kelas.find(x=>x['ID Kelas']===val('kelasAbsensi'));if(!kl)return alert('Pilih kelas dulu');const items=pesertaAbsensi.map((p,i)=>({idSiswa:p['ID Siswa'],namaSiswa:p['Nama Siswa'],kehadiran:val('hadir_'+i),keterangan:val('ket_'+i)}));const data={tanggal:val('tanggalAbsensi'),idKelas:kl['ID Kelas'],namaKelas:kl['Nama Kelas'],items};const res=await api('addAbsensiBatch',{data:JSON.stringify(data)});document.getElementById('msgAbsensi').innerText=res.message;loadData()}
-async function loadTagihanSiswa(){const id=val('siswaBayar');if(!id)return;tagihanSiswa=await api('getTagihanSiswa',{idSiswa:id,bulan:val('bulanBayar')});document.getElementById('tagihan').value=tagihanSiswa.totalTagihan||0;let h=`<b>${tagihanSiswa.namaSiswa||''}</b> ikut ${tagihanSiswa.jumlahKelas||0} kelas<br>`;(tagihanSiswa.kelas||[]).forEach(k=>h+=`<span class="pill">${k.namaKelas}: ${rupiah(k.biaya)}</span>`);h+=`<br><b>Total tagihan: ${rupiah(tagihanSiswa.totalTagihan||0)}</b><br>Total dibayar bulan ini: ${rupiah(tagihanSiswa.totalDibayar||0)} | Sisa: ${rupiah(tagihanSiswa.sisa||0)}`;document.getElementById('rincianTagihan').innerHTML=h}
-async function simpanPembayaran(){const sw=db.siswa.find(x=>x['ID Siswa']===val('siswaBayar'));if(!sw)return alert('Pilih siswa');const data={tanggalBayar:val('tanggalBayar'),bulanPembayaran:val('bulanBayar'),idSiswa:sw['ID Siswa'],namaSiswa:sw['Nama Siswa'],idKelas:'MULTI',namaKelas:'Semua Kelas Aktif',tagihan:val('tagihan'),dibayar:val('dibayar'),metodeBayar:val('metode'),keterangan:val('ketBayar')};const res=await api('addPembayaran',{data:JSON.stringify(data)});document.getElementById('msgBayar').innerText=res.message+' - '+res.statusPembayaran;loadData()}
-function isiCicilan(){const el=document.getElementById('pilihCicilan');if(!el)return;const rows=db.pembayaran.filter(r=>Number(String(r['Sisa']||'0').replace(/[^0-9]/g,''))>0);el.innerHTML='<option value="">Pilih cicilan belum lunas</option>';rows.forEach(r=>el.innerHTML+=`<option value="${r['ID Pembayaran']}">${r['Nama Siswa']} - ${r['Bulan Pembayaran']} - Sisa ${rupiah(r['Sisa'])}</option>`)}
-async function simpanPelunasan(){const id=val('pilihCicilan');if(!id)return alert('Pilih cicilan dulu');const data={idPembayaran:id,tanggalBayar:val('tanggalPelunasan'),dibayar:val('jumlahPelunasan'),metodeBayar:val('metodePelunasan'),keterangan:val('ketPelunasan')};const res=await api('addPelunasan',{data:JSON.stringify(data)});document.getElementById('msgPelunasan').innerText=res.message+' - '+res.statusPembayaran;loadData()}
-function renderWaReminder(){const rows=db.pembayaran.filter(r=>Number(String(r['Sisa']||'0').replace(/[^0-9]/g,''))>0);let h='';rows.forEach(r=>{const sw=db.siswa.find(s=>s['ID Siswa']===r['ID Siswa'])||{};const phone=cleanPhone(sw['No WA']);const pesan=`Assalamu'alaikum Bapak/Ibu, kami dari Sanggar Mam Is mengingatkan pembayaran ananda ${r['Nama Siswa']} untuk bulan ${r['Bulan Pembayaran']}. Sisa pembayaran: ${rupiah(r['Sisa'])}. Terima kasih.`;const url=`https://wa.me/${phone}?text=${encodeURIComponent(pesan)}`;h+=`<div class="card"><b>${r['Nama Siswa']}</b><br><span class="small">Sisa: ${rupiah(r['Sisa'])} | WA: ${sw['No WA']||'-'}</span><br><br><a class="btn wa" href="${url}" target="_blank">Kirim WA</a></div>`});document.getElementById('waReminder').innerHTML=h||'<p class="small">Tidak ada tunggakan.</p>'}
-document.getElementById('tanggalAbsensi').value=today();document.getElementById('tanggalMasuk').value=today();document.getElementById('tanggalBayar').value=today();document.getElementById('tanggalPelunasan').value=today();document.getElementById('bulanBayar').value=monthNow();loadData()
+  /*
+   * GANTI API_URL setelah Code.gs selesai di-deploy sebagai Web App.
+   */
+  const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
+
+  /*
+   * Nomor WhatsApp Sanggar.
+   * Gunakan format Indonesia tanpa tanda +, contoh: 6281234567890
+   */
+  const WA_SANGGAR = "6281318997525";
+
+  let daftarKelas = [];
+
+  function toggleMenu(){
+    document.getElementById("menu").classList.toggle("open");
+  }
+
+  function rupiah(n){
+    return new Intl.NumberFormat("id-ID",{
+      style:"currency",
+      currency:"IDR",
+      minimumFractionDigits:0
+    }).format(Number(n || 0));
+  }
+
+  function cleanPhone(no){
+    let x = String(no || "").replace(/[^0-9]/g,"");
+    if(x.startsWith("0")) x = "62" + x.slice(1);
+    if(!x.startsWith("62") && x.length > 8) x = "62" + x;
+    return x;
+  }
+
+  function api(action, params = {}){
+    return new Promise((resolve,reject)=>{
+      if(!API_URL || API_URL.includes("PASTE_URL")){
+        reject(new Error("API_URL belum diisi."));
+        return;
+      }
+
+      const cb = "cb_" + Date.now() + "_" + Math.floor(Math.random()*9999);
+      const script = document.createElement("script");
+
+      window[cb] = data => {
+        resolve(data);
+        delete window[cb];
+        script.remove();
+      };
+
+      params.action = action;
+      params.callback = cb;
+
+      const qs = new URLSearchParams(params).toString();
+      script.src = API_URL + "?" + qs;
+
+      script.onerror = () => {
+        delete window[cb];
+        script.remove();
+        reject(new Error("Gagal terhubung ke server."));
+      };
+
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadPublicData(){
+    const list = document.getElementById("programList");
+    try{
+      const data = await api("getPublicData");
+      if(!data.status) throw new Error(data.message || "Gagal memuat data.");
+
+      daftarKelas = Array.isArray(data.kelas) ? data.kelas : [];
+      renderProgram();
+      isiDropdownProgram();
+    }catch(err){
+      list.innerHTML = `
+        <div class="empty">
+          Daftar program belum dapat dimuat.<br>
+          <small>${err.message}</small>
+        </div>
+      `;
+    }
+  }
+
+  function renderProgram(){
+    const list = document.getElementById("programList");
+
+    if(!daftarKelas.length){
+      list.innerHTML = `
+        <div class="empty">
+          Belum ada program aktif. Silakan hubungi admin Sanggar Mam Is.
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = daftarKelas.map(k => `
+      <article class="card program-card">
+        <div class="icon i-blue">🎓</div>
+        <h3>${escapeHtml(k.namaKelas || "Program Belajar")}</h3>
+
+        <div class="meta">
+          <span class="pill">${escapeHtml(k.jenjang || "Semua Jenjang")}</span>
+          <span class="pill">${escapeHtml(k.kategori || "Kelas Belajar")}</span>
+        </div>
+
+        <p>
+          ${k.jadwal
+            ? "Jadwal: " + escapeHtml(k.jadwal)
+            : "Jadwal dikonfirmasi bersama admin."}
+        </p>
+
+        <div class="price">
+          ${Number(k.biaya || 0) > 0 ? rupiah(k.biaya) + "/bulan" : "Hubungi Admin"}
+        </div>
+
+        <button class="btn btn-primary" style="margin-top:14px"
+          onclick="pilihDariKartu('${escapeAttr(k.idKelas)}')">
+          Pilih Program
+        </button>
+      </article>
+    `).join("");
+  }
+
+  function isiDropdownProgram(){
+    const el = document.getElementById("kelasPilihan");
+    el.innerHTML = '<option value="">Pilih program</option>';
+
+    daftarKelas.forEach(k=>{
+      const opt = document.createElement("option");
+      opt.value = k.idKelas;
+      opt.textContent = `${k.namaKelas} - ${k.jenjang || ""}`;
+      el.appendChild(opt);
+    });
+  }
+
+  function pilihProgram(){
+    const id = document.getElementById("kelasPilihan").value;
+    const k = daftarKelas.find(x => String(x.idKelas) === String(id));
+
+    document.getElementById("jadwalPilihan").value = k ? (k.jadwal || "") : "";
+
+    if(k && k.jenjang){
+      document.getElementById("jenjang").value = k.jenjang;
+    }
+  }
+
+  function pilihDariKartu(idKelas){
+    document.getElementById("kelasPilihan").value = idKelas;
+    pilihProgram();
+    document.getElementById("pendaftaran").scrollIntoView({behavior:"smooth"});
+  }
+
+  async function kirimPendaftaran(event){
+    event.preventDefault();
+
+    const btn = document.getElementById("btnDaftar");
+    const status = document.getElementById("statusForm");
+    const idKelas = document.getElementById("kelasPilihan").value;
+    const kelas = daftarKelas.find(k => String(k.idKelas) === String(idKelas));
+
+    const data = {
+      namaSiswa: value("namaSiswa"),
+      jenisKelamin: value("jenisKelamin"),
+      tempatLahir: value("tempatLahir"),
+      tanggalLahir: value("tanggalLahir"),
+      jenjang: value("jenjang"),
+      kelasSekolah: value("kelasSekolah"),
+      namaSekolah: value("namaSekolah"),
+      idKelas,
+      programDipilih: kelas ? kelas.namaKelas : "",
+      jadwalDipilih: value("jadwalPilihan"),
+      namaOrtu: value("namaOrtu"),
+      noWa: cleanPhone(value("noWa")),
+      alamat: value("alamat"),
+      catatan: value("catatan")
+    };
+
+    if(!data.namaSiswa || !data.jenjang || !data.namaOrtu || !data.noWa){
+      showStatus("Mohon lengkapi data wajib.", "err");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Mengirim...";
+    showStatus("Pendaftaran sedang dikirim.", "wait");
+
+    try{
+      const res = await api("addPendaftaran",{
+        data:JSON.stringify(data)
+      });
+
+      if(!res.status) throw new Error(res.message || "Pendaftaran gagal.");
+
+      showStatus(
+        `${res.message} Nomor pendaftaran: ${res.idPendaftaran || "-"}`,
+        "ok"
+      );
+
+      document.getElementById("formPendaftaran").reset();
+      document.getElementById("jadwalPilihan").value = "";
+    }catch(err){
+      showStatus(err.message || "Pendaftaran gagal dikirim.", "err");
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "Kirim Pendaftaran";
+    }
+  }
+
+  function value(id){
+    return document.getElementById(id).value.trim();
+  }
+
+  function showStatus(message,type){
+    const el = document.getElementById("statusForm");
+    el.className = "status " + type;
+    el.textContent = message;
+  }
+
+  function escapeHtml(text){
+    return String(text || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function escapeAttr(text){
+    return String(text || "")
+      .replace(/\\/g,"\\\\")
+      .replace(/'/g,"\\'");
+  }
+
+  function setupWhatsApp(){
+    const pesan = encodeURIComponent(
+      "Assalamu'alaikum, saya ingin bertanya tentang program belajar Sanggar Mam Is."
+    );
+    const url = `https://wa.me/${WA_SANGGAR}?text=${pesan}`;
+
+    document.getElementById("floatingWa").href = url;
+    document.getElementById("footerWa").href = url;
+  }
+
+  document.getElementById("tahun").textContent = new Date().getFullYear();
+  setupWhatsApp();
+  loadPublicData();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{
+      navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+    });
+  }
 </script>
+
 </body>
 </html>
