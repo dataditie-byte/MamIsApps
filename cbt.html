@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173b63">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="logo-mam-is.png">
+  <title>CBT | Sanggar Mam Is</title>
+
+  <style>
+    :root{
+      --navy:#173b63;--blue:#2f80ed;--green:#16a34a;
+      --orange:#f97316;--red:#dc2626;--ink:#14213d;
+      --muted:#64748b;--line:#dce5ef;--bg:#f5f8fc;
+      --shadow:0 10px 30px rgba(23,59,99,.12);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+    button,input{font:inherit}button{cursor:pointer}
+    .hidden{display:none!important}
+    .container{width:min(1180px,calc(100% - 28px));margin:auto}
+    .topbar{background:#173b63;color:white;padding:14px 0;position:sticky;top:0;z-index:30}
+    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:46px;height:46px;object-fit:contain;background:white;border-radius:12px;padding:3px}
+    .brand strong{display:block}.brand small{color:#c8d8e8}
+    .btn{border:0;border-radius:13px;padding:11px 15px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+    .btn-primary{background:linear-gradient(135deg,var(--navy),var(--blue));color:white}
+    .btn-light{background:white;color:var(--navy);border:1px solid var(--line)}
+    .btn-green{background:var(--green);color:white}
+    .btn-red{background:var(--red);color:white}
+    .hero{padding:34px 0 20px}
+    .hero-card{background:linear-gradient(135deg,#173b63,#2f80ed);color:white;border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+    .hero-card h1{margin:0 0 8px;font-size:clamp(28px,5vw,44px)}
+    .hero-card p{margin:0;color:#e5f0fc}
+    .grid{display:grid;gap:16px}.grid-3{grid-template-columns:repeat(3,1fr)}
+    .card{background:white;border-radius:20px;padding:19px;box-shadow:var(--shadow);border:1px solid #edf1f6}
+    .card h3{margin:0 0 8px;color:var(--navy)}
+    .tag{display:inline-block;padding:5px 9px;background:#edf6ff;color:var(--navy);border-radius:999px;font-size:12px;font-weight:700;margin:4px 4px 4px 0}
+    .paket-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
+    .status{padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700}
+    .status.green{background:#dcfce7;color:#166534}.status.orange{background:#ffedd5;color:#9a3412}
+    .exam-layout{display:grid;grid-template-columns:260px 1fr;gap:18px;padding:22px 0}
+    .navigator{background:white;border-radius:20px;padding:16px;box-shadow:var(--shadow);position:sticky;top:92px;height:max-content}
+    .timer{font-size:28px;font-weight:900;color:var(--red);text-align:center;padding:12px;background:#fff1f2;border-radius:14px;margin-bottom:14px}
+    .numbers{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+    .num{border:0;border-radius:9px;padding:9px 0;background:#edf2f7;color:var(--navy);font-weight:800}
+    .num.answered{background:#dcfce7;color:#166534}.num.current{background:var(--blue);color:white}.num.doubt{outline:3px solid var(--orange)}
+    .question-card{background:white;border-radius:22px;padding:24px;box-shadow:var(--shadow)}
+    .question-title{font-size:20px;line-height:1.6;margin-bottom:18px}
+    .option{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:13px;margin:10px 0;cursor:pointer}
+    .option:hover{border-color:var(--blue);background:#f7fbff}.option.selected{border-color:var(--blue);background:#eaf4ff}
+    .option-key{width:30px;height:30px;border-radius:50%;background:#edf2f7;display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+    .exam-actions{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .result{padding:30px 0}.score{text-align:center;background:white;border-radius:24px;padding:28px;box-shadow:var(--shadow)}
+    .score-value{font-size:72px;font-weight:900;color:var(--navy)}
+    .review{margin-top:16px;background:white;border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    .review.correct{border-left:6px solid var(--green)}.review.wrong{border-left:6px solid var(--red)}
+    .empty{text-align:center;background:white;border:1px dashed var(--line);border-radius:18px;padding:28px;color:var(--muted)}
+    .modal{position:fixed;inset:0;background:rgba(15,39,66,.6);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}
+    .modal.open{display:flex}.modal-card{width:min(430px,100%);background:white;border-radius:22px;padding:22px}
+    .field{display:flex;flex-direction:column;gap:6px;margin:13px 0}
+    label{font-size:13px;font-weight:800;color:var(--navy)}
+    input{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px;outline:none}
+    @media(max-width:850px){.grid-3{grid-template-columns:repeat(2,1fr)}.exam-layout{grid-template-columns:1fr}.navigator{position:static}.numbers{grid-template-columns:repeat(10,1fr)}}
+    @media(max-width:600px){.grid-3{grid-template-columns:1fr}.numbers{grid-template-columns:repeat(5,1fr)}.question-card{padding:18px}}
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand">
+      <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
+      <div><strong>CBT Sanggar Mam Is</strong><small>Latihan dan Evaluasi Belajar</small></div>
+    </div>
+    <a class="btn btn-light" href="siswa.html">Portal Siswa</a>
+  </div>
+</header>
+
+<main>
+  <section id="paketScreen">
+    <div class="container">
+      <div class="hero">
+        <div class="hero-card">
+          <h1>Paket Latihan CBT</h1>
+          <p>Pilih paket, baca petunjuk, lalu kerjakan dengan jujur dan penuh konsentrasi.</p>
+        </div>
+      </div>
+      <div class="grid grid-3" id="paketList"></div>
+    </div>
+  </section>
+
+  <section id="examScreen" class="hidden">
+    <div class="container exam-layout">
+      <aside class="navigator">
+        <div class="timer" id="timer">00:00</div>
+        <div class="numbers" id="numbers"></div>
+        <button class="btn btn-red" style="width:100%;margin-top:15px" onclick="konfirmasiSelesai()">Selesaikan Ujian</button>
+      </aside>
+
+      <div class="question-card">
+        <div style="color:var(--muted);font-weight:700" id="questionMeta">Soal 1</div>
+        <div class="question-title" id="questionText"></div>
+        <img id="questionImage" class="hidden" style="max-height:340px;margin:0 auto 16px;border-radius:14px" alt="Gambar soal">
+        <div id="options"></div>
+
+        <label style="display:flex;align-items:center;gap:8px;margin-top:14px">
+          <input type="checkbox" id="doubtCheck" style="width:auto" onchange="toggleDoubt()">
+          Tandai ragu-ragu
+        </label>
+
+        <div class="exam-actions">
+          <button class="btn btn-light" onclick="prevQuestion()">← Sebelumnya</button>
+          <button class="btn btn-primary" onclick="nextQuestion()">Berikutnya →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="hidden result">
+    <div class="container">
+      <div class="score">
+        <h2 id="resultTitle">Hasil CBT</h2>
+        <div class="score-value" id="scoreValue">0</div>
+        <p id="scoreInfo"></p>
+        <div style="display:flex;justify-content:center;gap:9px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="backToPackages()">Kembali ke Paket</button>
+          <a class="btn btn-light" href="siswa.html">Portal Siswa</a>
+        </div>
+      </div>
+      <div id="reviewList"></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="codeModal">
+  <div class="modal-card">
+    <h3 style="margin:0;color:var(--navy)">Mulai Paket CBT</h3>
+    <p style="color:var(--muted)">Masukkan kode paket bila diminta.</p>
+    <div class="field">
+      <label>Kode Paket</label>
+      <input id="packageCode" placeholder="Masukkan kode">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-light" style="flex:1" onclick="closeCodeModal()">Batal</button>
+      <button class="btn btn-primary" style="flex:1" onclick="startSelectedPackage()">Mulai</button>
+    </div>
+    <p id="modalMessage" style="color:var(--red);font-weight:700"></p>
+  </div>
+</div>
+
+<script>
+const API_URL = "PASTE_URL_WEB_APP_TERBARU_DI_SINI";
+const API_KEY = "MAMIS-2026";
+
+let packages=[];
+let selectedPackage=null;
+let session=null;
+let questions=[];
+let current=0;
+let timerHandle=null;
+
+function jsonp(action,params={}){
+  return new Promise((resolve,reject)=>{
+    if(!API_URL || API_URL.includes("PASTE_URL")) return reject(new Error("API_URL belum diisi."));
+    const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
+    const script=document.createElement("script");
+    window[cb]=data=>{resolve(data);delete window[cb];script.remove()};
+    params.action=action;params.callback=cb;
+    script.src=API_URL+"?"+new URLSearchParams(params).toString();
+    script.onerror=()=>{delete window[cb];script.remove();reject(new Error("Gagal terhubung ke server."))};
+    document.body.appendChild(script);
+  });
+}
+
+async function loadPackages(){
+  const token=localStorage.getItem("mamis_token");
+  if(!token){location.href="siswa.html";return}
+
+  try{
+    const res=await jsonp("getPaketSiswa",{key:API_KEY,token});
+    if(!res.status) throw new Error(res.message);
+    packages=res.paket||[];
+    renderPackages();
+  }catch(err){
+    document.getElementById("paketList").innerHTML=`<div class="empty">${esc(err.message||"Gagal memuat paket.")}</div>`;
+  }
+}
+
+function renderPackages(){
+  const el=document.getElementById("paketList");
+  if(!packages.length){el.innerHTML='<div class="empty">Belum ada paket CBT aktif.</div>';return}
+
+  el.innerHTML=packages.map(p=>`
+    <article class="card">
+      <h3>${esc(p.namaPaket)}</h3>
+      <span class="tag">${esc(p.mataPelajaran)}</span>
+      <span class="tag">${esc(p.jenjang)}</span>
+      <span class="tag">${p.jumlahSoal} soal</span>
+      <span class="tag">${p.durasiMenit} menit</span>
+      <p style="color:var(--muted)">${esc(p.deskripsi||"Latihan CBT Sanggar Mam Is.")}</p>
+      ${p.nilaiTerbaik!==null?`<div class="status green">Nilai terbaik: ${p.nilaiTerbaik}</div>`:""}
+      <div class="paket-footer">
+        <small>${p.jumlahPercobaan||0} percobaan</small>
+        <button class="btn btn-primary" onclick="openPackage('${attr(p.idPaket)}')">
+          ${p.sedangBerlangsung?"Lanjutkan":"Mulai"}
+        </button>
+      </div>
+    </article>
+  `).join("");
+}
+
+function openPackage(id){
+  selectedPackage=packages.find(p=>String(p.idPaket)===String(id));
+  if(!selectedPackage)return;
+  document.getElementById("packageCode").value="";
+  document.getElementById("modalMessage").textContent="";
+  document.getElementById("codeModal").classList.add("open");
+}
+
+function closeCodeModal(){document.getElementById("codeModal").classList.remove("open")}
+
+async function startSelectedPackage(){
+  try{
+    const token=localStorage.getItem("mamis_token");
+    const res=await jsonp("mulaiCBT",{
+      key:API_KEY,token,
+      data:JSON.stringify({
+        idPaket:selectedPackage.idPaket,
+        kodePaket:document.getElementById("packageCode").value.trim()
+      })
+    });
+    if(!res.status)throw new Error(res.message);
+    closeCodeModal();
+    await loadSession(res.idSesi);
+  }catch(err){
+    document.getElementById("modalMessage").textContent=err.message||"Gagal memulai CBT.";
+  }
+}
+
+async function loadSession(idSesi){
+  const token=localStorage.getItem("mamis_token");
+  const res=await jsonp("getSesiCBT",{key:API_KEY,token,idSesi});
+  if(!res.status)throw new Error(res.message);
+
+  session=res.sesi;
+  questions=res.questions||[];
+  current=0;
+
+  document.getElementById("paketScreen").classList.add("hidden");
+  document.getElementById("resultScreen").classList.add("hidden");
+  document.getElementById("examScreen").classList.remove("hidden");
+
+  renderNumbers();
+  renderQuestion();
+  startTimer();
+}
+
+function renderNumbers(){
+  document.getElementById("numbers").innerHTML=questions.map((q,i)=>`
+    <button class="num ${q.jawabanSiswa?"answered":""} ${q.raguRagu?"doubt":""} ${i===current?"current":""}"
+      onclick="goQuestion(${i})">${i+1}</button>
+  `).join("");
+}
+
+function renderQuestion(){
+  const q=questions[current];
+  if(!q)return;
+
+  document.getElementById("questionMeta").textContent=`Soal ${current+1} dari ${questions.length}`;
+  document.getElementById("questionText").innerHTML=esc(q.pertanyaan).replace(/\n/g,"<br>");
+
+  const img=document.getElementById("questionImage");
+  if(q.gambarSoal){img.src=q.gambarSoal;img.classList.remove("hidden")}else img.classList.add("hidden");
+
+  document.getElementById("options").innerHTML=Object.entries(q.pilihan)
+    .filter(([k,v])=>String(v).trim())
+    .map(([k,v])=>`
+      <div class="option ${q.jawabanSiswa===k?"selected":""}" onclick="chooseAnswer('${k}')">
+        <div class="option-key">${k}</div>
+        <div>${esc(v)}</div>
+      </div>
+    `).join("");
+
+  document.getElementById("doubtCheck").checked=!!q.raguRagu;
+  renderNumbers();
+}
+
+async function chooseAnswer(answer){
+  const q=questions[current];
+  q.jawabanSiswa=answer;
+  renderQuestion();
+  await saveAnswer(q);
+}
+
+async function toggleDoubt(){
+  const q=questions[current];
+  q.raguRagu=document.getElementById("doubtCheck").checked;
+  renderNumbers();
+  await saveAnswer(q);
+}
+
+async function saveAnswer(q){
+  try{
+    await jsonp("simpanJawabanCBT",{
+      key:API_KEY,
+      token:localStorage.getItem("mamis_token"),
+      data:JSON.stringify({
+        idSesi:session.idSesi,
+        idSoal:q.idSoal,
+        jawaban:q.jawabanSiswa||"",
+        raguRagu:q.raguRagu
+      })
+    });
+  }catch(e){}
+}
+
+function nextQuestion(){if(current<questions.length-1){current++;renderQuestion()}}
+function prevQuestion(){if(current>0){current--;renderQuestion()}}
+function goQuestion(i){current=i;renderQuestion()}
+
+function startTimer(){
+  clearInterval(timerHandle);
+
+  const update=()=>{
+    const remain=Math.max(0,new Date(session.batasWaktu).getTime()-Date.now());
+    const total=Math.floor(remain/1000);
+    const m=String(Math.floor(total/60)).padStart(2,"0");
+    const s=String(total%60).padStart(2,"0");
+    document.getElementById("timer").textContent=`${m}:${s}`;
+    if(remain<=0){clearInterval(timerHandle);finishExam(true)}
+  };
+
+  update();
+  timerHandle=setInterval(update,1000);
+}
+
+function konfirmasiSelesai(){
+  const kosong=questions.filter(q=>!q.jawabanSiswa).length;
+  const pesan=kosong?`Masih ada ${kosong} soal belum dijawab. Tetap selesaikan?`:"Selesaikan dan kirim semua jawaban?";
+  if(confirm(pesan))finishExam(false);
+}
+
+async function finishExam(auto){
+  clearInterval(timerHandle);
+  try{
+    const res=await jsonp("selesaiCBT",{
+      key:API_KEY,
+      token:localStorage.getItem("mamis_token"),
+      data:JSON.stringify({idSesi:session.idSesi,otomatis:auto})
+    });
+    if(!res.status)throw new Error(res.message);
+    renderResult(res);
+  }catch(err){alert(err.message||"Gagal menyelesaikan CBT.")}
+}
+
+function renderResult(res){
+  document.getElementById("examScreen").classList.add("hidden");
+  document.getElementById("resultScreen").classList.remove("hidden");
+
+  const h=res.hasil||{};
+  document.getElementById("resultTitle").textContent=h.namaPaket||"Hasil CBT";
+  document.getElementById("scoreValue").textContent=h.nilai||0;
+  document.getElementById("scoreInfo").textContent=
+    `${h.jawabanBenar||0} benar • ${h.jawabanSalah||0} salah • ${h.tidakDijawab||0} kosong • ${String(h.lulus).toLowerCase()==="ya"?"Lulus":"Belum Lulus"}`;
+
+  document.getElementById("reviewList").innerHTML=(res.detail||[]).map(d=>`
+    <article class="review ${String(d.benar).toLowerCase()==="ya"?"correct":"wrong"}">
+      <strong>Soal ${d.nomor}</strong>
+      <p>${esc(d.pertanyaan)}</p>
+      <p>Jawaban Anda: <b>${esc(d.jawabanSiswa||"-")}</b>
+      ${d.jawabanBenar?` • Jawaban benar: <b>${esc(d.jawabanBenar)}</b>`:""}</p>
+      ${d.pembahasan?`<div style="background:#f8fbff;border-radius:12px;padding:12px"><b>Pembahasan:</b><br>${esc(d.pembahasan)}</div>`:""}
+    </article>
+  `).join("");
+}
+
+function backToPackages(){
+  document.getElementById("resultScreen").classList.add("hidden");
+  document.getElementById("paketScreen").classList.remove("hidden");
+  loadPackages();
+}
+
+function esc(x){return String(x??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function attr(x){return esc(x).replace(/`/g,"&#096;")}
+
+loadPackages();
+</script>
+</body>
+</html>
