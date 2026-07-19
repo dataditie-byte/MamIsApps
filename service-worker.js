@@ -1,84 +1,48 @@
-const CACHE_NAME = "mamis-learning-hub-v8";
+const CACHE_NAME="mamis-learning-hub-v9";
+const ASSETS=["./offline.html","./manifest.json","./logo-mam-is.png","./icon-192.png","./icon-512.png"];
 
-const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./siswa.html",
-  "./admin.html",
-  "./cbt.html",
-  "./offline.html",
-  "./manifest.json",
-  "./logo-mam-is.png",
-  "./icon-192.png",
-  "./icon-512.png"
-];
-
-self.addEventListener("install", event => {
+self.addEventListener("install",function(event){
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(async cache => {
-        for (const url of APP_SHELL) {
-          try {
-            await cache.add(url);
-          } catch (err) {
-            console.warn("Tidak dapat cache:", url);
-          }
-        }
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(async function(cache){
+      for(const url of ASSETS){
+        try{await cache.add(new Request(url,{cache:"reload"}));}catch(e){}
+      }
+    }).then(function(){return self.skipWaiting();})
   );
 });
 
-self.addEventListener("activate", event => {
+self.addEventListener("activate",function(event){
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then(function(keys){
+      return Promise.all(keys.filter(function(k){return k!==CACHE_NAME;}).map(function(k){return caches.delete(k);}));
+    }).then(function(){return self.clients.claim();})
   );
 });
 
-self.addEventListener("fetch", event => {
-  const request = event.request;
-  if (request.method !== "GET") return;
+self.addEventListener("fetch",function(event){
+  const req=event.request;
+  if(req.method!=="GET") return;
+  const url=new URL(req.url);
 
-  const url = new URL(request.url);
-
-  if (
-    url.hostname.includes("script.google.com") ||
-    url.hostname.includes("script.googleusercontent.com")
-  ) {
-    event.respondWith(fetch(request));
+  if(url.hostname.indexOf("script.google.com")!==-1 || url.hostname.indexOf("script.googleusercontent.com")!==-1){
     return;
   }
 
-  if (request.mode === "navigate") {
+  if(req.mode==="navigate" || /\.(?:html?)$/i.test(url.pathname)){
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request).then(r => r || caches.match("./offline.html")))
+      fetch(new Request(req,{cache:"no-store"}))
+        .catch(function(){return caches.match("./offline.html");})
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cached => {
-      return cached || fetch(request).then(response => {
-        if (response && response.status === 200) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
-      });
-    })
+    fetch(req).then(function(res){
+      if(res && res.ok && url.origin===self.location.origin){
+        const copy=res.clone();
+        caches.open(CACHE_NAME).then(function(cache){cache.put(req,copy);});
+      }
+      return res;
+    }).catch(function(){return caches.match(req);})
   );
-});
-
-self.addEventListener("message", event => {
-  if (event.data === "SKIP_WAITING") self.skipWaiting();
 });
