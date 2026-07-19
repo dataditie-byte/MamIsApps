@@ -22,7 +22,7 @@
 <section class="hero" id="beranda"><div class="container hero-grid"><div><div style="display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:16px">Belajar Lebih Terarah dan Menyenangkan</div><h1>Sanggar Mam Is Learning Hub</h1><p>Ruang belajar digital untuk siswa yang ingin memahami materi, berlatih soal, mengikuti kelas, dan memantau perkembangan belajar dalam satu aplikasi yang mudah digunakan.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-light" href="#daftar">Daftar Sekarang</a><a class="btn btn-green" href="siswa.html">Masuk Portal Siswa</a><a class="btn btn-light" href="#program">Lihat Program</a></div></div><div class="hero-card"><h3>Keunggulan Sanggar Mam Is</h3><ul><li>Materi terarah sesuai kelas dan jenjang</li><li>Latihan soal dan CBT bertahap</li><li>Pendampingan belajar yang ramah</li><li>Nilai, absensi, dan perkembangan tersimpan rapi</li><li>Dapat diakses melalui ponsel maupun komputer</li></ul></div></div></section>
 
 <section id="keunggulan"><div class="container"><div class="section-head"><h2>Belajar Bukan Sekadar Mengerjakan Soal</h2><p>Sanggar Mam Is membantu siswa membangun pemahaman, kebiasaan belajar, kepercayaan diri, dan kesiapan menghadapi tantangan akademik.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">📚 Materi Terarah</h3><p>Materi disusun sesuai jenjang, kelas, dan kebutuhan belajar siswa.</p></article><article class="card"><h3 style="color:var(--navy)">🧠 Latihan Bertahap</h3><p>Latihan soal dibuat dari tingkat dasar hingga tantangan lanjutan.</p></article><article class="card"><h3 style="color:var(--navy)">📈 Perkembangan Terpantau</h3><p>Nilai, absensi, materi, dan aktivitas belajar tersimpan rapi.</p></article></div></div></section>
-<section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><p id="serverStatus" style="font-size:13px;color:var(--muted);margin-top:6px">Data kelas disimpan di perangkat agar lebih cepat dibuka kembali.</p></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
+<section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><p id="serverStatus" style="font-size:13px;color:var(--muted);margin-top:6px">Program tetap dapat dibuka pada koneksi tethering atau jaringan lambat.</p></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
 <section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Biaya pendaftaran siswa baru: Rp30.000.</b></p></aside>
@@ -93,6 +93,7 @@
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
 const BIAYA_PENDAFTARAN=30000;
+const FALLBACK_KELAS=[{"idKelas": "KLS-CALISTUNG", "namaKelas": "Calistung", "jenjang": "TK/SD", "kategori": "Dasar", "biaya": 125000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-MAPEL-SD", "namaKelas": "Mapel SD", "jenjang": "SD", "kategori": "Mata Pelajaran", "biaya": 200000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SD", "namaKelas": "E-SD", "jenjang": "SD", "kategori": "Bahasa Inggris", "biaya": 125000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SMP", "namaKelas": "E-SMP", "jenjang": "SMP", "kategori": "Bahasa Inggris", "biaya": 150000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-MAPEL-SMA", "namaKelas": "Mapel SMA", "jenjang": "SMA", "kategori": "Mata Pelajaran", "biaya": 250000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SMA", "namaKelas": "E-SMA", "jenjang": "SMA", "kategori": "Bahasa Inggris", "biaya": 200000, "jadwal": "Jadwal dikonfirmasi admin"}];
 
 let kelas=[];
 let deferredPrompt=null;
@@ -182,35 +183,35 @@ async function load(){
   const list=document.getElementById("programList");
   const checks=document.getElementById("kelasChecklist");
 
+  // 1. Tampilkan data lokal segera agar tetap berjalan pada tethering.
   const cached=localStorage.getItem("mamis_public_kelas");
-  if(cached){
-    try{
-      kelas=JSON.parse(cached)||[];
-      if(kelas.length) render();
-    }catch(e){}
-  }
-
-  if(!kelas.length){
-    list.innerHTML='<div class="empty">Memuat program...</div>';
-    checks.innerHTML='<div class="empty">Memuat pilihan kelas...</div>';
-  }
-
   try{
-    const r=await apiRetry("getPublicData",{},3);
-    if(!r.status) throw new Error(r.message||"Gagal memuat program.");
-
-    kelas=Array.isArray(r.kelas)?r.kelas:[];
-    localStorage.setItem("mamis_public_kelas",JSON.stringify(kelas));
-    localStorage.setItem("mamis_public_kelas_time",Date.now());
-    render();
+    const saved=cached ? JSON.parse(cached) : [];
+    kelas=Array.isArray(saved) && saved.length ? saved : FALLBACK_KELAS;
   }catch(e){
-    if(kelas.length){
-      list.insertAdjacentHTML("afterbegin",
-        '<div class="empty" style="grid-column:1/-1;padding:12px">Menampilkan data terakhir tersimpan. Koneksi server sedang lambat.</div>'
-      );
-    }else{
-      list.innerHTML=`<div class="empty">Program belum dapat dimuat.<br><small>${esc(e.message)}</small><br><button class="btn btn-primary" style="margin-top:12px" onclick="load()">Coba Lagi</button></div>`;
-      checks.innerHTML='<div class="empty">Pilihan kelas belum tersedia. Tekan Coba Lagi pada bagian Program Belajar.</div>';
+    kelas=FALLBACK_KELAS;
+  }
+
+  render();
+
+  const serverStatus=document.getElementById("serverStatus");
+  if(serverStatus){
+    serverStatus.textContent="Program siap digunakan. Sinkronisasi data berjalan di latar belakang.";
+  }
+
+  // 2. Sinkronkan ke Apps Script tanpa menghalangi tampilan.
+  try{
+    const r=await apiRetry("getPublicData",{},2);
+    if(r.status && Array.isArray(r.kelas) && r.kelas.length){
+      kelas=r.kelas;
+      localStorage.setItem("mamis_public_kelas",JSON.stringify(kelas));
+      localStorage.setItem("mamis_public_kelas_time",Date.now());
+      render();
+      if(serverStatus) serverStatus.textContent="Program sudah tersinkron dengan server.";
+    }
+  }catch(e){
+    if(serverStatus){
+      serverStatus.textContent="Mode ringan aktif: memakai data kelas tersimpan karena koneksi server lambat.";
     }
   }
 }
