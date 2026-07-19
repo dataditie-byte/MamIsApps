@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png?v=7">
+<link rel="manifest" href="manifest.json?v=7">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Mam Is Learning Hub</title>
 <style>
@@ -72,7 +72,7 @@
         <h4 style="margin:0 0 8px;color:white">Akses</h4>
         <p style="margin:6px 0"><a href="admin.html">Portal Admin</a></p>
         <p style="margin:10px 0 0">
-          <button class="btn btn-green" id="installBtn" type="button" style="display:none;padding:10px 14px">
+          <button class="btn btn-green" id="installBtn" type="button" style="display:inline-flex;padding:10px 14px">
             📲 Install Aplikasi
           </button>
         </p>
@@ -406,7 +406,7 @@ window.addEventListener("beforeinstallprompt",event=>{
 
 document.getElementById("installBtn").addEventListener("click",async()=>{
   if(!deferredPrompt){
-    alert("Di Chrome Android, buka menu ⋮ lalu pilih Instal aplikasi atau Tambahkan ke layar utama.");
+    alert("Chrome belum menyiapkan instalasi otomatis. Buka menu ⋮ lalu pilih Instal aplikasi atau Tambahkan ke layar utama. Pastikan situs dibuka langsung di Chrome, bukan browser WhatsApp.");
     return;
   }
 
@@ -440,14 +440,14 @@ window.addEventListener("appinstalled",()=>{
 });
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",async()=>{
-    try{
-      const reg=await navigator.serviceWorker.register("./service-worker.js",{scope:"./"});
+  navigator.serviceWorker.register("./service-worker.js",{scope:"./"})
+    .then(reg=>{
       reg.update();
-    }catch(err){
+      console.log("Service worker aktif.");
+    })
+    .catch(err=>{
       console.error("Service worker gagal:",err);
-    }
-  });
+    });
 }
 
 document.getElementById("year").textContent=new Date().getFullYear();
