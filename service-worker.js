@@ -1,4 +1,4 @@
-const CACHE_NAME = "mamis-learning-hub-v6";
+const CACHE_NAME = "mamis-learning-hub-v7";
 
 const APP_SHELL = [
   "./",
