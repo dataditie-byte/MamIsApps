@@ -291,6 +291,7 @@
     .b-green{background:#e9f8ef}
     .b-orange{background:#fff1e8}
     .b-purple{background:#f1ebff}
+    .b-red{background:#fee2e2}
 
     .summary-card strong{
       display:block;
@@ -632,13 +633,21 @@
         <div class="toolbar">
           <input id="filterPendaftaran" placeholder="Cari nama atau nomor WA" oninput="renderPendaftaran()">
           <select id="statusPendaftaranFilter" onchange="renderPendaftaran()">
+            <option value="Menunggu Verifikasi" selected>Menunggu Verifikasi</option>
+            <option value="Baru">Baru</option>
+            <option value="Dihubungi">Dihubungi</option>
+            <option value="Diterima">Diterima</option>
+            <option value="Ditolak">Ditolak</option>
+            <option value="Diarsipkan">Diarsipkan</option>
+            <option value="Terhapus">Terhapus</option>
             <option value="">Semua status</option>
-            <option>Baru</option>
-            <option>Menunggu Verifikasi</option>
-            <option>Dihubungi</option>
-            <option>Diterima</option>
-            <option>Ditolak</option>
           </select>
+        </div>
+        <div class="grid grid-4" style="margin-bottom:14px">
+          <div class="card summary-card"><div class="summary-icon b-orange">⏳</div><div><strong id="cntMenunggu">0</strong><span>Menunggu verifikasi</span></div></div>
+          <div class="card summary-card"><div class="summary-icon b-green">✅</div><div><strong id="cntDiterima">0</strong><span>Diterima</span></div></div>
+          <div class="card summary-card"><div class="summary-icon b-red">❌</div><div><strong id="cntDitolak">0</strong><span>Ditolak</span></div></div>
+          <div class="card summary-card"><div class="summary-icon b-purple">🗃️</div><div><strong id="cntArsip">0</strong><span>Arsip/Terhapus</span></div></div>
         </div>
         <div class="table-wrap" id="pendaftaranTable"></div>
       </section>
@@ -902,13 +911,7 @@
             <td>${renderBuktiButton(r)}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
             <td>
-              <div class="actions">
-                ${String(r["Status Pendaftaran"]).toLowerCase()==="diterima"
-                  ? `<button class="btn btn-light" disabled>Sudah Diterima</button>`
-                  : `<button class="btn btn-green" onclick="terimaPendaftaran('${attr(r["ID Pendaftaran"])}')">Terima</button>`
-                }
-                <button class="btn btn-light" onclick="hubungiPendaftar('${attr(r["ID Pendaftaran"])}')">WhatsApp</button>
-              </div>
+              ${renderAksiPendaftaran(r)}
             </td>
           </tr>
         `).join("")}</tbody>
@@ -932,6 +935,12 @@
   }
 
   function renderPendaftaran(){
+    const all = db.pendaftaran || [];
+    setText("cntMenunggu",all.filter(r=>["baru","menunggu verifikasi","dihubungi"].includes(String(r["Status Pendaftaran"]||"").toLowerCase())).length);
+    setText("cntDiterima",all.filter(r=>String(r["Status Pendaftaran"]||"").toLowerCase()==="diterima").length);
+    setText("cntDitolak",all.filter(r=>String(r["Status Pendaftaran"]||"").toLowerCase()==="ditolak").length);
+    setText("cntArsip",all.filter(r=>["diarsipkan","terhapus"].includes(String(r["Status Pendaftaran"]||"").toLowerCase())).length);
+
     const q = (document.getElementById("filterPendaftaran")?.value || "").toLowerCase();
     const status = document.getElementById("statusPendaftaranFilter")?.value || "";
 
@@ -964,17 +973,7 @@
             <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
             <td>${renderBuktiButton(r)}</td>
             <td>${badge(r["Status Pendaftaran"])}</td>
-            <td>
-              <div class="actions">
-                ${String(r["Status Pendaftaran"]).toLowerCase()==="diterima"
-                  ? `<button class="btn btn-light" disabled>Sudah Diterima</button>`
-                  : `<button class="btn btn-green" onclick="terimaPendaftaran('${attr(r["ID Pendaftaran"])}')">Terima</button>`
-                }
-                <button class="btn btn-light" onclick="hubungiPendaftar('${attr(r["ID Pendaftaran"])}')">WhatsApp</button>
-                <button class="btn btn-light" onclick="ubahStatusPendaftaran('${attr(r["ID Pendaftaran"])}','Dihubungi')">Dihubungi</button>
-                <button class="btn btn-red" onclick="ubahStatusPendaftaran('${attr(r["ID Pendaftaran"])}','Ditolak')">Tolak</button>
-              </div>
-            </td>
+            <td>${renderAksiPendaftaran(r)}</td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -1173,6 +1172,89 @@
     ` : empty("Belum ada hasil latihan.");
   }
 
+
+
+  function renderAksiPendaftaran(r){
+    const id = attr(r["ID Pendaftaran"]);
+    const status = String(r["Status Pendaftaran"] || "").toLowerCase();
+
+    if(status === "terhapus"){
+      return `<div class="actions">
+        <button class="btn btn-green" onclick="pulihkanPendaftaran('${id}')">Pulihkan</button>
+        <button class="btn btn-red" onclick="hapusPermanenPendaftaran('${id}')">Hapus Permanen</button>
+      </div>`;
+    }
+
+    if(status === "diterima"){
+      return `<div class="actions">
+        <button class="btn btn-light" disabled>Sudah Diterima</button>
+        <button class="btn btn-light" onclick="hubungiPendaftar('${id}')">WhatsApp</button>
+        <button class="btn btn-orange" onclick="arsipkanPendaftaran('${id}')">Arsipkan</button>
+      </div>`;
+    }
+
+    if(status === "diarsipkan"){
+      return `<div class="actions">
+        <button class="btn btn-green" onclick="pulihkanPendaftaran('${id}')">Pulihkan</button>
+        <button class="btn btn-red" onclick="hapusPendaftaran('${id}')">Hapus</button>
+      </div>`;
+    }
+
+    return `<div class="actions">
+      <button class="btn btn-green" onclick="terimaPendaftaran('${id}')">Terima</button>
+      <button class="btn btn-light" onclick="hubungiPendaftar('${id}')">WhatsApp</button>
+      <button class="btn btn-light" onclick="ubahStatusPendaftaran('${id}','Dihubungi')">Dihubungi</button>
+      <button class="btn btn-red" onclick="ubahStatusPendaftaran('${id}','Ditolak')">Tolak</button>
+      <button class="btn btn-red" onclick="hapusPendaftaran('${id}')">Hapus</button>
+    </div>`;
+  }
+
+  async function hapusPendaftaran(id){
+    if(!confirm("Pindahkan pendaftaran ini ke Terhapus? Data masih dapat dipulihkan.")) return;
+    try{
+      const res=await jsonp("hapusPendaftaran",{
+        key:API_KEY,
+        data:JSON.stringify({idPendaftaran:id,diprosesOleh:"Admin"})
+      });
+      if(!res.status) throw new Error(res.message||"Gagal menghapus.");
+      await loadBootstrap();
+    }catch(err){ alert(err.message||"Gagal menghapus pendaftaran."); }
+  }
+
+  async function arsipkanPendaftaran(id){
+    if(!confirm("Arsipkan pendaftaran ini?")) return;
+    try{
+      const res=await jsonp("arsipkanPendaftaran",{
+        key:API_KEY,
+        data:JSON.stringify({idPendaftaran:id,diprosesOleh:"Admin"})
+      });
+      if(!res.status) throw new Error(res.message||"Gagal mengarsipkan.");
+      await loadBootstrap();
+    }catch(err){ alert(err.message||"Gagal mengarsipkan pendaftaran."); }
+  }
+
+  async function pulihkanPendaftaran(id){
+    try{
+      const res=await jsonp("pulihkanPendaftaran",{
+        key:API_KEY,
+        data:JSON.stringify({idPendaftaran:id,diprosesOleh:"Admin"})
+      });
+      if(!res.status) throw new Error(res.message||"Gagal memulihkan.");
+      await loadBootstrap();
+    }catch(err){ alert(err.message||"Gagal memulihkan pendaftaran."); }
+  }
+
+  async function hapusPermanenPendaftaran(id){
+    if(!confirm("Hapus permanen pendaftaran ini? Tindakan ini tidak dapat dibatalkan.")) return;
+    try{
+      const res=await jsonp("hapusPermanenPendaftaran",{
+        key:API_KEY,
+        data:JSON.stringify({idPendaftaran:id})
+      });
+      if(!res.status) throw new Error(res.message||"Gagal menghapus permanen.");
+      await loadBootstrap();
+    }catch(err){ alert(err.message||"Gagal menghapus permanen."); }
+  }
 
   function renderBuktiButton(r){
     const bukti = String(r["Bukti Pembayaran"] || "").trim();
@@ -1770,8 +1852,8 @@ Sanggar Mam Is Learning Hub`;
 
     if(["aktif","lunas","hadir","diterima","selesai"].includes(s)) cls="badge-green";
     else if(["baru","dihubungi","cicilan","izin","sakit","menunggu verifikasi","menunggu"].includes(s)) cls="badge-orange";
-    else if(["ditolak","tidak aktif","belum bayar","alpa"].includes(s)) cls="badge-red";
-    else if(["admin","siswa"].includes(s)) cls="badge-purple";
+    else if(["ditolak","tidak aktif","belum bayar","alpa","terhapus"].includes(s)) cls="badge-red";
+    else if(["admin","siswa","diarsipkan"].includes(s)) cls="badge-purple";
 
     return `<span class="badge ${cls}">${esc(text || "-")}</span>`;
   }
