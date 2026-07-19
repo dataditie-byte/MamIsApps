@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#173b63">
   <meta name="description" content="Dashboard Admin Sanggar Mam Is Learning Hub">
   <link rel="manifest" href="manifest.json">
@@ -493,7 +496,7 @@
       <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
       <div>
         <h1>Dashboard Admin</h1>
-        <p>Sanggar Mam Is Learning Hub</p>
+        <p>Sanggar Mam Is Learning Hub · Admin v4.1</p>
       </div>
     </div>
 
@@ -510,6 +513,9 @@
 
       <button class="btn btn-primary btn-block" id="btnLogin" type="submit">Masuk Dashboard</button>
       <div class="status" id="loginStatus"></div>
+      <button class="btn btn-light btn-block" type="button" onclick="bersihkanVersiLama()" style="margin-top:10px">
+        Perbarui Admin di Perangkat Ini
+      </button>
     </form>
 
     <a href="index.html" style="display:block;text-align:center;margin-top:15px;color:var(--muted);font-size:13px;font-weight:700">
@@ -789,6 +795,7 @@
 
       params.action = action;
       params.callback = cb;
+      params._ts = Date.now();
 
       const qs = new URLSearchParams(params).toString();
       script.src = API_URL + "?" + qs;
@@ -803,11 +810,37 @@
     });
   }
 
+
+  async function bersihkanVersiLama(){
+    const btn = event?.currentTarget;
+    if(btn){btn.disabled=true;btn.textContent="Memperbarui...";}
+    try{
+      localStorage.removeItem("mamis_admin_token");
+      localStorage.removeItem("mamis_admin_user");
+
+      if("serviceWorker" in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+
+      if("caches" in window){
+        const names=await caches.keys();
+        await Promise.all(names.map(n=>caches.delete(n)));
+      }
+
+      const cleanUrl=location.pathname+"?adminv=4.1&t="+Date.now();
+      location.replace(cleanUrl);
+    }catch(e){
+      location.reload(true);
+    }
+  }
+
   async function loginAdmin(event){
     event.preventDefault();
 
     const username = document.getElementById("loginUsername").value.trim();
-    const pin = document.getElementById("loginPin").value.trim();
+    const pinRaw = document.getElementById("loginPin").value;
+    const pin = String(pinRaw).replace(/[^0-9]/g,"");
     const btn = document.getElementById("btnLogin");
 
     btn.disabled = true;
@@ -833,7 +866,12 @@
       await loadBootstrap();
       showApp();
     }catch(err){
-      showLoginStatus(err.message || "Login gagal.", "err");
+      const msg = err.message || "Login gagal.";
+      if(/terhubung|server|network|load/i.test(msg)){
+        showLoginStatus("Admin versi lama atau koneksi server terdeteksi. Muat ulang halaman lalu coba kembali.", "err");
+      }else{
+        showLoginStatus(msg, "err");
+      }
     }finally{
       btn.disabled = false;
       btn.textContent = "Masuk Dashboard";
@@ -1899,6 +1937,23 @@ Sanggar Mam Is Learning Hub`;
   }
 
   restoreSession();
+</script>
+
+
+<script>
+(function(){
+  // Halaman admin harus selalu mengambil versi terbaru dari jaringan.
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(reg=>{
+        try{
+          const scope=String(reg.scope||"");
+          if(scope.includes(location.host)) reg.unregister();
+        }catch(e){}
+      });
+    }).catch(()=>{});
+  }
+})();
 </script>
 
 </body>
