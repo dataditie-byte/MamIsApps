@@ -7,13 +7,22 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png?v=7">
-<link rel="manifest" href="manifest.json?v=7">
+<link rel="apple-touch-icon" href="icon-192.png?v=8">
+<link rel="manifest" href="manifest.json?v=8">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Mam Is Learning Hub</title>
 <style>
 :root{--navy:#173b63;--blue:#2f80ed;--green:#16a34a;--orange:#f97316;--red:#dc2626;--ink:#14213d;--muted:#64748b;--line:#dbe4ef;--bg:#f6f9fc;--shadow:0 10px 30px rgba(23,59,99,.12)}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}.container{width:min(1120px,calc(100% - 28px));margin:auto}.top{position:sticky;top:0;z-index:20;background:white;border-bottom:1px solid var(--line)}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;color:var(--navy)}.brand img{width:48px;height:48px;object-fit:contain}.menu{display:flex;gap:14px;align-items:center;font-weight:700}.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;cursor:pointer;display:inline-flex;justify-content:center;align-items:center}.btn-primary{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff}.btn-green{background:var(--green);color:#fff}.btn-light{background:white;color:var(--navy);border:1px solid var(--line)}.hero{background:linear-gradient(135deg,#173b63,#2f80ed);color:#fff;padding:65px 0;border-radius:0 0 35px 35px}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.05;margin:0 0 14px}.hero p{font-size:18px;color:#e7f1ff}.hero-card,.card,.form-card{background:white;color:var(--ink);border-radius:22px;padding:22px;box-shadow:var(--shadow)}.hero-card h3{margin-top:0;color:var(--navy);font-size:24px}.hero-card li{margin:9px 0}.card p{color:var(--muted);margin-bottom:0}section{padding:58px 0}.section-head{text-align:center;max-width:740px;margin:0 auto 28px}.section-head h2{color:var(--navy);font-size:clamp(28px,4vw,40px);margin:0 0 8px}.grid{display:grid;gap:16px}.grid-3{grid-template-columns:repeat(3,1fr)}.program h3{margin:0;color:var(--navy)}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eaf4ff;color:var(--navy);font-size:12px;font-weight:800;margin:8px 5px 8px 0}.price{font-size:21px;font-weight:900;color:var(--green);margin-top:12px}.register{display:grid;grid-template-columns:.8fr 1.2fr;gap:22px;align-items:start}.info{background:linear-gradient(135deg,#173b63,#2f80ed);color:#fff;border-radius:24px;padding:25px;position:sticky;top:90px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.field{display:flex;flex-direction:column;gap:6px}.full{grid-column:1/-1}label{font-size:13px;font-weight:800;color:var(--navy)}input,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#fff}textarea{min-height:90px}.class-list{display:grid;gap:9px}.class-choice{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.class-choice input{width:auto;margin-top:4px}.summary{background:#f0f7ff;border:1px solid #cfe4fb;border-radius:15px;padding:14px}.summary-row{display:flex;justify-content:space-between;gap:10px;margin:6px 0}.summary-total{font-size:20px;font-weight:900;color:var(--navy);border-top:1px solid #cfe4fb;padding-top:10px;margin-top:10px}.status{display:none;margin-top:12px;padding:12px;border-radius:12px;font-weight:700}.status.ok{display:block;background:#dcfce7;color:#166534}.status.err{display:block;background:#fee2e2;color:#991b1b}.status.wait{display:block;background:#ffedd5;color:#9a3412}.empty{text-align:center;padding:25px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);background:#fff}footer{background:#0f2742;color:#dbeafe;padding:30px 0;text-align:center}@media(max-width:850px){.hero-grid,.register{grid-template-columns:1fr}.grid-3{grid-template-columns:repeat(2,1fr)}.info{position:static}.menu{display:none}}@media(max-width:620px){.grid-3,.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.hero{padding:48px 0}footer .container>div:first-child{grid-template-columns:1fr!important}.menu{display:none!important}#installBtn{width:100%}}
+
+.skeleton-card{min-height:190px;position:relative;overflow:hidden}
+.skeleton-line{height:14px;border-radius:8px;background:#e8eef5;margin:12px 0}
+.skeleton-line.short{width:45%}.skeleton-line.medium{width:70%}
+.skeleton-card:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:shine 1.35s infinite}
+@keyframes shine{100%{transform:translateX(100%)}}
+.sync-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:6px}
+.sync-dot.ok{background:#16a34a}.sync-dot.offline{background:#64748b}
+
 </style>
 </head>
 <body>
@@ -22,7 +31,10 @@
 <section class="hero" id="beranda"><div class="container hero-grid"><div><div style="display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:16px">Belajar Lebih Terarah dan Menyenangkan</div><h1>Sanggar Mam Is Learning Hub</h1><p>Ruang belajar digital untuk siswa yang ingin memahami materi, berlatih soal, mengikuti kelas, dan memantau perkembangan belajar dalam satu aplikasi yang mudah digunakan.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-light" href="#daftar">Daftar Sekarang</a><a class="btn btn-green" href="siswa.html">Masuk Portal Siswa</a><a class="btn btn-light" href="#program">Lihat Program</a></div></div><div class="hero-card"><h3>Keunggulan Sanggar Mam Is</h3><ul><li>Materi terarah sesuai kelas dan jenjang</li><li>Latihan soal dan CBT bertahap</li><li>Pendampingan belajar yang ramah</li><li>Nilai, absensi, dan perkembangan tersimpan rapi</li><li>Dapat diakses melalui ponsel maupun komputer</li></ul></div></div></section>
 
 <section id="keunggulan"><div class="container"><div class="section-head"><h2>Belajar Bukan Sekadar Mengerjakan Soal</h2><p>Sanggar Mam Is membantu siswa membangun pemahaman, kebiasaan belajar, kepercayaan diri, dan kesiapan menghadapi tantangan akademik.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">📚 Materi Terarah</h3><p>Materi disusun sesuai jenjang, kelas, dan kebutuhan belajar siswa.</p></article><article class="card"><h3 style="color:var(--navy)">🧠 Latihan Bertahap</h3><p>Latihan soal dibuat dari tingkat dasar hingga tantangan lanjutan.</p></article><article class="card"><h3 style="color:var(--navy)">📈 Perkembangan Terpantau</h3><p>Nilai, absensi, materi, dan aktivitas belajar tersimpan rapi.</p></article></div></div></section>
-<section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><p id="serverStatus" style="font-size:13px;color:var(--muted);margin-top:6px">Program tetap dapat dibuka pada koneksi tethering atau jaringan lambat.</p></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
+<section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
+<p id="serverStatus" style="font-size:13px;color:var(--muted);margin:0">Memuat seluruh program kelas...</p>
+<button type="button" class="btn btn-light" id="refreshKelasBtn" onclick="refreshSemuaKelas()" style="padding:8px 12px;font-size:13px">↻ Perbarui Semua Kelas</button>
+</div></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
 <section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Biaya pendaftaran siswa baru: Rp30.000.</b></p></aside>
@@ -93,7 +105,6 @@
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
 const BIAYA_PENDAFTARAN=30000;
-const FALLBACK_KELAS=[{"idKelas": "KLS-CALISTUNG", "namaKelas": "Calistung", "jenjang": "TK/SD", "kategori": "Dasar", "biaya": 125000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-MAPEL-SD", "namaKelas": "Mapel SD", "jenjang": "SD", "kategori": "Mata Pelajaran", "biaya": 200000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SD", "namaKelas": "E-SD", "jenjang": "SD", "kategori": "Bahasa Inggris", "biaya": 125000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SMP", "namaKelas": "E-SMP", "jenjang": "SMP", "kategori": "Bahasa Inggris", "biaya": 150000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-MAPEL-SMA", "namaKelas": "Mapel SMA", "jenjang": "SMA", "kategori": "Mata Pelajaran", "biaya": 250000, "jadwal": "Jadwal dikonfirmasi admin"}, {"idKelas": "KLS-E-SMA", "namaKelas": "E-SMA", "jenjang": "SMA", "kategori": "Bahasa Inggris", "biaya": 200000, "jadwal": "Jadwal dikonfirmasi admin"}];
 
 let kelas=[];
 let deferredPrompt=null;
@@ -139,14 +150,18 @@ function api(action,params={},timeoutMs=12000){
   });
 }
 
-async function apiRetry(action,params={},attempts=3){
+async function apiRetry(action,params={},attempts=4){
   let lastError=null;
   for(let i=1;i<=attempts;i++){
     try{
-      return await api(action,params,12000);
+      const timeout=i===1 ? 9000 : 15000;
+      return await api(action,params,timeout);
     }catch(err){
       lastError=err;
-      if(i<attempts) await new Promise(r=>setTimeout(r,1200*i));
+      if(i<attempts){
+        const delay=Math.min(4500,900*i)+Math.floor(Math.random()*500);
+        await new Promise(r=>setTimeout(r,delay));
+      }
     }
   }
   throw lastError || new Error("Server tidak merespons.");
@@ -179,52 +194,130 @@ function v(id){
   return document.getElementById(id).value.trim();
 }
 
+
+const CACHE_KELAS_KEY="mamis_semua_kelas_v3";
+const CACHE_TIME_KEY="mamis_semua_kelas_v3_time";
+let syncingKelas=false;
+
+function normalizeKelas(data){
+  if(!Array.isArray(data)) return [];
+  const seen=new Set();
+  return data.map(k=>({
+    idKelas:String(k.idKelas ?? k["ID Kelas"] ?? "").trim(),
+    namaKelas:String(k.namaKelas ?? k["Nama Kelas"] ?? "").trim(),
+    jenjang:String(k.jenjang ?? k["Jenjang"] ?? "").trim(),
+    kategori:String(k.kategori ?? k["Kategori"] ?? "Kelas").trim(),
+    biaya:Number(k.biaya ?? k["Biaya Bulanan"] ?? 0),
+    jadwal:String(k.jadwal ?? k["Jadwal"] ?? "").trim()
+  })).filter(k=>{
+    if(!k.idKelas || !k.namaKelas || seen.has(k.idKelas)) return false;
+    seen.add(k.idKelas);
+    return true;
+  });
+}
+
+function bacaCacheKelas(){
+  const keys=[CACHE_KELAS_KEY,"mamis_public_kelas"];
+  for(const key of keys){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(key)||"[]");
+      const normalized=normalizeKelas(parsed);
+      if(normalized.length) return normalized;
+    }catch(e){}
+  }
+  return [];
+}
+
+function simpanCacheKelas(items){
+  localStorage.setItem(CACHE_KELAS_KEY,JSON.stringify(items));
+  localStorage.setItem(CACHE_TIME_KEY,String(Date.now()));
+  // Tetap isi kunci lama supaya versi halaman lain dapat membaca seluruh kelas.
+  localStorage.setItem("mamis_public_kelas",JSON.stringify(items));
+  localStorage.setItem("mamis_public_kelas_time",String(Date.now()));
+}
+
+function setServerStatus(text,type="wait"){
+  const el=document.getElementById("serverStatus");
+  if(!el) return;
+  const cls=type==="ok"?"ok":type==="offline"?"offline":"";
+  el.innerHTML=`<span class="sync-dot ${cls}"></span>${esc(text)}`;
+}
+
+function renderSkeleton(){
+  const cards=Array.from({length:6},()=>`
+    <article class="card skeleton-card" aria-hidden="true">
+      <div class="skeleton-line medium"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line medium"></div>
+    </article>`).join("");
+  document.getElementById("programList").innerHTML=cards;
+  document.getElementById("kelasChecklist").innerHTML='<div class="empty">Sedang mengambil seluruh kelas aktif...</div>';
+}
+
+async function sinkronKelas({manual=false}={}){
+  if(syncingKelas) return;
+  syncingKelas=true;
+  const btn=document.getElementById("refreshKelasBtn");
+  if(btn){btn.disabled=true;btn.textContent="↻ Menyinkronkan...";}
+  setServerStatus(manual?"Memperbarui seluruh kelas dari server...":"Sinkronisasi seluruh kelas berjalan di latar belakang.");
+
+  try{
+    const r=await apiRetry("getPublicData",{},4);
+    const semua=normalizeKelas(r && r.kelas);
+    if(!(r && r.status)) throw new Error((r && r.message)||"Server menolak permintaan.");
+    if(!semua.length) throw new Error("Server belum mengirim data kelas aktif.");
+
+    kelas=semua;
+    simpanCacheKelas(kelas);
+    render();
+    setServerStatus(`${kelas.length} kelas aktif sudah tersinkron.`, "ok");
+  }catch(err){
+    if(kelas.length){
+      setServerStatus(`${kelas.length} kelas tersimpan ditampilkan. Koneksi server sedang lambat.`, "offline");
+    }else{
+      document.getElementById("programList").innerHTML=`
+        <div class="empty" style="grid-column:1/-1">
+          <b>Daftar kelas belum berhasil dimuat.</b><br>
+          Sambungkan internet lalu tekan <b>Perbarui Semua Kelas</b>.<br>
+          <small>${esc(err.message||"Koneksi server lambat.")}</small>
+        </div>`;
+      document.getElementById("kelasChecklist").innerHTML='<div class="empty">Daftar kelas belum tersedia. Tekan Perbarui Semua Kelas.</div>';
+      setServerStatus("Belum ada data kelas tersimpan di perangkat ini.", "offline");
+    }
+  }finally{
+    syncingKelas=false;
+    if(btn){btn.disabled=false;btn.textContent="↻ Perbarui Semua Kelas";}
+  }
+}
+
+async function refreshSemuaKelas(){
+  await sinkronKelas({manual:true});
+}
+
 async function load(){
-  const list=document.getElementById("programList");
-  const checks=document.getElementById("kelasChecklist");
+  kelas=bacaCacheKelas();
 
-  // 1. Tampilkan data lokal segera agar tetap berjalan pada tethering.
-  const cached=localStorage.getItem("mamis_public_kelas");
-  try{
-    const saved=cached ? JSON.parse(cached) : [];
-    kelas=Array.isArray(saved) && saved.length ? saved : FALLBACK_KELAS;
-  }catch(e){
-    kelas=FALLBACK_KELAS;
+  if(kelas.length){
+    render();
+    const t=Number(localStorage.getItem(CACHE_TIME_KEY)||localStorage.getItem("mamis_public_kelas_time")||0);
+    const age=t ? Math.round((Date.now()-t)/60000) : null;
+    setServerStatus(`${kelas.length} kelas tersimpan ditampilkan${age!==null?` · diperbarui ${age} menit lalu`:""}.`);
+  }else{
+    renderSkeleton();
   }
 
-  render();
-
-  const serverStatus=document.getElementById("serverStatus");
-  if(serverStatus){
-    serverStatus.textContent="Program siap digunakan. Sinkronisasi data berjalan di latar belakang.";
-  }
-
-  // 2. Sinkronkan ke Apps Script tanpa menghalangi tampilan.
-  try{
-    const r=await apiRetry("getPublicData",{},2);
-    if(r.status && Array.isArray(r.kelas) && r.kelas.length){
-      kelas=r.kelas;
-      localStorage.setItem("mamis_public_kelas",JSON.stringify(kelas));
-      localStorage.setItem("mamis_public_kelas_time",Date.now());
-      render();
-      if(serverStatus) serverStatus.textContent="Program sudah tersinkron dengan server.";
-    }
-  }catch(e){
-    if(serverStatus){
-      serverStatus.textContent="Mode ringan aktif: memakai data kelas tersimpan karena koneksi server lambat.";
-    }
-  }
+  // Selalu ambil ulang seluruh data kelas; cache hanya mempercepat tampilan awal.
+  await sinkronKelas();
 }
 
 function render(){
   const list=document.getElementById("programList");
-  const serverStatus=document.getElementById("serverStatus");
-  if(serverStatus) serverStatus.textContent="Program siap digunakan.";
   const checks=document.getElementById("kelasChecklist");
 
   if(!kelas.length){
-    list.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
-    checks.innerHTML='<div class="empty">Belum ada kelas aktif.</div>';
+    list.innerHTML='<div class="empty" style="grid-column:1/-1">Belum ada kelas aktif yang diterima dari server.</div>';
+    checks.innerHTML='<div class="empty">Belum ada kelas aktif yang diterima dari server.</div>';
     return;
   }
 
