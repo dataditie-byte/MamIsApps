@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png?v=8">
-<link rel="manifest" href="manifest.json?v=8">
+<link rel="apple-touch-icon" href="icon-192.png?v=9">
+<link rel="manifest" href="manifest.json?v=9">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Mam Is Learning Hub</title>
 <style>
@@ -34,6 +34,7 @@
 <section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
 <p id="serverStatus" style="font-size:13px;color:var(--muted);margin:0">Memuat seluruh program kelas...</p>
 <button type="button" class="btn btn-light" id="refreshKelasBtn" onclick="refreshSemuaKelas()" style="padding:8px 12px;font-size:13px">↻ Perbarui Semua Kelas</button>
+<button type="button" class="btn btn-light" onclick="perbaikiAplikasi()" style="padding:8px 12px;font-size:13px">Perbaiki Tampilan</button>
 </div></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
@@ -95,7 +96,7 @@
     </div>
 
     <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);text-align:center">
-      © <span id="year"></span> Sanggar Mam Is Learning Hub
+      © <span id="year"></span> Sanggar Mam Is Learning Hub · Web v4.2
     </div>
   </div>
 </footer>
@@ -135,7 +136,11 @@ function api(action,params={},timeoutMs=12000){
     params.action=action;
     params.callback=cb;
     params._ts=Date.now();
-    s.src=API_URL+"?"+new URLSearchParams(params).toString();
+    var qs=[];
+    Object.keys(params).forEach(function(key){
+      qs.push(encodeURIComponent(key)+"="+encodeURIComponent(params[key]==null?"":String(params[key])));
+    });
+    s.src=API_URL+"?"+qs.join("&");
 
     s.onerror=()=>{
       if(done) return;
@@ -146,7 +151,9 @@ function api(action,params={},timeoutMs=12000){
       reject(new Error("Gagal terhubung ke server."));
     };
 
-    document.body.appendChild(s);
+    s.async=true;
+    s.crossOrigin="anonymous";
+    (document.head||document.documentElement).appendChild(s);
   });
 }
 
@@ -176,7 +183,7 @@ function rupiah(n){
 }
 
 function esc(x){
-  return String(x??"")
+  return String(x==null?"":x)
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
@@ -203,12 +210,12 @@ function normalizeKelas(data){
   if(!Array.isArray(data)) return [];
   const seen=new Set();
   return data.map(k=>({
-    idKelas:String(k.idKelas ?? k["ID Kelas"] ?? "").trim(),
-    namaKelas:String(k.namaKelas ?? k["Nama Kelas"] ?? "").trim(),
-    jenjang:String(k.jenjang ?? k["Jenjang"] ?? "").trim(),
-    kategori:String(k.kategori ?? k["Kategori"] ?? "Kelas").trim(),
-    biaya:Number(k.biaya ?? k["Biaya Bulanan"] ?? 0),
-    jadwal:String(k.jadwal ?? k["Jadwal"] ?? "").trim()
+    idKelas:String(k.idKelas != null ? k.idKelas : (k["ID Kelas"] != null ? k["ID Kelas"] : "")).trim(),
+    namaKelas:String(k.namaKelas != null ? k.namaKelas : (k["Nama Kelas"] != null ? k["Nama Kelas"] : "")).trim(),
+    jenjang:String(k.jenjang != null ? k.jenjang : (k["Jenjang"] != null ? k["Jenjang"] : "")).trim(),
+    kategori:String(k.kategori != null ? k.kategori : (k["Kategori"] != null ? k["Kategori"] : "Kelas")).trim(),
+    biaya:Number(k.biaya != null ? k.biaya : (k["Biaya Bulanan"] != null ? k["Biaya Bulanan"] : 0)),
+    jadwal:String(k.jadwal != null ? k.jadwal : (k["Jadwal"] != null ? k["Jadwal"] : "")).trim()
   })).filter(k=>{
     if(!k.idKelas || !k.namaKelas || seen.has(k.idKelas)) return false;
     seen.add(k.idKelas);
@@ -255,7 +262,27 @@ function renderSkeleton(){
   document.getElementById("kelasChecklist").innerHTML='<div class="empty">Sedang mengambil seluruh kelas aktif...</div>';
 }
 
-async function sinkronKelas({manual=false}={}){
+
+async function bacaKelasJsonLokal(){
+  try{
+    var ctrl = typeof AbortController!=="undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function(){ctrl.abort();},5000) : null;
+    var res = await fetch("./kelas.json?v=9&t="+Date.now(),{
+      cache:"no-store",
+      signal:ctrl ? ctrl.signal : undefined
+    });
+    if(timer) clearTimeout(timer);
+    if(!res.ok) return [];
+    var data=await res.json();
+    return normalizeKelas(Array.isArray(data)?data:(data.kelas||[]));
+  }catch(e){
+    return [];
+  }
+}
+
+async function sinkronKelas(options){
+  options=options||{};
+  var manual=!!options.manual;
   if(syncingKelas) return;
   syncingKelas=true;
   const btn=document.getElementById("refreshKelasBtn");
@@ -273,8 +300,18 @@ async function sinkronKelas({manual=false}={}){
     render();
     setServerStatus(`${kelas.length} kelas aktif sudah tersinkron.`, "ok");
   }catch(err){
+    if(!kelas.length){
+      var lokal=await bacaKelasJsonLokal();
+      if(lokal.length){
+        kelas=lokal;
+        simpanCacheKelas(kelas);
+        render();
+        setServerStatus(kelas.length+" kelas ditampilkan dari cadangan GitHub.", "offline");
+        return;
+      }
+    }
     if(kelas.length){
-      setServerStatus(`${kelas.length} kelas tersimpan ditampilkan. Koneksi server sedang lambat.`, "offline");
+      setServerStatus(kelas.length+" kelas tersimpan ditampilkan. Koneksi server sedang lambat.", "offline");
     }else{
       document.getElementById("programList").innerHTML=`
         <div class="empty" style="grid-column:1/-1">
@@ -532,8 +569,27 @@ window.addEventListener("appinstalled",()=>{
   document.getElementById("installBtn").style.display="none";
 });
 
+
+async function perbaikiAplikasi(){
+  try{
+    localStorage.removeItem(CACHE_KELAS_KEY);
+    localStorage.removeItem(CACHE_TIME_KEY);
+    localStorage.removeItem("mamis_public_kelas");
+    localStorage.removeItem("mamis_public_kelas_time");
+    if("caches" in window){
+      var names=await caches.keys();
+      await Promise.all(names.map(function(n){return caches.delete(n);}));
+    }
+    if("serviceWorker" in navigator){
+      var regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function(r){return r.unregister();}));
+    }
+  }catch(e){}
+  location.replace(location.pathname+"?v=9&t="+Date.now());
+}
+
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js",{scope:"./"})
+  navigator.serviceWorker.register("./service-worker.js?v=9",{scope:"./",updateViaCache:"none"})
     .then(reg=>{
       reg.update();
       console.log("Service worker aktif.");
