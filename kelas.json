@@ -1,0 +1,77 @@
+{
+  "_petunjuk": "Ganti daftar di bawah dengan seluruh kelas aktif dari sheet Kelas. File ini menjadi cadangan bila Apps Script diblokir perangkat/jaringan.",
+  "kelas": [
+    {
+      "idKelas": "KLS-CALISTUNG",
+      "namaKelas": "Calistung",
+      "jenjang": "TK/SD",
+      "kategori": "Dasar",
+      "biaya": 125000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-BACA",
+      "namaKelas": "Baca",
+      "jenjang": "TK/SD",
+      "kategori": "Dasar",
+      "biaya": 125000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-MAT-SD",
+      "namaKelas": "Matematika SD",
+      "jenjang": "SD",
+      "kategori": "Matematika",
+      "biaya": 150000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-MAPEL-SD",
+      "namaKelas": "Mapel SD",
+      "jenjang": "SD",
+      "kategori": "Mata Pelajaran",
+      "biaya": 200000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-MAPEL-SMP",
+      "namaKelas": "Mapel SMP",
+      "jenjang": "SMP",
+      "kategori": "Mata Pelajaran",
+      "biaya": 225000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-MAPEL-SMA",
+      "namaKelas": "Mapel SMA",
+      "jenjang": "SMA",
+      "kategori": "Mata Pelajaran",
+      "biaya": 250000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-E-SD",
+      "namaKelas": "Bahasa Inggris SD",
+      "jenjang": "SD",
+      "kategori": "Bahasa Inggris",
+      "biaya": 125000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-E-SMP",
+      "namaKelas": "Bahasa Inggris SMP",
+      "jenjang": "SMP",
+      "kategori": "Bahasa Inggris",
+      "biaya": 150000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    },
+    {
+      "idKelas": "KLS-E-SMA",
+      "namaKelas": "Bahasa Inggris SMA",
+      "jenjang": "SMA",
+      "kategori": "Bahasa Inggris",
+      "biaya": 200000,
+      "jadwal": "Jadwal dikonfirmasi admin"
+    }
+  ]
+}
