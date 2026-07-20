@@ -496,7 +496,7 @@
       <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
       <div>
         <h1>Dashboard Admin</h1>
-        <p>Sanggar Mam Is Learning Hub · Admin v4.2</p>
+        <p>Sanggar Mam Is Learning Hub · Admin v5.0</p>
       </div>
     </div>
 
@@ -665,6 +665,11 @@
         </div>
         <div class="toolbar">
           <input id="filterSiswa" placeholder="Cari siswa" oninput="renderSiswa()">
+          <select id="filterStatusSiswa" onchange="renderSiswa()">
+            <option value="Aktif" selected>Siswa Aktif</option>
+            <option value="Tidak Aktif">Siswa Tidak Aktif</option>
+            <option value="">Semua Status</option>
+          </select>
         </div>
         <div class="table-wrap" id="siswaTable"></div>
       </section>
@@ -687,8 +692,7 @@
 
       <section class="page" id="page-peserta">
         <div class="section-head">
-          <div><h3>Peserta Kelas</h3><p>Penempatan siswa dan jumlah peserta pada setiap kelas</p></div>
-          <button class="btn btn-primary" onclick="openPesertaModal()">+ Tambah Peserta</button>
+          <div><h3>Peserta Kelas & Penilaian</h3><p>Monitoring peserta dan penilaian perkembangan setiap tiga bulan</p></div>
         </div>
 
         <div class="grid grid-4" style="margin-bottom:14px">
@@ -720,6 +724,13 @@
             <option value="Tidak Aktif">Tidak Aktif</option>
           </select>
           <input id="filterPesertaCari" type="search" placeholder="Cari nama siswa..." oninput="renderPeserta()">
+          <select id="filterTahunNilai" onchange="renderPeserta()"></select>
+          <select id="filterTriwulanNilai" onchange="renderPeserta()">
+            <option value="1">Triwulan 1 (Jan–Mar)</option>
+            <option value="2">Triwulan 2 (Apr–Jun)</option>
+            <option value="3">Triwulan 3 (Jul–Sep)</option>
+            <option value="4">Triwulan 4 (Okt–Des)</option>
+          </select>
           <button class="btn btn-light" type="button" onclick="resetFilterPeserta()">Reset Filter</button>
         </div>
 
@@ -803,7 +814,7 @@
   const API_KEY = "MAMIS-2026";
 
   let db = {
-    siswa:[],pengajar:[],kelas:[],peserta:[],pembayaran:[],
+    siswa:[],pengajar:[],kelas:[],peserta:[],penilaian:[],pembayaran:[],
     absensi:[],pendaftaran:[],akun:[],materi:[],hasil:[],pengumuman:[]
   };
 
@@ -862,7 +873,7 @@
         await Promise.all(names.map(n=>caches.delete(n)));
       }
 
-      const cleanUrl=location.pathname+"?adminv=4.2&t="+Date.now();
+      const cleanUrl=location.pathname+"?adminv=5.0&t="+Date.now();
       location.replace(cleanUrl);
     }catch(e){
       location.reload(true);
@@ -922,6 +933,7 @@
         pengajar:res.pengajar || [],
         kelas:res.kelas || [],
         peserta:res.peserta || [],
+        penilaian:res.penilaian || [],
         pembayaran:res.pembayaran || [],
         absensi:res.absensi || [],
         pendaftaran:res.pendaftaran || [],
@@ -1054,29 +1066,52 @@
 
   function renderSiswa(){
     const q = (document.getElementById("filterSiswa")?.value || "").toLowerCase();
-    const rows = db.siswa.filter(r=>
-      `${r["Nama Siswa"]} ${r["ID Siswa"]} ${r["Nama Orang Tua"]}`.toLowerCase().includes(q)
-    );
+    const statusFilter = document.getElementById("filterStatusSiswa")?.value || "";
+
+    const rows = db.siswa.filter(r=>{
+      const cocokCari = `${r["Nama Siswa"]} ${r["ID Siswa"]} ${r["Nama Orang Tua"]}`.toLowerCase().includes(q);
+      const cocokStatus = !statusFilter || String(r["Status Aktif"])===statusFilter;
+      return cocokCari && cocokStatus;
+    });
 
     document.getElementById("siswaTable").innerHTML = rows.length ? `
       <table>
-        <thead><tr><th>ID</th><th>Nama</th><th>Jenjang</th><th>Orang Tua</th><th>WA</th><th>Status</th><th>Aksi</th></tr></thead>
-        <tbody>${rows.map(r=>`
-          <tr>
+        <thead><tr><th>ID</th><th>Nama</th><th>Sekolah/Jenjang</th><th>Kelas yang Diikuti</th><th>Orang Tua/Wali</th><th>WA</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody>${rows.map(r=>{
+          const kelasAktif = db.peserta
+            .filter(p=>String(p["ID Siswa"])===String(r["ID Siswa"]) && String(p["Status Aktif"]).toLowerCase()==="aktif")
+            .map(p=>p["Nama Kelas"]);
+          const tidakAktif = String(r["Status Aktif"]).toLowerCase()==="tidak aktif";
+          return `<tr>
             <td>${esc(r["ID Siswa"])}</td>
             <td><strong>${esc(r["Nama Siswa"])}</strong></td>
-            <td>${esc(r["Jenjang"])}</td>
+            <td>${esc(r["Nama Sekolah"] || "-")}<br><small>${esc(r["Jenjang"] || "")} ${esc(r["Kelas Sekolah"] || "")}</small></td>
+            <td>${kelasAktif.length ? kelasAktif.map(k=>`<span class="badge badge-blue" style="margin:2px">${esc(k)}</span>`).join("") : "-"}</td>
             <td>${esc(r["Nama Orang Tua"])}</td>
             <td>${esc(r["No WA"])}</td>
             <td>${badge(r["Status Aktif"])}</td>
             <td><div class="actions">
               <button class="btn btn-light" onclick='openSiswaModal(${JSON.stringify(r)})'>Edit</button>
-              <button class="btn btn-primary" onclick="buatAkun('${attr(r["ID Siswa"])}')">Buat Akun</button>
+              ${tidakAktif ? `<button class="btn btn-red" onclick="hapusSiswaTidakAktif('${attr(r["ID Siswa"])}','${attr(r["Nama Siswa"])}')">Hapus</button>` : `<button class="btn btn-primary" onclick="buatAkun('${attr(r["ID Siswa"])}')">Buat Akun</button>`}
             </div></td>
-          </tr>
-        `).join("")}</tbody>
+          </tr>`;
+        }).join("")}</tbody>
       </table>
-    ` : empty("Belum ada siswa.");
+    ` : empty("Data siswa tidak ditemukan.");
+  }
+
+  async function hapusSiswaTidakAktif(idSiswa,nama){
+    if(!confirm(`Hapus ${nama} dari daftar siswa? Data peserta, akun, dan penilaiannya juga akan dihapus.`)) return;
+    try{
+      const res = await jsonp("hapusSiswaTidakAktif",{
+        key:API_KEY,
+        data:JSON.stringify({idSiswa})
+      });
+      if(!res.status) throw new Error(res.message || "Gagal menghapus siswa.");
+      await loadBootstrap();
+    }catch(err){
+      alert(err.message || "Gagal menghapus siswa.");
+    }
   }
 
   function renderPengajar(){
@@ -1140,6 +1175,11 @@
     if(kelas) kelas.value = "";
     if(status) status.value = "";
     if(cari) cari.value = "";
+    const now = new Date();
+    const tahun = document.getElementById("filterTahunNilai");
+    const tri = document.getElementById("filterTriwulanNilai");
+    if(tahun) tahun.value = String(now.getFullYear());
+    if(tri) tri.value = String(Math.floor(now.getMonth()/3)+1);
     renderPeserta();
   }
 
@@ -1183,20 +1223,41 @@
     }
   }
 
+  function initFilterPenilaian(){
+    const tahun = document.getElementById("filterTahunNilai");
+    const tri = document.getElementById("filterTriwulanNilai");
+    if(!tahun || tahun.options.length) return;
+
+    const now = new Date();
+    const y = now.getFullYear();
+    tahun.innerHTML = [y-1,y,y+1].map(v=>`<option value="${v}" ${v===y?"selected":""}>Tahun ${v}</option>`).join("");
+    tri.value = String(Math.floor(now.getMonth()/3)+1);
+  }
+
+  function getNilaiPeserta(idPeserta,tahun,triwulan){
+    return (db.penilaian || []).find(n=>
+      String(n["ID Peserta"])===String(idPeserta) &&
+      String(n["Tahun"])===String(tahun) &&
+      String(n["Triwulan"])===String(triwulan)
+    );
+  }
+
   function renderPeserta(){
+    initFilterPenilaian();
     isiFilterPesertaKelas();
     renderRekapPesertaKelas();
 
     const kelasDipilih = String(document.getElementById("filterPesertaKelas")?.value || "").trim();
     const statusDipilih = String(document.getElementById("filterPesertaStatus")?.value || "").trim().toLowerCase();
     const kata = String(document.getElementById("filterPesertaCari")?.value || "").trim().toLowerCase();
+    const tahun = document.getElementById("filterTahunNilai")?.value || new Date().getFullYear();
+    const triwulan = document.getElementById("filterTriwulanNilai")?.value || "1";
 
     const semua = db.peserta || [];
     const rows = semua.filter(r=>{
       const namaKelas = String(r["Nama Kelas"] || "").trim();
       const status = String(r["Status Aktif"] || "").trim().toLowerCase();
       const namaSiswa = String(r["Nama Siswa"] || "").trim().toLowerCase();
-
       if(kelasDipilih && namaKelas !== kelasDipilih) return false;
       if(statusDipilih && status !== statusDipilih) return false;
       if(kata && !namaSiswa.includes(kata)) return false;
@@ -1212,29 +1273,53 @@
     setText("pesertaNamaKelasRingkas",kelasDipilih || "Semua");
 
     document.getElementById("pesertaTable").innerHTML = rows.length ? `
-      <div style="padding:12px 14px;border-bottom:1px solid var(--border);background:#f8fafc">
+      <div style="padding:12px 14px;border-bottom:1px solid var(--line);background:#f8fafc">
         <strong>${kelasDipilih ? esc(kelasDipilih) : "Semua Kelas"}</strong>
-        · ${rows.length} peserta
-        · ${aktif} aktif
+        · ${rows.length} peserta · Penilaian Tahun ${esc(tahun)} Triwulan ${esc(triwulan)}
       </div>
       <table>
-        <thead><tr><th>No.</th><th>ID</th><th>Siswa</th><th>Kelas</th><th>Tanggal Masuk</th><th>Status</th></tr></thead>
-        <tbody>${rows.map((r,i)=>`
-          <tr>
+        <thead><tr><th>No.</th><th>Siswa</th><th>Kelas</th><th>Status</th><th>Nilai</th><th>Catatan Pengajar</th><th>Pengajar</th><th>Aksi</th></tr></thead>
+        <tbody>${rows.map((r,i)=>{
+          const nilai = getNilaiPeserta(r["ID Peserta"],tahun,triwulan);
+          return `<tr>
             <td>${i+1}</td>
-            <td>${esc(r["ID Peserta"])}</td>
             <td><strong>${esc(r["Nama Siswa"])}</strong></td>
             <td>${esc(r["Nama Kelas"])}</td>
-            <td>${esc(r["Tanggal Masuk"] || "-")}</td>
             <td>${badge(r["Status Aktif"])}</td>
-          </tr>
-        `).join("")}</tbody>
+            <td>${nilai ? `<strong>${esc(nilai["Nilai"])}</strong>` : `<span class="badge badge-orange">Belum dinilai</span>`}</td>
+            <td style="max-width:320px">${esc(nilai?.["Catatan"] || "-")}</td>
+            <td>${esc(nilai?.["Nama Pengajar"] || "-")}</td>
+            <td><button class="btn btn-primary" onclick='openPenilaianModal(${JSON.stringify(r)},${JSON.stringify(nilai || null)})'>${nilai?"Edit Nilai":"Isi Nilai"}</button></td>
+          </tr>`;
+        }).join("")}</tbody>
       </table>
-    ` : empty(
-      kelasDipilih
-        ? `Belum ada peserta yang sesuai pada kelas ${esc(kelasDipilih)}.`
-        : "Belum ada peserta yang sesuai dengan filter."
-    );
+    ` : empty("Belum ada peserta yang sesuai dengan filter.");
+  }
+
+  function openPenilaianModal(peserta,nilai=null){
+    const tahun = document.getElementById("filterTahunNilai")?.value || new Date().getFullYear();
+    const triwulan = document.getElementById("filterTriwulanNilai")?.value || "1";
+    const pengajarKelas = db.kelas.find(k=>String(k["ID Kelas"])===String(peserta["ID Kelas"]));
+    const defaultPengajar = nilai?.["ID Pengajar"] || pengajarKelas?.["ID Pengajar"] || "";
+
+    openDynamicForm("penilaian",nilai,{
+      title:`Penilaian ${peserta["Nama Siswa"]} — ${peserta["Nama Kelas"]}`,
+      fields:[
+        field("idPeserta","ID Peserta","hidden",peserta["ID Peserta"],true),
+        field("tahun","Tahun","number",tahun,true),
+        field("triwulan","Triwulan","select",triwulan,true,[
+          {value:"1",label:"Triwulan 1 (Januari–Maret)"},
+          {value:"2",label:"Triwulan 2 (April–Juni)"},
+          {value:"3",label:"Triwulan 3 (Juli–September)"},
+          {value:"4",label:"Triwulan 4 (Oktober–Desember)"}
+        ]),
+        field("nilai","Nilai","number",nilai?.["Nilai"] || "",true),
+        field("idPengajar","Pengajar","select",defaultPengajar,true,db.pengajar
+          .filter(p=>String(p["Status Aktif"]).toLowerCase()==="aktif")
+          .map(p=>({value:p["ID Pengajar"],label:p["Nama Pengajar"]}))),
+        field("catatan","Catatan Pengajar","textarea",nilai?.["Catatan"] || "",true)
+      ]
+    });
   }
 
   function renderMateri(){
@@ -1557,17 +1642,45 @@ Sanggar Mam Is Learning Hub`;
   }
 
   function openSiswaModal(r=null){
+    const kelasTerpilih = r
+      ? db.peserta
+          .filter(p=>String(p["ID Siswa"])===String(r["ID Siswa"]) && String(p["Status Aktif"]).toLowerCase()==="aktif")
+          .map(p=>String(p["ID Kelas"]))
+      : [];
+
     openDynamicForm("siswa",r,{
-      title:r?"Edit Siswa":"Tambah Siswa",
+      title:r?"Edit Siswa dan Kelas":"Tambah Siswa dan Kelas",
       fields:[
         field("namaSiswa","Nama Siswa","text",r?.["Nama Siswa"],true),
+        field("jenisKelamin","Jenis Kelamin","select",r?.["Jenis Kelamin"] || "",false,["","Laki-laki","Perempuan"]),
+        field("tempatLahir","Tempat Lahir","text",r?.["Tempat Lahir"]),
+        field("tanggalLahir","Tanggal Lahir","date",String(r?.["Tanggal Lahir"] || "").slice(0,10)),
         field("jenjang","Jenjang","select",r?.["Jenjang"],true,["TK","SD","SMP","SMA","Umum"]),
-        field("namaOrtu","Nama Orang Tua","text",r?.["Nama Orang Tua"],true),
+        field("kelasSekolah","Kelas Sekolah","text",r?.["Kelas Sekolah"]),
+        field("namaSekolah","Nama Sekolah","text",r?.["Nama Sekolah"]),
+        field("namaOrtu","Nama Orang Tua/Wali","text",r?.["Nama Orang Tua"],true),
         field("noWa","Nomor WhatsApp","text",r?.["No WA"],true),
         field("alamat","Alamat","textarea",r?.["Alamat"]),
+        fieldKelasChecklist(kelasTerpilih),
         field("statusAktif","Status","select",r?.["Status Aktif"] || "Aktif",true,["Aktif","Tidak Aktif"])
       ]
     });
+  }
+
+  function fieldKelasChecklist(selected=[]){
+    const aktif = db.kelas.filter(k=>String(k["Status Kelas"]).toLowerCase()==="aktif");
+    return `<div class="field full">
+      <label>Kelas yang Diikuti *</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;border:1px solid var(--line);border-radius:13px;padding:12px">
+        ${aktif.map(k=>`
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid #edf1f6;border-radius:10px;cursor:pointer">
+            <input type="checkbox" name="idKelasList" value="${attr(k["ID Kelas"])}" ${selected.includes(String(k["ID Kelas"]))?"checked":""} style="width:auto;margin-top:2px">
+            <span><strong>${esc(k["Nama Kelas"])}</strong><br><small>${esc(k["Jadwal"] || "")}</small></span>
+          </label>
+        `).join("")}
+      </div>
+      <small style="color:var(--muted)">Pilih satu atau beberapa kelas. Perubahan otomatis disinkronkan ke Peserta Kelas.</small>
+    </div>`;
   }
 
   function openPengajarModal(r=null){
@@ -1687,10 +1800,17 @@ Sanggar Mam Is Learning Hub`;
       let payload = values;
 
       if(currentForm==="siswa"){
+        if(String(payload.statusAktif).toLowerCase()==="aktif" && (!payload.idKelasList || !payload.idKelasList.length)){
+          throw new Error("Pilih minimal satu kelas untuk siswa aktif.");
+        }
         if(editingData){
           action="updateSiswa";
           payload.idSiswa=editingData["ID Siswa"];
         }else action="addSiswa";
+      }
+
+      if(currentForm==="penilaian"){
+        action="simpanPenilaian";
       }
 
       if(currentForm==="pengajar"){
@@ -1764,6 +1884,10 @@ Sanggar Mam Is Learning Hub`;
     const req = required ? "required" : "";
     const val = value ?? "";
 
+    if(type==="hidden"){
+      return `<input name="${attr(name)}" type="hidden" value="${attr(val)}">`;
+    }
+
     if(type==="textarea"){
       return `<div class="field full"><label>${esc(label)}${required?" *":""}</label>
         <textarea name="${attr(name)}" ${req}>${esc(val)}</textarea></div>`;
@@ -1786,7 +1910,9 @@ Sanggar Mam Is Learning Hub`;
   function formValues(){
     const form = document.getElementById("dynamicForm");
     const fd = new FormData(form);
-    return Object.fromEntries(fd.entries());
+    const obj = Object.fromEntries(fd.entries());
+    obj.idKelasList = fd.getAll("idKelasList");
+    return obj;
   }
 
   function showAccountResult(res){
@@ -1987,7 +2113,7 @@ Sanggar Mam Is Learning Hub`;
       siswa:["Siswa","Data siswa aktif dan akun"],
       pengajar:["Pengajar","Data tenaga pengajar"],
       kelas:["Kelas","Program, jadwal, dan biaya"],
-      peserta:["Peserta Kelas","Penempatan siswa pada program"],
+      peserta:["Peserta Kelas & Penilaian","Monitoring kelas dan penilaian triwulan"],
       materi:["Materi","Konten belajar siswa"],
       pengumuman:["Pengumuman","Informasi untuk siswa"],
       akun:["Akun Siswa","Username dan reset PIN"],
