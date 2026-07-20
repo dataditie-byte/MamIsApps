@@ -496,7 +496,7 @@
       <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
       <div>
         <h1>Dashboard Admin</h1>
-        <p>Sanggar Mam Is Learning Hub · Admin v4.1</p>
+        <p>Sanggar Mam Is Learning Hub · Admin v4.2</p>
       </div>
     </div>
 
@@ -687,9 +687,43 @@
 
       <section class="page" id="page-peserta">
         <div class="section-head">
-          <div><h3>Peserta Kelas</h3><p>Penempatan siswa ke kelas belajar</p></div>
+          <div><h3>Peserta Kelas</h3><p>Penempatan siswa dan jumlah peserta pada setiap kelas</p></div>
           <button class="btn btn-primary" onclick="openPesertaModal()">+ Tambah Peserta</button>
         </div>
+
+        <div class="grid grid-4" style="margin-bottom:14px">
+          <div class="card summary-card">
+            <div class="summary-icon b-blue">👥</div>
+            <div><strong id="pesertaJumlahTampil">0</strong><span>Peserta ditampilkan</span></div>
+          </div>
+          <div class="card summary-card">
+            <div class="summary-icon b-green">✅</div>
+            <div><strong id="pesertaAktifTampil">0</strong><span>Peserta aktif</span></div>
+          </div>
+          <div class="card summary-card">
+            <div class="summary-icon b-purple">🏫</div>
+            <div><strong id="pesertaJumlahKelas">0</strong><span>Kelas terisi</span></div>
+          </div>
+          <div class="card summary-card">
+            <div class="summary-icon b-orange">📚</div>
+            <div><strong id="pesertaNamaKelasRingkas">Semua</strong><span>Filter kelas</span></div>
+          </div>
+        </div>
+
+        <div class="filters" style="margin-bottom:14px">
+          <select id="filterPesertaKelas" onchange="renderPeserta()">
+            <option value="">Semua Kelas</option>
+          </select>
+          <select id="filterPesertaStatus" onchange="renderPeserta()">
+            <option value="">Semua Status</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Tidak Aktif">Tidak Aktif</option>
+          </select>
+          <input id="filterPesertaCari" type="search" placeholder="Cari nama siswa..." oninput="renderPeserta()">
+          <button class="btn btn-light" type="button" onclick="resetFilterPeserta()">Reset Filter</button>
+        </div>
+
+        <div id="pesertaRekapKelas" class="card" style="margin-bottom:14px"></div>
         <div class="table-wrap" id="pesertaTable"></div>
       </section>
 
@@ -828,7 +862,7 @@
         await Promise.all(names.map(n=>caches.delete(n)));
       }
 
-      const cleanUrl=location.pathname+"?adminv=4.1&t="+Date.now();
+      const cleanUrl=location.pathname+"?adminv=4.2&t="+Date.now();
       location.replace(cleanUrl);
     }catch(e){
       location.reload(true);
@@ -1082,21 +1116,125 @@
     ` : empty("Belum ada kelas.");
   }
 
+  function isiFilterPesertaKelas(){
+    const select = document.getElementById("filterPesertaKelas");
+    if(!select) return;
+
+    const current = select.value;
+    const daftar = [...new Set(
+      (db.peserta || [])
+        .map(r => String(r["Nama Kelas"] || "").trim())
+        .filter(Boolean)
+    )].sort((a,b)=>a.localeCompare(b,"id"));
+
+    select.innerHTML = '<option value="">Semua Kelas</option>' +
+      daftar.map(n => `<option value="${attr(n)}">${esc(n)}</option>`).join("");
+
+    if(daftar.includes(current)) select.value = current;
+  }
+
+  function resetFilterPeserta(){
+    const kelas = document.getElementById("filterPesertaKelas");
+    const status = document.getElementById("filterPesertaStatus");
+    const cari = document.getElementById("filterPesertaCari");
+    if(kelas) kelas.value = "";
+    if(status) status.value = "";
+    if(cari) cari.value = "";
+    renderPeserta();
+  }
+
+  function renderRekapPesertaKelas(){
+    const box = document.getElementById("pesertaRekapKelas");
+    if(!box) return;
+
+    const rows = db.peserta || [];
+    const map = {};
+
+    rows.forEach(r=>{
+      const nama = String(r["Nama Kelas"] || "Tanpa Kelas").trim() || "Tanpa Kelas";
+      const aktif = String(r["Status Aktif"] || "").toLowerCase() === "aktif";
+      if(!map[nama]) map[nama] = {total:0,aktif:0};
+      map[nama].total++;
+      if(aktif) map[nama].aktif++;
+    });
+
+    const items = Object.keys(map).sort((a,b)=>a.localeCompare(b,"id"));
+    box.innerHTML = items.length ? `
+      <div class="section-head" style="margin-bottom:10px">
+        <div><h4 style="margin:0">Rekap Jumlah Peserta per Kelas</h4>
+        <p style="margin:4px 0 0">Klik nama kelas untuk memfilter daftar peserta.</p></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${items.map(n=>`
+          <button type="button" class="btn btn-light" onclick='pilihFilterPesertaKelas(${JSON.stringify(n)})'>
+            ${esc(n)} <strong>(${map[n].aktif} aktif / ${map[n].total} total)</strong>
+          </button>
+        `).join("")}
+      </div>
+    ` : empty("Belum ada peserta kelas.");
+  }
+
+  function pilihFilterPesertaKelas(nama){
+    const select = document.getElementById("filterPesertaKelas");
+    if(select){
+      select.value = nama;
+      renderPeserta();
+      document.getElementById("pesertaTable")?.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+  }
+
   function renderPeserta(){
-    document.getElementById("pesertaTable").innerHTML = db.peserta.length ? `
+    isiFilterPesertaKelas();
+    renderRekapPesertaKelas();
+
+    const kelasDipilih = String(document.getElementById("filterPesertaKelas")?.value || "").trim();
+    const statusDipilih = String(document.getElementById("filterPesertaStatus")?.value || "").trim().toLowerCase();
+    const kata = String(document.getElementById("filterPesertaCari")?.value || "").trim().toLowerCase();
+
+    const semua = db.peserta || [];
+    const rows = semua.filter(r=>{
+      const namaKelas = String(r["Nama Kelas"] || "").trim();
+      const status = String(r["Status Aktif"] || "").trim().toLowerCase();
+      const namaSiswa = String(r["Nama Siswa"] || "").trim().toLowerCase();
+
+      if(kelasDipilih && namaKelas !== kelasDipilih) return false;
+      if(statusDipilih && status !== statusDipilih) return false;
+      if(kata && !namaSiswa.includes(kata)) return false;
+      return true;
+    });
+
+    const aktif = rows.filter(r=>String(r["Status Aktif"] || "").toLowerCase()==="aktif").length;
+    const jumlahKelas = new Set(rows.map(r=>String(r["Nama Kelas"] || "").trim()).filter(Boolean)).size;
+
+    setText("pesertaJumlahTampil",rows.length);
+    setText("pesertaAktifTampil",aktif);
+    setText("pesertaJumlahKelas",jumlahKelas);
+    setText("pesertaNamaKelasRingkas",kelasDipilih || "Semua");
+
+    document.getElementById("pesertaTable").innerHTML = rows.length ? `
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border);background:#f8fafc">
+        <strong>${kelasDipilih ? esc(kelasDipilih) : "Semua Kelas"}</strong>
+        · ${rows.length} peserta
+        · ${aktif} aktif
+      </div>
       <table>
-        <thead><tr><th>ID</th><th>Siswa</th><th>Kelas</th><th>Tanggal Masuk</th><th>Status</th></tr></thead>
-        <tbody>${db.peserta.map(r=>`
+        <thead><tr><th>No.</th><th>ID</th><th>Siswa</th><th>Kelas</th><th>Tanggal Masuk</th><th>Status</th></tr></thead>
+        <tbody>${rows.map((r,i)=>`
           <tr>
+            <td>${i+1}</td>
             <td>${esc(r["ID Peserta"])}</td>
-            <td>${esc(r["Nama Siswa"])}</td>
+            <td><strong>${esc(r["Nama Siswa"])}</strong></td>
             <td>${esc(r["Nama Kelas"])}</td>
-            <td>${esc(r["Tanggal Masuk"])}</td>
+            <td>${esc(r["Tanggal Masuk"] || "-")}</td>
             <td>${badge(r["Status Aktif"])}</td>
           </tr>
         `).join("")}</tbody>
       </table>
-    ` : empty("Belum ada peserta kelas.");
+    ` : empty(
+      kelasDipilih
+        ? `Belum ada peserta yang sesuai pada kelas ${esc(kelasDipilih)}.`
+        : "Belum ada peserta yang sesuai dengan filter."
+    );
   }
 
   function renderMateri(){
