@@ -496,7 +496,7 @@
       <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
       <div>
         <h1>Dashboard Admin</h1>
-        <p>Sanggar Mam Is Learning Hub · Admin v5.0</p>
+        <p>Sanggar Mam Is Learning Hub · Admin v5.3.0</p>
       </div>
     </div>
 
@@ -1051,7 +1051,7 @@
               <small>${esc(r["Jenjang"] || "")} ${esc(r["Kelas Sekolah"] || "")}</small>
             </td>
             <td>${esc(r["Nama Orang Tua"])}</td>
-            <td>${esc(r["No WA"])}</td>
+            <td>${renderNomorWa(r["No WA"],r["Nama Orang Tua"] || r["Nama Siswa"])}</td>
             <td>${esc(r["Program Terpilih"] || r["Program Dipilih"] || "-")}</td>
             <td>${rupiah(r["Total Tagihan"] || 0)}</td>
             <td>${badge(r["Status Pembayaran"] || "Belum Bayar")}<br><small>${rupiah(r["Nominal Dibayar"] || 0)}</small></td>
@@ -1088,7 +1088,7 @@
             <td>${esc(r["Nama Sekolah"] || "-")}<br><small>${esc(r["Jenjang"] || "")} ${esc(r["Kelas Sekolah"] || "")}</small></td>
             <td>${kelasAktif.length ? kelasAktif.map(k=>`<span class="badge badge-blue" style="margin:2px">${esc(k)}</span>`).join("") : "-"}</td>
             <td>${esc(r["Nama Orang Tua"])}</td>
-            <td>${esc(r["No WA"])}</td>
+            <td>${renderNomorWa(r["No WA"],r["Nama Orang Tua"] || r["Nama Siswa"])}</td>
             <td>${badge(r["Status Aktif"])}</td>
             <td><div class="actions">
               <button class="btn btn-light" onclick='openSiswaModal(${JSON.stringify(r)})'>Edit</button>
@@ -1122,7 +1122,7 @@
           <tr>
             <td>${esc(r["ID Pengajar"])}</td>
             <td>${esc(r["Nama Pengajar"])}</td>
-            <td>${esc(r["No WA"])}</td>
+            <td>${renderNomorWa(r["No WA"],r["Nama Pengajar"])}</td>
             <td>${badge(r["Status Aktif"])}</td>
             <td><button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button></td>
           </tr>
@@ -1791,6 +1791,16 @@ Sanggar Mam Is Learning Hub`;
   async function submitDynamicForm(event){
     event.preventDefault();
     const values = formValues();
+
+    if(Object.prototype.hasOwnProperty.call(values,"noWa") && String(values.noWa || "").trim()){
+      try{
+        values.noWa = normalisasiNomorWaNasional(values.noWa);
+      }catch(err){
+        showModalStatus(err.message,"err");
+        return;
+      }
+    }
+
     const btn = document.getElementById("btnSave");
     btn.disabled = true;
     btn.textContent = "Menyimpan...";
@@ -1903,6 +1913,15 @@ Sanggar Mam Is Learning Hub`;
         <select name="${attr(name)}" ${req}>${opts}</select></div>`;
     }
 
+    if(name==="noWa"){
+      return `<div class="field"><label>${esc(label)}${required?" *":""}</label>
+        <input name="${attr(name)}" type="tel" inputmode="numeric" autocomplete="tel"
+          placeholder="Contoh: 081234567890" value="${attr(val)}" ${req}
+          onblur="rapikanInputWa(this)">
+        <small style="color:var(--muted)">Boleh ditulis 08…, 8…, 62…, atau +62…. Sistem menyimpan sebagai 08…</small>
+      </div>`;
+    }
+
     return `<div class="field"><label>${esc(label)}${required?" *":""}</label>
       <input name="${attr(name)}" type="${attr(type)}" value="${attr(val)}" ${req}></div>`;
   }
@@ -1972,6 +1991,43 @@ Sanggar Mam Is Learning Hub`;
     `;
 
     document.getElementById("resultModal").classList.add("open");
+  }
+
+  function normalisasiNomorWaNasional(no){
+    let nomor = String(no || "").replace(/[^0-9]/g,"");
+    if(!nomor) return "";
+    if(nomor.startsWith("0062")) nomor = nomor.slice(4);
+    if(nomor.startsWith("62")) nomor = nomor.slice(2);
+    nomor = nomor.replace(/^0+/,"");
+    if(nomor.startsWith("8")) nomor = "0" + nomor;
+    if(!/^08\d{8,11}$/.test(nomor)){
+      throw new Error("Nomor WhatsApp belum valid. Gunakan nomor Indonesia, misalnya 081234567890.");
+    }
+    return nomor;
+  }
+
+  function rapikanInputWa(input){
+    const awal = String(input.value || "").trim();
+    if(!awal) return;
+    try{
+      input.value = normalisasiNomorWaNasional(awal);
+      input.setCustomValidity("");
+    }catch(err){
+      input.setCustomValidity(err.message);
+      input.reportValidity();
+    }
+  }
+
+  function renderNomorWa(no,nama=""){
+    const raw = String(no || "").trim();
+    if(!raw) return "-";
+    let nasional = raw;
+    try{ nasional = normalisasiNomorWaNasional(raw); }catch(e){}
+    const internasional = formatNomorWhatsApp(raw);
+    return `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span>${esc(nasional)}</span>
+      ${internasional ? `<a class="btn btn-green" style="padding:6px 8px;font-size:11px" href="https://wa.me/${attr(internasional)}" target="_blank" rel="noopener" title="WhatsApp ${attr(nama)}">💬 WA</a>` : ""}
+    </div>`;
   }
 
   function formatNomorWhatsApp(no){
