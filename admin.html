@@ -1064,6 +1064,27 @@
     ` : empty("Data pendaftaran tidak ditemukan.");
   }
 
+  function normNamaAkun(value){
+    return String(value || "").toLowerCase().replace(/\s+/g," ").trim();
+  }
+
+  function cariAkunSiswa(siswa){
+    return db.akun.find(a=>
+      String(a["Peran"]).toLowerCase()==="siswa" &&
+      (String(a["ID Siswa"])===String(siswa["ID Siswa"]) ||
+       normNamaAkun(a["Nama Siswa"])===normNamaAkun(siswa["Nama Siswa"]))
+    );
+  }
+
+  function cariAkunPengajar(pengajar){
+    return db.akun.find(a=>
+      String(a["Peran"]).toLowerCase()==="pengajar" &&
+      (String(a["ID Pengajar"])===String(pengajar["ID Pengajar"]) ||
+       String(a["ID Siswa"])===String(pengajar["ID Pengajar"]) ||
+       normNamaAkun(a["Nama Siswa"])===normNamaAkun(pengajar["Nama Pengajar"]))
+    );
+  }
+
   function renderSiswa(){
     const q = (document.getElementById("filterSiswa")?.value || "").toLowerCase();
     const statusFilter = document.getElementById("filterStatusSiswa")?.value || "";
@@ -1095,9 +1116,9 @@
               ${tidakAktif
                 ? `<button class="btn btn-red" onclick="hapusSiswaTidakAktif('${attr(r["ID Siswa"])}','${attr(r["Nama Siswa"])}')">Hapus</button>`
                 : (()=>{
-                    const akun=db.akun.find(a=>String(a["ID Siswa"])===String(r["ID Siswa"]) && String(a["Peran"]).toLowerCase()==="siswa");
+                    const akun=cariAkunSiswa(r);
                     return akun
-                      ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat Akun</button>`
+                      ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat / Edit Akun</button>`
                       : `<button class="btn btn-primary" onclick="buatAkun('${attr(r["ID Siswa"])}')">Buat Akun</button>`;
                   })()}
             </div></td>
@@ -1134,9 +1155,9 @@
             <td><div class="actions">
               <button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button>
               ${(()=>{
-                const akun=db.akun.find(a=>String(a["ID Pengajar"])===String(r["ID Pengajar"]) && String(a["Peran"]).toLowerCase()==="pengajar");
+                const akun=cariAkunPengajar(r);
                 return akun
-                  ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat Akun</button>`
+                  ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat / Edit Akun</button>`
                   : `<button class="btn btn-primary" onclick="buatAkunPengajar('${attr(r["ID Pengajar"])}')">Buat Akun</button>`;
               })()}
             </div></td>
@@ -1387,7 +1408,7 @@
             <td>${badge(r["Status Akun"])}</td>
             <td>${esc(r["Login Terakhir"] || "-")}</td>
             <td><div class="actions">
-              <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat Akun</button>
+              <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat / Edit Akun</button>
               <button class="btn btn-orange" onclick="resetPin('${attr(r["ID Akun"])}','${attr(r["Nama Siswa"])}')">Reset PIN</button>
             </div></td>
           </tr>
