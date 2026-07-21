@@ -802,7 +802,7 @@
 <div class="modal" id="resultModal">
   <div class="modal-card" style="width:min(520px,100%)">
     <div class="modal-head">
-      <h3>Informasi Akun Siswa</h3>
+      <h3 id="resultModalTitle">Informasi Akun Pengguna</h3>
       <button class="close" onclick="closeResultModal()">×</button>
     </div>
     <div id="resultContent"></div>
@@ -1388,7 +1388,10 @@
             <td>${esc(r["Target"])}</td>
             <td>${esc(r["ID Kelas"] || "-")}</td>
             <td>${badge(r["Status"])}</td>
-            <td><button class="btn btn-light" onclick='openPengumumanModal(${JSON.stringify(r)})'>Edit</button></td>
+            <td><div class="actions">
+              <button class="btn btn-light" onclick='openPengumumanModal(${JSON.stringify(r)})'>Edit</button>
+              <button class="btn btn-red" onclick="hapusPengumuman('${attr(r["ID Pengumuman"])}','${attr(r["Judul"])}')">Hapus</button>
+            </div></td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -1409,7 +1412,6 @@
             <td>${esc(r["Login Terakhir"] || "-")}</td>
             <td><div class="actions">
               <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat / Edit Akun</button>
-              <button class="btn btn-orange" onclick="resetPin('${attr(r["ID Akun"])}','${attr(r["Nama Siswa"])}')">Reset PIN</button>
             </div></td>
           </tr>
         `).join("")}</tbody>
@@ -1724,11 +1726,12 @@ Sanggar Mam Is Learning Hub`;
       namaSiswa:identitas.nama,
       namaPengajar:identitas.nama,
       username:akun["Username"],
-      pin:"",
+      pin:akun["PIN Akses"] || "",
+      pinAkses:akun["PIN Akses"] || "",
       peran:akun["Peran"],
       noWa:identitas.noWa,
       existingAccount:true,
-      message:"Akun sudah terdata. PIN lama tetap berlaku dan tidak dapat ditampilkan demi keamanan."
+      message:"Akun sudah terdata. Admin dapat mengecek atau mengedit akun tanpa membuat akun baru."
     });
   }
 
@@ -1900,6 +1903,11 @@ Sanggar Mam Is Learning Hub`;
       let action = "";
       let payload = values;
 
+      if(currentForm==="akunPengguna"){
+        action="simpanAkunPengguna";
+        payload.idAkun=editingData["ID Akun"];
+      }
+
       if(currentForm==="siswa"){
         if(String(payload.statusAktif).toLowerCase()==="aktif" && (!payload.idKelasList || !payload.idKelasList.length)){
           throw new Error("Pilih minimal satu kelas untuk siswa aktif.");
@@ -2029,8 +2037,7 @@ Sanggar Mam Is Learning Hub`;
     const peran = res.peran || (res.idPengajar ? "Pengajar" : "Siswa");
     const nama = res.namaPengajar || res.namaSiswa || "";
     const username = res.username || "";
-    const pin = res.pin || res.pinBaru || "";
-    const existing = !!res.existingAccount || !pin;
+    const pin = res.pin || res.pinAkses || res.pinBaru || "";
     let noWa = res.noWa || "";
 
     if(!noWa && res.idPengajar){
@@ -2051,28 +2058,28 @@ Sanggar Mam Is Learning Hub`;
       noWa
     };
 
+    const title=document.getElementById("resultModalTitle");
+    if(title) title.textContent=`Informasi Akun ${peran}`;
+
     document.getElementById("resultContent").innerHTML = `
       <div class="code-box">
-        <strong>${esc(res.message || "Informasi akun.")}</strong>
+        <strong>${esc(res.message || "Informasi akun tersimpan.")}</strong>
         <p>Peran: <b>${esc(peran)}</b></p>
         <p>Nama: <b>${esc(nama)}</b></p>
         <p>Username: <b>${esc(username)}</b></p>
-        <p>PIN: <b>${pin ? esc(pin) : "Tidak ditampilkan"}</b></p>
-        ${!pin ? `<p style="color:var(--orange);margin-bottom:0">PIN disimpan dalam bentuk terenkripsi. Bila lupa, gunakan tombol Reset PIN.</p>` : ""}
+        <p>PIN: <b>${pin ? esc(pin) : "Belum tersimpan untuk ditampilkan"}</b></p>
+        ${!pin ? `<p style="color:var(--orange);margin-bottom:0">Akun lama hanya memiliki PIN terenkripsi. Klik <b>Edit Akun</b> untuk menetapkan PIN yang dapat dicek admin.</p>` : ""}
         ${noWa ? `<p>WhatsApp: <b>${esc(noWa)}</b></p>` : ""}
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(${res.idAkun ? 3 : 2},1fr);gap:9px;margin-top:14px">
-        <button class="btn btn-light" type="button" onclick="salinInformasiAkun()">📋 Salin Akun</button>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px">
+        <button class="btn btn-light" type="button" onclick="salinInformasiAkun()" ${pin ? "" : "disabled"}>📋 Salin Akun</button>
         <button class="btn btn-green" type="button" onclick="kirimWhatsAppAkun()" ${noWa && pin ? "" : "disabled"}>💬 Kirim WhatsApp</button>
-        ${res.idAkun ? `<button class="btn btn-orange" type="button" onclick="closeResultModal();resetPin('${attr(res.idAkun)}','${attr(nama)}')">🔄 Reset PIN</button>` : ""}
+        <button class="btn btn-orange" type="button" onclick="editAkunPengguna('${attr(res.idAkun||"")}')">✏️ Edit Akun</button>
       </div>
 
       <p style="color:var(--muted);font-size:13px;margin-bottom:0">
-        ${pin
-          ? "Simpan atau kirimkan informasi ini sekarang. Setelah modal ditutup, PIN tidak dapat ditampilkan kembali."
-          : "Username dapat dilihat kapan saja. Untuk keamanan, PIN lama tidak dapat dibaca dan harus direset bila lupa."
-        }
+        Username dan PIN dapat dicek kembali oleh admin. Gunakan Edit Akun hanya bila perlu mengubah username, PIN, atau status akun.
       </p>
     `;
 
@@ -2244,6 +2251,35 @@ Sanggar Mam Is Learning Hub`;
       localStorage.removeItem("mamis_admin_user");
       showLogin();
     }
+  }
+
+
+  async function hapusPengumuman(id,judul){
+    if(!id) return;
+    if(!confirm(`Hapus pengumuman "${judul}"? Data yang dihapus tidak dapat dikembalikan.`)) return;
+    try{
+      const r=await jsonp("deletePengumuman",{id});
+      if(!r.status) throw new Error(r.message||"Pengumuman gagal dihapus.");
+      await loadBootstrap();
+      alert("Pengumuman berhasil dihapus.");
+    }catch(err){
+      alert(err.message||"Pengumuman gagal dihapus.");
+    }
+  }
+
+  function editAkunPengguna(idAkun){
+    const a=db.akun.find(x=>String(x["ID Akun"])===String(idAkun));
+    if(!a) return alert("Data akun tidak ditemukan.");
+    closeResultModal();
+    currentForm="akunPengguna";
+    editingData=a;
+    document.getElementById("modalTitle").textContent=`Edit Akun ${a["Peran"]||"Pengguna"}`;
+    document.getElementById("dynamicFields").innerHTML=`
+      ${field("username","Username","text",a["Username"]||"",true)}
+      ${field("pinAkses","PIN","text",a["PIN Akses"]||"",true)}
+      ${selectField("statusAkun","Status Akun",["Aktif","Tidak Aktif"],a["Status Akun"]||"Aktif",true)}
+      <div class="field full"><div class="summary">PIN ini akan disimpan agar dapat dicek kembali oleh admin dan sekaligus digunakan untuk login.</div></div>`;
+    document.getElementById("formModal").classList.add("open");
   }
 
   function openPage(page,button){
