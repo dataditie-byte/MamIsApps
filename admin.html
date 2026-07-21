@@ -1124,7 +1124,7 @@
             <td>${esc(r["Nama Pengajar"])}</td>
             <td>${renderNomorWa(r["No WA"],r["Nama Pengajar"])}</td>
             <td>${badge(r["Status Aktif"])}</td>
-            <td><button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button></td>
+            <td><button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button> <button class="btn btn-primary" onclick="buatAkunPengajar('${attr(r["ID Pengajar"])}')">Buat Akun</button></td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -1603,6 +1603,17 @@ Sanggar Mam Is Learning Hub`;
     }
   }
 
+
+  async function buatAkunPengajar(idPengajar){
+    try{
+      const res = await jsonp("buatAkunPengajar",{key:API_KEY,data:JSON.stringify({idPengajar})});
+      if(!res.status) throw new Error(res.message || "Gagal membuat akun pengajar.");
+      const teks = `Akun Portal Pengajar Sanggar Mam Is\nNama: ${res.namaPengajar}\nUsername: ${res.username}\nPIN: ${res.pin}\n\nSilakan login melalui halaman portal pengajar.`;
+      alert(teks);
+      await loadBootstrap();
+    }catch(err){ alert(err.message || "Gagal membuat akun pengajar."); }
+  }
+
   async function buatAkun(idSiswa){
     try{
       const res = await jsonp("buatAkunSiswa",{
@@ -1766,7 +1777,7 @@ Sanggar Mam Is Learning Hub`;
       fields:[
         field("judul","Judul","text",r?.["Judul"],true),
         field("tanggal","Tanggal","date",String(r?.["Tanggal"] || today()).slice(0,10)),
-        field("target","Target","select",r?.["Target"] || "Semua",true,["Semua","Siswa","Kelas"]),
+        field("target","Target","select",r?.["Target"] || "Semua",true,["Semua","Siswa","Pengajar","Kelas"]),
         field("idKelas","Kelas","select",r?.["ID Kelas"] || "",false,
           [{value:"",label:"Tidak khusus"}].concat(db.kelas.map(x=>({
             value:x["ID Kelas"],label:x["Nama Kelas"]
