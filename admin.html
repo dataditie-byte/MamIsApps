@@ -530,7 +530,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub</small>
+        <small>Admin Learning Hub v6.1</small>
       </div>
     </div>
 
@@ -548,7 +548,7 @@
       <button class="nav-btn" onclick="openPage('peserta',this)">👥 Peserta Kelas</button>
       <button class="nav-btn" onclick="openPage('materi',this)">📚 Materi</button>
       <button class="nav-btn" onclick="openPage('pengumuman',this)">📢 Pengumuman</button>
-      <button class="nav-btn" onclick="openPage('akun',this)">🔐 Akun Siswa</button>
+      <button class="nav-btn" onclick="openPage('akun',this)">🔐 Akun Pengguna</button>
       <button class="nav-btn" onclick="openPage('absensi',this)">🗓️ Absensi</button>
       <button class="nav-btn" onclick="openPage('pembayaran',this)">💳 Pembayaran</button>
       <button class="nav-btn" onclick="openPage('hasil',this)">📈 Hasil Latihan</button>
@@ -756,7 +756,7 @@
 
       <section class="page" id="page-akun">
         <div class="section-head">
-          <div><h3>Akun Siswa</h3><p>Username, status akun, dan reset PIN</p></div>
+          <div><h3>Akun Siswa & Pengajar</h3><p>Lihat username yang sudah terdata atau reset PIN bila lupa</p></div>
         </div>
         <div class="table-wrap" id="akunTable"></div>
       </section>
@@ -1092,7 +1092,14 @@
             <td>${badge(r["Status Aktif"])}</td>
             <td><div class="actions">
               <button class="btn btn-light" onclick='openSiswaModal(${JSON.stringify(r)})'>Edit</button>
-              ${tidakAktif ? `<button class="btn btn-red" onclick="hapusSiswaTidakAktif('${attr(r["ID Siswa"])}','${attr(r["Nama Siswa"])}')">Hapus</button>` : `<button class="btn btn-primary" onclick="buatAkun('${attr(r["ID Siswa"])}')">Buat Akun</button>`}
+              ${tidakAktif
+                ? `<button class="btn btn-red" onclick="hapusSiswaTidakAktif('${attr(r["ID Siswa"])}','${attr(r["Nama Siswa"])}')">Hapus</button>`
+                : (()=>{
+                    const akun=db.akun.find(a=>String(a["ID Siswa"])===String(r["ID Siswa"]) && String(a["Peran"]).toLowerCase()==="siswa");
+                    return akun
+                      ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat Akun</button>`
+                      : `<button class="btn btn-primary" onclick="buatAkun('${attr(r["ID Siswa"])}')">Buat Akun</button>`;
+                  })()}
             </div></td>
           </tr>`;
         }).join("")}</tbody>
@@ -1124,7 +1131,15 @@
             <td>${esc(r["Nama Pengajar"])}</td>
             <td>${renderNomorWa(r["No WA"],r["Nama Pengajar"])}</td>
             <td>${badge(r["Status Aktif"])}</td>
-            <td><button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button> <button class="btn btn-primary" onclick="buatAkunPengajar('${attr(r["ID Pengajar"])}')">Buat Akun</button></td>
+            <td><div class="actions">
+              <button class="btn btn-light" onclick='openPengajarModal(${JSON.stringify(r)})'>Edit</button>
+              ${(()=>{
+                const akun=db.akun.find(a=>String(a["ID Pengajar"])===String(r["ID Pengajar"]) && String(a["Peran"]).toLowerCase()==="pengajar");
+                return akun
+                  ? `<button class="btn btn-green" onclick="lihatAkun('${attr(akun["ID Akun"])}')">Lihat Akun</button>`
+                  : `<button class="btn btn-primary" onclick="buatAkunPengajar('${attr(r["ID Pengajar"])}')">Buat Akun</button>`;
+              })()}
+            </div></td>
           </tr>
         `).join("")}</tbody>
       </table>
@@ -1362,20 +1377,23 @@
   function renderAkun(){
     document.getElementById("akunTable").innerHTML = db.akun.length ? `
       <table>
-        <thead><tr><th>ID Akun</th><th>Siswa</th><th>Username</th><th>Peran</th><th>Status</th><th>Login Terakhir</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>ID Akun</th><th>Nama</th><th>Username</th><th>Peran</th><th>Status</th><th>Login Terakhir</th><th>Aksi</th></tr></thead>
         <tbody>${db.akun.map(r=>`
           <tr>
             <td>${esc(r["ID Akun"])}</td>
             <td>${esc(r["Nama Siswa"])}</td>
             <td><strong>${esc(r["Username"])}</strong></td>
-            <td>${esc(r["Peran"])}</td>
+            <td>${badge(r["Peran"])}</td>
             <td>${badge(r["Status Akun"])}</td>
             <td>${esc(r["Login Terakhir"] || "-")}</td>
-            <td><button class="btn btn-orange" onclick="resetPin('${attr(r["ID Akun"])}','${attr(r["Nama Siswa"])}')">Reset PIN</button></td>
+            <td><div class="actions">
+              <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat Akun</button>
+              <button class="btn btn-orange" onclick="resetPin('${attr(r["ID Akun"])}','${attr(r["Nama Siswa"])}')">Reset PIN</button>
+            </div></td>
           </tr>
         `).join("")}</tbody>
       </table>
-    ` : empty("Belum ada akun.");
+    ` : empty("Belum ada akun siswa atau pengajar.");
   }
 
   function renderAbsensi(){
@@ -1607,11 +1625,10 @@ Sanggar Mam Is Learning Hub`;
   async function buatAkunPengajar(idPengajar){
     try{
       const res = await jsonp("buatAkunPengajar",{key:API_KEY,data:JSON.stringify({idPengajar})});
-      if(!res.status) throw new Error(res.message || "Gagal membuat akun pengajar.");
-      const teks = `Akun Portal Pengajar Sanggar Mam Is\nNama: ${res.namaPengajar}\nUsername: ${res.username}\nPIN: ${res.pin}\n\nSilakan login melalui halaman portal pengajar.`;
-      alert(teks);
+      if(!res.status) throw new Error(res.message || "Gagal memproses akun pengajar.");
+      showAccountResult(res);
       await loadBootstrap();
-    }catch(err){ alert(err.message || "Gagal membuat akun pengajar."); }
+    }catch(err){ alert(err.message || "Gagal memproses akun pengajar."); }
   }
 
   async function buatAkun(idSiswa){
@@ -1630,8 +1647,13 @@ Sanggar Mam Is Learning Hub`;
   }
 
   async function resetPin(idAkun,nama){
+    const akun = db.akun.find(a=>String(a["ID Akun"])===String(idAkun));
     const pinBaru = prompt("Masukkan PIN baru 6 digit untuk " + nama + ". Kosongkan untuk PIN otomatis.");
     if(pinBaru === null) return;
+    if(pinBaru.trim() && !/^\d{6}$/.test(pinBaru.trim())){
+      alert("PIN harus terdiri dari 6 digit angka.");
+      return;
+    }
 
     try{
       const res = await jsonp("resetPin",{
@@ -1641,15 +1663,52 @@ Sanggar Mam Is Learning Hub`;
 
       if(!res.status) throw new Error(res.message || "Reset PIN gagal.");
 
+      const identitas = accountIdentity(akun || {});
       showAccountResult({
+        idAkun,
+        idSiswa:akun ? akun["ID Siswa"] : "",
+        idPengajar:akun ? akun["ID Pengajar"] : "",
         namaSiswa:nama,
-        username:"Tetap sama",
+        namaPengajar:nama,
+        username:akun ? akun["Username"] : "",
         pin:res.pinBaru,
-        message:"PIN berhasil direset."
+        peran:akun ? akun["Peran"] : "Siswa",
+        noWa:identitas.noWa,
+        message:"PIN berhasil direset. Username tetap sama."
       });
+      await loadBootstrap();
     }catch(err){
       alert(err.message || "Reset PIN gagal.");
     }
+  }
+
+  function accountIdentity(akun){
+    const peran=String(akun && akun["Peran"] || "Siswa");
+    if(peran.toLowerCase()==="pengajar"){
+      const p=db.pengajar.find(x=>String(x["ID Pengajar"])===String(akun["ID Pengajar"]));
+      return {nama:p ? p["Nama Pengajar"] : akun["Nama Siswa"],noWa:p ? p["No WA"] : ""};
+    }
+    const s=db.siswa.find(x=>String(x["ID Siswa"])===String(akun && akun["ID Siswa"]));
+    return {nama:s ? s["Nama Siswa"] : akun["Nama Siswa"],noWa:s ? s["No WA"] : ""};
+  }
+
+  function lihatAkun(idAkun){
+    const akun=db.akun.find(a=>String(a["ID Akun"])===String(idAkun));
+    if(!akun){ alert("Data akun tidak ditemukan."); return; }
+    const identitas=accountIdentity(akun);
+    showAccountResult({
+      idAkun:akun["ID Akun"],
+      idSiswa:akun["ID Siswa"],
+      idPengajar:akun["ID Pengajar"],
+      namaSiswa:identitas.nama,
+      namaPengajar:identitas.nama,
+      username:akun["Username"],
+      pin:"",
+      peran:akun["Peran"],
+      noWa:identitas.noWa,
+      existingAccount:true,
+      message:"Akun sudah terdata. PIN lama tetap berlaku dan tidak dapat ditampilkan demi keamanan."
+    });
   }
 
   function openSiswaModal(r=null){
@@ -1946,62 +2005,61 @@ Sanggar Mam Is Learning Hub`;
   }
 
   function showAccountResult(res){
-    const nama = res.namaSiswa || "";
+    const peran = res.peran || (res.idPengajar ? "Pengajar" : "Siswa");
+    const nama = res.namaPengajar || res.namaSiswa || "";
     const username = res.username || "";
     const pin = res.pin || res.pinBaru || "";
-
+    const existing = !!res.existingAccount || !pin;
     let noWa = res.noWa || "";
 
-    if(!noWa && res.idSiswa){
-      const siswa = db.siswa.find(x =>
-        String(x["ID Siswa"]) === String(res.idSiswa)
-      );
-      if(siswa) noWa = siswa["No WA"] || "";
+    if(!noWa && res.idPengajar){
+      const p=db.pengajar.find(x=>String(x["ID Pengajar"])===String(res.idPengajar));
+      if(p) noWa=p["No WA"] || "";
     }
-
-    if(!noWa && nama){
-      const siswa = db.siswa.find(x =>
-        String(x["Nama Siswa"]).toLowerCase() === String(nama).toLowerCase()
-      );
-      if(siswa) noWa = siswa["No WA"] || "";
+    if(!noWa && res.idSiswa){
+      const s=db.siswa.find(x=>String(x["ID Siswa"])===String(res.idSiswa));
+      if(s) noWa=s["No WA"] || "";
     }
 
     lastAccountResult = {
+      idAkun:res.idAkun || "",
       namaSiswa:nama,
       username,
       pin,
+      peran,
       noWa
     };
 
     document.getElementById("resultContent").innerHTML = `
       <div class="code-box">
-        <strong>${esc(res.message || "Akun berhasil dibuat.")}</strong>
-        ${nama ? `<p>Nama siswa: <b>${esc(nama)}</b></p>` : ""}
+        <strong>${esc(res.message || "Informasi akun.")}</strong>
+        <p>Peran: <b>${esc(peran)}</b></p>
+        <p>Nama: <b>${esc(nama)}</b></p>
         <p>Username: <b>${esc(username)}</b></p>
-        <p>PIN: <b>${esc(pin)}</b></p>
-        ${noWa ? `<p>WhatsApp orang tua: <b>${esc(noWa)}</b></p>` : ""}
+        <p>PIN: <b>${pin ? esc(pin) : "Tidak ditampilkan"}</b></p>
+        ${!pin ? `<p style="color:var(--orange);margin-bottom:0">PIN disimpan dalam bentuk terenkripsi. Bila lupa, gunakan tombol Reset PIN.</p>` : ""}
+        ${noWa ? `<p>WhatsApp: <b>${esc(noWa)}</b></p>` : ""}
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px">
-        <button class="btn btn-light" type="button" onclick="salinInformasiAkun()">
-          📋 Salin Akun
-        </button>
-
-        <button class="btn btn-green" type="button" onclick="kirimWhatsAppAkun()"
-          ${noWa ? "" : "disabled"}>
-          💬 Kirim WhatsApp
-        </button>
+      <div style="display:grid;grid-template-columns:repeat(${res.idAkun ? 3 : 2},1fr);gap:9px;margin-top:14px">
+        <button class="btn btn-light" type="button" onclick="salinInformasiAkun()">📋 Salin Akun</button>
+        <button class="btn btn-green" type="button" onclick="kirimWhatsAppAkun()" ${noWa && pin ? "" : "disabled"}>💬 Kirim WhatsApp</button>
+        ${res.idAkun ? `<button class="btn btn-orange" type="button" onclick="closeResultModal();resetPin('${attr(res.idAkun)}','${attr(nama)}')">🔄 Reset PIN</button>` : ""}
       </div>
 
       <p style="color:var(--muted);font-size:13px;margin-bottom:0">
-        ${noWa
-          ? "Klik Kirim WhatsApp untuk membuka pesan otomatis kepada orang tua/wali."
-          : "Nomor WhatsApp orang tua belum ditemukan. Gunakan tombol Salin Akun."
+        ${pin
+          ? "Simpan atau kirimkan informasi ini sekarang. Setelah modal ditutup, PIN tidak dapat ditampilkan kembali."
+          : "Username dapat dilihat kapan saja. Untuk keamanan, PIN lama tidak dapat dibaca dan harus direset bila lupa."
         }
       </p>
     `;
 
     document.getElementById("resultModal").classList.add("open");
+  }
+
+  function closeResultModal(){
+    document.getElementById("resultModal").classList.remove("open");
   }
 
   function normalisasiNomorWaNasional(no){
@@ -2056,23 +2114,23 @@ Sanggar Mam Is Learning Hub`;
   function teksInformasiAkun(){
     if(!lastAccountResult) return "";
 
-    const nama = lastAccountResult.namaSiswa || "Ananda";
+    const nama = lastAccountResult.namaSiswa || "Pengguna";
     const username = lastAccountResult.username || "-";
-    const pin = lastAccountResult.pin || "-";
+    const pin = lastAccountResult.pin || "";
+    const peran = lastAccountResult.peran || "Siswa";
 
     const baseUrl = location.href.substring(0,location.href.lastIndexOf("/")+1);
-    const portalUrl = baseUrl + "siswa.html";
+    const portalUrl = baseUrl + (String(peran).toLowerCase()==="pengajar" ? "pengajar.html" : "siswa.html");
 
-    return `Assalamu'alaikum Bapak/Ibu.
+    return `Assalamu'alaikum.
 
-Pendaftaran Ananda ${nama} di Sanggar Mam Is telah diterima.
+Berikut akun Portal ${peran} Sanggar Mam Is:
 
-Berikut akun Portal Siswa:
-
+Nama: ${nama}
 Username: ${username}
-PIN: ${pin}
+${pin ? `PIN: ${pin}` : "PIN: gunakan PIN lama atau hubungi admin untuk reset PIN"}
 
-Portal siswa:
+Portal ${peran}:
 ${portalUrl}
 
 Mohon simpan username dan PIN ini serta tidak membagikannya kepada pihak lain.
@@ -2183,7 +2241,7 @@ Sanggar Mam Is Learning Hub`;
       peserta:["Peserta Kelas & Penilaian","Monitoring kelas dan penilaian triwulan"],
       materi:["Materi","Konten belajar siswa"],
       pengumuman:["Pengumuman","Informasi untuk siswa"],
-      akun:["Akun Siswa","Username dan reset PIN"],
+      akun:["Akun Pengguna","Username siswa dan pengajar serta reset PIN"],
       absensi:["Absensi","Riwayat kehadiran"],
       pembayaran:["Pembayaran","Tagihan dan pelunasan"],
       hasil:["Hasil Latihan","Nilai dan perkembangan belajar"]
