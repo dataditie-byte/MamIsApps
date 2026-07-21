@@ -736,6 +736,22 @@
 
         <div id="pesertaRekapKelas" class="card" style="margin-bottom:14px"></div>
         <div class="table-wrap" id="pesertaTable"></div>
+
+        <div class="section-head" style="margin-top:24px">
+          <div>
+            <h3>Riwayat Penilaian</h3>
+            <p>Seluruh nilai dari Admin maupun Pengajar. Data dapat diedit atau dihapus.</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <input id="filterRiwayatNilai" placeholder="Cari siswa, kelas, pengajar, atau periode..." oninput="renderRiwayatPenilaian()">
+          <select id="filterSumberNilai" onchange="renderRiwayatPenilaian()">
+            <option value="">Semua Sumber</option>
+            <option value="Admin">Admin</option>
+            <option value="Pengajar">Pengajar</option>
+          </select>
+        </div>
+        <div class="table-wrap" id="riwayatPenilaianTable"></div>
       </section>
 
       <section class="page" id="page-materi">
@@ -1330,6 +1346,8 @@
         }).join("")}</tbody>
       </table>
     ` : empty("Belum ada peserta yang sesuai dengan filter.");
+
+    renderRiwayatPenilaian();
   }
 
   function openPenilaianModal(peserta,nilai=null){
@@ -1356,6 +1374,104 @@
         field("catatan","Catatan Pengajar","textarea",nilai?.["Catatan"] || "",true)
       ]
     });
+  }
+
+
+  function cariPesertaUntukNilai(nilai){
+    return (db.peserta || []).find(p=>
+      String(p["ID Peserta"])===String(nilai["ID Peserta"]) ||
+      (
+        String(p["ID Siswa"])===String(nilai["ID Siswa"]) &&
+        String(p["ID Kelas"])===String(nilai["ID Kelas"])
+      )
+    ) || {
+      "ID Peserta":nilai["ID Peserta"],
+      "ID Siswa":nilai["ID Siswa"],
+      "Nama Siswa":nilai["Nama Siswa"],
+      "ID Kelas":nilai["ID Kelas"],
+      "Nama Kelas":nilai["Nama Kelas"],
+      "Status Aktif":"Aktif"
+    };
+  }
+
+  function renderRiwayatPenilaian(){
+    const target=document.getElementById("riwayatPenilaianTable");
+    if(!target) return;
+
+    const kata=String(document.getElementById("filterRiwayatNilai")?.value || "").trim().toLowerCase();
+    const sumber=String(document.getElementById("filterSumberNilai")?.value || "").trim().toLowerCase();
+
+    const rows=(db.penilaian || []).slice().sort((a,b)=>{
+      const da=String(a["Diperbarui"] || a["Tanggal Input"] || "");
+      const dbb=String(b["Diperbarui"] || b["Tanggal Input"] || "");
+      return dbb.localeCompare(da);
+    }).filter(r=>{
+      const haystack=[
+        r["Nama Siswa"],r["Nama Kelas"],r["Periode"],r["Nama Pengajar"],
+        r["Sumber Input"],r["Nilai"],r["Catatan"]
+      ].join(" ").toLowerCase();
+      if(kata && !haystack.includes(kata)) return false;
+      if(sumber && String(r["Sumber Input"] || "").toLowerCase()!==sumber) return false;
+      return true;
+    });
+
+    target.innerHTML=rows.length ? `
+      <table>
+        <thead>
+          <tr>
+            <th>Periode</th><th>Siswa</th><th>Kelas</th><th>Nilai</th>
+            <th>Catatan</th><th>Pengajar</th><th>Sumber</th><th>Diperbarui</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>${rows.map(r=>`
+          <tr>
+            <td>${esc(r["Periode"] || (`${r["Tahun"]||"-"} - Triwulan ${r["Triwulan"]||"-"}`))}</td>
+            <td><strong>${esc(r["Nama Siswa"] || "-")}</strong></td>
+            <td>${esc(r["Nama Kelas"] || "-")}</td>
+            <td><strong>${esc(r["Nilai"] ?? "-")}</strong></td>
+            <td style="max-width:280px">${esc(r["Catatan"] || "-")}</td>
+            <td>${esc(r["Nama Pengajar"] || "-")}</td>
+            <td>${badge(r["Sumber Input"] || "-")}</td>
+            <td>${esc(r["Diperbarui"] || r["Tanggal Input"] || "-")}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-light" onclick='editRiwayatPenilaian(${JSON.stringify(r)})'>Edit</button>
+                <button class="btn btn-danger" onclick='hapusRiwayatPenilaian(${JSON.stringify(r["ID Penilaian"])},${JSON.stringify(r["Nama Siswa"] || "")})'>Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `).join("")}</tbody>
+      </table>
+    ` : empty("Belum ada riwayat penilaian.");
+  }
+
+  function editRiwayatPenilaian(nilai){
+    const peserta=cariPesertaUntukNilai(nilai);
+    const tahun=document.getElementById("filterTahunNilai");
+    const tri=document.getElementById("filterTriwulanNilai");
+    if(tahun){
+      if(![...tahun.options].some(o=>String(o.value)===String(nilai["Tahun"]))){
+        tahun.insertAdjacentHTML("beforeend",`<option value="${esc(nilai["Tahun"])}">Tahun ${esc(nilai["Tahun"])}</option>`);
+      }
+      tahun.value=String(nilai["Tahun"] || tahun.value);
+    }
+    if(tri) tri.value=String(nilai["Triwulan"] || tri.value);
+    openPenilaianModal(peserta,nilai);
+  }
+
+  async function hapusRiwayatPenilaian(idPenilaian,nama){
+    if(!confirm(`Hapus penilaian ${nama || "ini"}? Nilai akan hilang dari Admin, Portal Pengajar, dan Portal Siswa.`)) return;
+    try{
+      const res=await jsonp("hapusPenilaianAdmin",{
+        key:API_KEY,
+        data:JSON.stringify({idPenilaian})
+      });
+      if(!res.status) throw new Error(res.message || "Penilaian gagal dihapus.");
+      toast(res.message || "Penilaian berhasil dihapus.");
+      await loadData();
+    }catch(e){
+      alert(e.message || "Penilaian gagal dihapus.");
+    }
   }
 
   function renderMateri(){
