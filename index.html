@@ -1,3 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b63">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png?v=9">
+<link rel="manifest" href="manifest.json?v=9">
+<link rel="icon" href="logo-mam-is.png">
+<title>Sanggar Mam Is Learning Hub</title>
+<style>
+:root{--navy:#173b63;--blue:#2f80ed;--green:#16a34a;--orange:#f97316;--red:#dc2626;--ink:#14213d;--muted:#64748b;--line:#dbe4ef;--bg:#f6f9fc;--shadow:0 10px 30px rgba(23,59,99,.12)}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}.container{width:min(1120px,calc(100% - 28px));margin:auto}.top{position:sticky;top:0;z-index:20;background:white;border-bottom:1px solid var(--line)}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;color:var(--navy)}.brand img{width:48px;height:48px;object-fit:contain}.menu{display:flex;gap:14px;align-items:center;font-weight:700}.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;cursor:pointer;display:inline-flex;justify-content:center;align-items:center}.btn-primary{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff}.btn-green{background:var(--green);color:#fff}.btn-light{background:white;color:var(--navy);border:1px solid var(--line)}.hero{background:linear-gradient(135deg,#173b63,#2f80ed);color:#fff;padding:65px 0;border-radius:0 0 35px 35px}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}.hero h1{font-size:clamp(38px,6vw,64px);line-height:1.05;margin:0 0 14px}.hero p{font-size:18px;color:#e7f1ff}.hero-card,.card,.form-card{background:white;color:var(--ink);border-radius:22px;padding:22px;box-shadow:var(--shadow)}.hero-card h3{margin-top:0;color:var(--navy);font-size:24px}.hero-card li{margin:9px 0}.card p{color:var(--muted);margin-bottom:0}section{padding:58px 0}.section-head{text-align:center;max-width:740px;margin:0 auto 28px}.section-head h2{color:var(--navy);font-size:clamp(28px,4vw,40px);margin:0 0 8px}.grid{display:grid;gap:16px}.grid-3{grid-template-columns:repeat(3,1fr)}.program h3{margin:0;color:var(--navy)}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eaf4ff;color:var(--navy);font-size:12px;font-weight:800;margin:8px 5px 8px 0}.price{font-size:21px;font-weight:900;color:var(--green);margin-top:12px}.register{display:grid;grid-template-columns:.8fr 1.2fr;gap:22px;align-items:start}.info{background:linear-gradient(135deg,#173b63,#2f80ed);color:#fff;border-radius:24px;padding:25px;position:sticky;top:90px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.field{display:flex;flex-direction:column;gap:6px}.full{grid-column:1/-1}label{font-size:13px;font-weight:800;color:var(--navy)}input,select,textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#fff}textarea{min-height:90px}.class-list{display:grid;gap:9px}.class-choice{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.class-choice input{width:auto;margin-top:4px}.summary{background:#f0f7ff;border:1px solid #cfe4fb;border-radius:15px;padding:14px}.summary-row{display:flex;justify-content:space-between;gap:10px;margin:6px 0}.summary-total{font-size:20px;font-weight:900;color:var(--navy);border-top:1px solid #cfe4fb;padding-top:10px;margin-top:10px}.status{display:none;margin-top:12px;padding:12px;border-radius:12px;font-weight:700}.status.ok{display:block;background:#dcfce7;color:#166534}.status.err{display:block;background:#fee2e2;color:#991b1b}.status.wait{display:block;background:#ffedd5;color:#9a3412}.empty{text-align:center;padding:25px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);background:#fff}footer{background:#0f2742;color:#dbeafe;padding:30px 0;text-align:center}@media(max-width:850px){.hero-grid,.register{grid-template-columns:1fr}.grid-3{grid-template-columns:repeat(2,1fr)}.info{position:static}.menu{display:none}}@media(max-width:620px){.grid-3,.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.hero{padding:48px 0}footer .container>div:first-child{grid-template-columns:1fr!important}.menu{display:none!important}#installBtn{width:100%}}
+
+.skeleton-card{min-height:190px;position:relative;overflow:hidden}
+.skeleton-line{height:14px;border-radius:8px;background:#e8eef5;margin:12px 0}
+.skeleton-line.short{width:45%}.skeleton-line.medium{width:70%}
+.skeleton-card:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:shine 1.35s infinite}
+@keyframes shine{100%{transform:translateX(100%)}}
+.sync-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:6px}
+.sync-dot.ok{background:#16a34a}.sync-dot.offline{background:#64748b}
+
+</style>
+</head>
+<body>
+<header class="top"><div class="container nav"><a class="brand" href="#"><img src="logo-mam-is.png" alt="Logo">Sanggar Mam Is</a><nav class="menu"><a href="#beranda">Beranda</a><a href="#keunggulan">Keunggulan</a><a href="#program">Program</a><a href="#cara-daftar">Cara Daftar</a><a href="#daftar">Pendaftaran</a><a class="btn btn-primary" href="siswa.html">Portal Siswa</a></nav></div></header>
+
+<section class="hero" id="beranda"><div class="container hero-grid"><div><div style="display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:16px">Belajar Lebih Terarah dan Menyenangkan</div><h1>Sanggar Mam Is Learning Hub</h1><p>Ruang belajar digital untuk siswa yang ingin memahami materi, berlatih soal, mengikuti kelas, dan memantau perkembangan belajar dalam satu aplikasi yang mudah digunakan.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-light" href="#daftar">Daftar Sekarang</a><a class="btn btn-green" href="siswa.html">Masuk Portal Siswa</a><a class="btn btn-light" href="#program">Lihat Program</a></div></div><div class="hero-card"><h3>Keunggulan Sanggar Mam Is</h3><ul><li>Materi terarah sesuai kelas dan jenjang</li><li>Latihan soal dan CBT bertahap</li><li>Pendampingan belajar yang ramah</li><li>Nilai, absensi, dan perkembangan tersimpan rapi</li><li>Dapat diakses melalui ponsel maupun komputer</li></ul></div></div></section>
+
+<section id="keunggulan"><div class="container"><div class="section-head"><h2>Belajar Bukan Sekadar Mengerjakan Soal</h2><p>Sanggar Mam Is membantu siswa membangun pemahaman, kebiasaan belajar, kepercayaan diri, dan kesiapan menghadapi tantangan akademik.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">📚 Materi Terarah</h3><p>Materi disusun sesuai jenjang, kelas, dan kebutuhan belajar siswa.</p></article><article class="card"><h3 style="color:var(--navy)">🧠 Latihan Bertahap</h3><p>Latihan soal dibuat dari tingkat dasar hingga tantangan lanjutan.</p></article><article class="card"><h3 style="color:var(--navy)">📈 Perkembangan Terpantau</h3><p>Nilai, absensi, materi, dan aktivitas belajar tersimpan rapi.</p></article></div></div></section>
+<section id="program"><div class="container"><div class="section-head"><h2>Program Belajar</h2><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p><div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
+<p id="serverStatus" style="font-size:13px;color:var(--muted);margin:0">Memuat seluruh program kelas...</p>
+<button type="button" class="btn btn-light" id="refreshKelasBtn" onclick="refreshSemuaKelas()" style="padding:8px 12px;font-size:13px">↻ Perbarui Semua Kelas</button>
+<button type="button" class="btn btn-light" onclick="perbaikiAplikasi()" style="padding:8px 12px;font-size:13px">Perbaiki Tampilan</button>
+</div></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
+
+<section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
+<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Biaya pendaftaran siswa baru: Rp30.000.</b></p></aside>
+
+<div class="form-card"><form id="formDaftar" onsubmit="kirim(event)"><div class="form-grid">
+<div class="field"><label>Nama siswa *</label><input id="namaSiswa" required></div>
+<div class="field"><label>Jenis kelamin</label><select id="jenisKelamin"><option value="">Pilih</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+<div class="field"><label>Jenjang *</label><select id="jenjang" required><option value="">Pilih</option><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select></div>
+<div class="field"><label>Kelas sekolah</label><input id="kelasSekolah" placeholder="Contoh: Kelas X"></div>
+<div class="field"><label>Nama sekolah</label><input id="namaSekolah"></div>
+<div class="field"><label>Bulan mulai *</label><input id="bulanMulai" type="month" required></div>
+<div class="field"><label>Nama orang tua/wali *</label><input id="namaOrtu" required></div>
+<div class="field"><label>Nomor WhatsApp *</label><input id="noWa" required inputmode="numeric"></div>
+<div class="field full"><label>Alamat</label><textarea id="alamat"></textarea></div>
+
+<div class="field full"><label>Pilih kelas *</label><div class="class-list" id="kelasChecklist"><div class="empty">Memuat kelas...</div></div></div>
+<div class="field full"><div class="summary" id="ringkasan"><div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>Rp30.000</b></div><div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div><div class="summary-row summary-total"><span>Total pembayaran awal</span><span id="totalText">Rp30.000</span></div></div></div>
+
+<div class="field"><label>Metode pembayaran</label><select id="metodeBayar"><option>Transfer Bank</option><option>QRIS</option><option>Tunai</option></select></div>
+<div class="field"><label>Nama pengirim</label><input id="namaPengirim"></div>
+<div class="field"><label>Tanggal pembayaran *</label><input id="tanggalBayar" type="date" required></div>
+<div class="field"><label>Nominal dibayar *</label><input id="nominalDibayar" type="number" min="0" required></div>
+<div class="field full"><div class="summary"><b>Bukti pembayaran dikirim melalui WhatsApp setelah formulir berhasil disimpan.</b><br><small>WhatsApp akan terbuka dengan pesan otomatis. Lampirkan foto bukti transfer pada percakapan tersebut.</small></div></div>
+<div class="field full"><label>Catatan kebutuhan belajar</label><textarea id="catatan"></textarea></div>
+<div class="field full"><button class="btn btn-primary" style="width:100%" id="btnKirim">Kirim Pendaftaran</button><div class="status" id="status"></div></div>
+</div></form></div></div></section>
+
+<footer>
+<div class="container">
+<div style="display:grid;grid-template-columns:1.3fr .7fr .7fr;gap:22px;text-align:left;align-items:start">
+<div>
+<h3 style="margin:0 0 8px;color:white">Sanggar Mam Is Learning Hub</h3>
+<p style="margin:0;color:#dbeafe">
+Belajar, berlatih, dan bertumbuh bersama melalui pendampingan
+yang ramah, terarah, dan mudah diakses.
+</p>
+</div>
+
+<div>
+<h4 style="margin:0 0 8px;color:white">Menu</h4>
+<p style="margin:6px 0"><a href="#program">Program Belajar</a></p>
+<p style="margin:6px 0"><a href="#daftar">Pendaftaran</a></p>
+<p style="margin:6px 0"><a href="siswa.html">Portal Siswa</a></p>
 </div>
 
 <div>
