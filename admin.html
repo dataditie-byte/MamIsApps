@@ -533,7 +533,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v6.6</small>
+        <small>Admin Learning Hub v6.6.1</small>
       </div>
     </div>
 
@@ -875,6 +875,26 @@
   </div>
 </div>
 
+
+
+<div id="appToast"
+     role="status"
+     aria-live="polite"
+     style="
+       display:none;
+       position:fixed;
+       right:22px;
+       bottom:22px;
+       z-index:9999;
+       max-width:380px;
+       padding:14px 18px;
+       border-radius:14px;
+       background:#166534;
+       color:#fff;
+       font-weight:700;
+       box-shadow:0 12px 32px rgba(15,39,66,.28);
+     ">
+</div>
 
 <div class="modal" id="jadwalDetailModal">
   <div class="modal-box" style="max-width:780px">
@@ -1709,7 +1729,7 @@
       openJadwalDetail(idJadwal);
       toast(r.message||"Peserta berhasil ditambahkan.");
     }catch(e){
-      alert(e.message||"Peserta gagal ditambahkan.");
+      toast(e.message||"Peserta gagal ditambahkan.","error");
     }
   }
 
@@ -1729,7 +1749,7 @@
       openJadwalDetail(idJadwal);
       toast(r.message||"Peserta berhasil dikeluarkan.");
     }catch(e){
-      alert(e.message||"Peserta gagal dikeluarkan.");
+      toast(e.message||"Peserta gagal dikeluarkan.","error");
     }
   }
 
@@ -1748,7 +1768,7 @@
       setTabKelasJadwal("daftar");
       toast(r.message||"Jadwal berhasil dihapus.");
     }catch(e){
-      alert(e.message||"Jadwal gagal dihapus.");
+      toast(e.message||"Jadwal gagal dihapus.","error");
     }
   }
 
