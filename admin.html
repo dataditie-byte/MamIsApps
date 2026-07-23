@@ -485,11 +485,7 @@
       .toolbar input,.toolbar select{width:100%}
       .field.full{grid-column:auto}
     }
-  
-.schedule-legend{display:flex;gap:12px;flex-wrap:wrap}
-#papanJadwal td{vertical-align:top}
-#kelasDetailModal .card{box-shadow:none;border:1px solid var(--line)}
-</style>
+  </style>
 </head>
 
 <body>
@@ -534,7 +530,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v8.1</small>
+        <small>Admin Learning Hub v6.1</small>
       </div>
     </div>
 
@@ -548,7 +544,7 @@
       <button class="nav-btn" onclick="openPage('pendaftaran',this)">📝 Pendaftaran</button>
       <button class="nav-btn" onclick="openPage('siswa',this)">👨‍🎓 Siswa</button>
       <button class="nav-btn" onclick="openPage('pengajar',this)">👩‍🏫 Pengajar</button>
-      <button class="nav-btn" onclick="openPage('kelas',this)">🗓️ Kelas & Jadwal</button>
+      <button class="nav-btn" onclick="openPage('kelas',this)">🎓 Kelas</button>
       <button class="nav-btn" onclick="openPage('peserta',this)">👥 Peserta Kelas</button>
       <button class="nav-btn" onclick="openPage('materi',this)">📚 Materi</button>
       <button class="nav-btn" onclick="openPage('pengumuman',this)">📢 Pengumuman</button>
@@ -688,48 +684,10 @@
 
       <section class="page" id="page-kelas">
         <div class="section-head">
-          <div><h3>Paket, Kelas & Jadwal</h3><p>Paket Program adalah master pendaftaran dan harga. Kelas Jadwal hanya mengatur hari, jam, ruang, pengajar, dan peserta.</p></div>
-          <div class="actions">
-            <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
-            <button class="btn btn-light" onclick="pulihkanHargaPaket()">↻ Pulihkan Harga Lama</button>
-            <button class="btn btn-light" onclick="sinkronJadwalKelas()">↻ Sinkron Jadwal</button>
-            <button class="btn btn-primary" onclick="openKelasModal()">+ Kelas & Jadwal</button>
-          </div>
+          <div><h3>Data Kelas</h3><p>Program, jadwal, pengajar, dan biaya</p></div>
+          <button class="btn btn-primary" onclick="openKelasModal()">+ Tambah Kelas</button>
         </div>
-
-        <div class="toolbar">
-          <button class="btn btn-primary" id="tabJadwalBtn" onclick="setKelasTab('jadwal')">Papan Jadwal</button>
-          <button class="btn btn-light" id="tabKelasBtn" onclick="setKelasTab('kelas')">Daftar Kelas</button>
-          <button class="btn btn-light" id="tabPaketBtn" onclick="setKelasTab('paket')">Paket Program</button>
-          <select id="jadwalHari" onchange="renderPapanJadwal()">
-            <option>Senin</option><option>Selasa</option><option>Rabu</option>
-            <option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
-          </select>
-        </div>
-
-        <div id="kelasTabJadwal">
-          <div class="card" style="margin-bottom:14px;background:#eff6ff">
-            <strong>Cara memakai:</strong>
-            1) Pastikan Paket Program sudah tersedia,
-            2) klik kotak ruang kosong untuk membuat kelas,
-            3) klik kelas yang sudah dibuat untuk menempatkan peserta.
-          </div>
-          <div class="card" style="margin-bottom:14px">
-            <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px">
-              <span>🟢 Tersedia</span><span>🟡 Hampir penuh</span>
-              <span>🔴 Penuh</span><span>⚪ Ruang masih kosong</span>
-            </div>
-          </div>
-          <div id="papanJadwal"></div>
-        </div>
-
-        <div id="kelasTabKelas" style="display:none">
-          <div class="table-wrap" id="kelasTable"></div>
-        </div>
-
-        <div id="kelasTabPaket" style="display:none">
-          <div class="table-wrap" id="paketTable"></div>
-        </div>
+        <div class="table-wrap" id="kelasTable"></div>
       </section>
 
       <section class="page" id="page-peserta">
@@ -867,24 +825,6 @@
   </div>
 </div>
 
-
-
-
-<div id="appToast" role="status" aria-live="polite"
-     style="display:none;position:fixed;right:22px;bottom:22px;z-index:9999;
-            max-width:380px;padding:14px 18px;border-radius:14px;
-            background:#173b63;color:#fff;font-weight:700;
-            box-shadow:0 12px 32px rgba(15,39,66,.28)">
-</div>
-
-<div class="modal" id="kelasDetailModal">
-  <div class="modal-box" style="max-width:760px">
-    <button class="modal-close" onclick="closeKelasDetail()">×</button>
-    <h3 id="kelasDetailTitle">Detail Kelas</h3>
-    <div id="kelasDetailBody"></div>
-  </div>
-</div>
-
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
   const API_KEY = "MAMIS-2026";
@@ -1007,7 +947,6 @@
       db = {
         siswa:res.siswa || [],
         pengajar:res.pengajar || [],
-        paket:res.paket || [],
         kelas:res.kelas || [],
         peserta:res.peserta || [],
         penilaian:res.penilaian || [],
@@ -1041,9 +980,7 @@
     renderPendaftaran();
     renderSiswa();
     renderPengajar();
-    renderPaket();
     renderKelas();
-    renderPapanJadwal();
     renderPeserta();
     renderMateri();
     renderPengumuman();
@@ -1246,215 +1183,24 @@
     ` : empty("Belum ada pengajar.");
   }
 
-  let kelasTabAktif="jadwal";
-
-  function setKelasTab(tab){
-    kelasTabAktif=tab;
-    ["jadwal","kelas","paket"].forEach(n=>{
-      const box=document.getElementById("kelasTab"+n.charAt(0).toUpperCase()+n.slice(1));
-      if(box) box.style.display=n===tab?"block":"none";
-      const btn=document.getElementById("tab"+n.charAt(0).toUpperCase()+n.slice(1)+"Btn");
-      if(btn) btn.className="btn "+(n===tab?"btn-primary":"btn-light");
-    });
-    if(tab==="jadwal") renderPapanJadwal();
-    if(tab==="kelas") renderKelas();
-    if(tab==="paket") renderPaket();
-  }
-
-  function renderPaket(){
-    const el=document.getElementById("paketTable");
-    if(!el) return;
-    const rows=db.paket||[];
-    el.innerHTML=rows.length?`
-      <table>
-        <thead><tr><th>ID</th><th>Nama Paket</th><th>Jenjang</th><th>Kategori</th><th>Biaya</th><th>Status</th><th>Aksi</th></tr></thead>
-        <tbody>${rows.map(r=>`
-          <tr>
-            <td>${esc(r["ID Paket"])}</td>
-            <td><strong>${esc(r["Nama Paket"])}</strong><br><small>${esc(r["Deskripsi"]||"")}</small></td>
-            <td>${esc(r["Jenjang"]||"-")}</td>
-            <td>${esc(r["Kategori"]||"-")}</td>
-            <td>${rupiah(r["Biaya Bulanan"]||0)}</td>
-            <td>${badge(r["Status Paket"]||"Aktif")}</td>
-            <td><div class="actions">
-              <button class="btn btn-light" onclick='openPaketModal(${JSON.stringify(r)})'>Edit</button>
-              <button class="btn btn-danger" onclick='hapusPaket(${JSON.stringify(r["ID Paket"])},${JSON.stringify(r["Nama Paket"])})'>Hapus</button>
-            </div></td>
-          </tr>`).join("")}</tbody>
-      </table>`:empty("Belum ada paket program.");
-  }
-
-  function jumlahPesertaKelas(idKelas){
-    return (db.peserta||[]).filter(p=>
-      String(p["ID Kelas"])===String(idKelas) &&
-      ["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase())
-    ).length;
-  }
-
   function renderKelas(){
-    const el=document.getElementById("kelasTable");
-    if(!el) return;
-    el.innerHTML = db.kelas.length ? `
+    document.getElementById("kelasTable").innerHTML = db.kelas.length ? `
       <table>
-        <thead><tr><th>ID</th><th>Kelas</th><th>Paket</th><th>Hari/Jam</th><th>Ruang</th><th>Pengajar</th><th>Kapasitas</th><th>Status</th><th>Aksi</th></tr></thead>
-        <tbody>${db.kelas.map(r=>{
-          const isi=jumlahPesertaKelas(r["ID Kelas"]);
-          const kap=Number(r["Kapasitas"]||8);
-          return `<tr>
+        <thead><tr><th>ID</th><th>Kelas</th><th>Jenjang</th><th>Pengajar</th><th>Jadwal</th><th>Biaya</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody>${db.kelas.map(r=>`
+          <tr>
             <td>${esc(r["ID Kelas"])}</td>
-            <td><strong>${esc(r["Nama Kelas"])}</strong></td>
-            <td>${esc(r["Nama Paket"]||r["Kategori"]||"-")}</td>
-            <td>${esc(r["Hari"]||"-")}<br><small>${esc(r["Jam Mulai"]||"")}–${esc(r["Jam Selesai"]||"")}</small></td>
-            <td>${esc(r["Ruang"]||"-")}</td>
+            <td>${esc(r["Nama Kelas"])}</td>
+            <td>${esc(r["Jenjang"])}</td>
             <td>${esc(r["Nama Pengajar"] || "-")}</td>
-            <td>${isi}/${kap}</td>
+            <td>${esc(r["Jadwal"] || "-")}</td>
+            <td>${rupiah(r["Biaya Bulanan"] || 0)}</td>
             <td>${badge(r["Status Kelas"])}</td>
-            <td><div class="actions">
-              <button class="btn btn-primary" onclick='openKelasDetail(${JSON.stringify(r["ID Kelas"])})'>+ Peserta</button>
-              <button class="btn btn-light" onclick='openKelasModal(${JSON.stringify(r)})'>Edit</button>
-            </div></td>
-          </tr>`;
-        }).join("")}</tbody>
+            <td><button class="btn btn-light" onclick='openKelasModal(${JSON.stringify(r)})'>Edit</button></td>
+          </tr>
+        `).join("")}</tbody>
       </table>
-    ` : empty("Belum ada kelas dan jadwal.");
-  }
-
-
-  function normHariJadwal(v){
-    const s=String(v||"").trim().toLowerCase();
-    const map={monday:"Senin",tuesday:"Selasa",wednesday:"Rabu",thursday:"Kamis",friday:"Jumat",saturday:"Sabtu",sunday:"Minggu"};
-    if(map[s]) return map[s];
-    return String(v||"").trim().replace(/^./,c=>c.toUpperCase());
-  }
-
-  function normJamJadwal(v){
-    const s=String(v||"").trim().replace(".",":");
-    const m=s.match(/(\d{1,2}):(\d{2})/);
-    return m ? `${String(Number(m[1])).padStart(2,"0")}:${String(Number(m[2])).padStart(2,"0")}` : s;
-  }
-
-  function normRuangJadwal(v){
-    const s=String(v||"").trim().toLowerCase().replace(/\s+/g," ");
-    const m=s.match(/(?:ruang\s*)?([123])/);
-    return m ? `Ruang ${m[1]}` : String(v||"").trim();
-  }
-
-  function slotJadwal(){
-    const set=new Set(["09:00–10:00","10:00–11:00","11:00–12:00","13:00–15:00","14:00–15:00","15:00–16:00","16:00–17:00","17:00–18:30","18:30–20:00"]);
-    (db.kelas||[]).forEach(k=>{
-      if(k["Jam Mulai"]&&k["Jam Selesai"]) set.add(`${normJamJadwal(k["Jam Mulai"])}–${normJamJadwal(k["Jam Selesai"])}`);
-    });
-    return [...set].sort((a,b)=>a.localeCompare(b));
-  }
-
-  function statusKapasitas(isi,kap){
-    if(isi>=kap) return {warna:"#fee2e2",teks:"Penuh",ikon:"🔴"};
-    if(isi>=Math.max(1,Math.ceil(kap*.75))) return {warna:"#fef3c7",teks:"Hampir penuh",ikon:"🟡"};
-    return {warna:"#dcfce7",teks:"Tersedia",ikon:"🟢"};
-  }
-
-  function renderPapanJadwal(){
-    const target=document.getElementById("papanJadwal");
-    if(!target) return;
-    const hari=document.getElementById("jadwalHari")?.value||"Senin";
-    const ruang=["Ruang 1","Ruang 2","Ruang 3"];
-    const slots=slotJadwal();
-    const kelasHari=(db.kelas||[]).filter(k=>
-      normHariJadwal(k["Hari"])===normHariJadwal(hari) &&
-      String(k["Status Kelas"]||"").toLowerCase()==="aktif"
-    );
-
-    target.innerHTML=`
-      <div class="table-wrap">
-        <table style="min-width:900px">
-          <thead><tr><th style="width:130px">Jam</th>${ruang.map(r=>`<th>${r}</th>`).join("")}</tr></thead>
-          <tbody>${slots.map(slot=>{
-            const [mulai,selesai]=slot.split("–");
-            return `<tr><td><strong>${esc(slot)}</strong></td>${ruang.map(r=>{
-              const k=kelasHari.find(x=>
-                normRuangJadwal(x["Ruang"])===normRuangJadwal(r) &&
-                normJamJadwal(x["Jam Mulai"])===normJamJadwal(mulai) &&
-                normJamJadwal(x["Jam Selesai"])===normJamJadwal(selesai)
-              );
-              if(!k) return `<td><button class="btn btn-light" style="width:100%;min-height:92px;border-style:dashed" onclick='openKelasModal(null,${JSON.stringify({hari,jamMulai:mulai,jamSelesai:selesai,ruang:r})})'>＋ Kelas tersedia<br><small>${r}</small></button></td>`;
-              const isi=jumlahPesertaKelas(k["ID Kelas"]);
-              const kap=Number(k["Kapasitas"]||8);
-              const st=statusKapasitas(isi,kap);
-              return `<td>
-                <button onclick='openKelasDetail(${JSON.stringify(k["ID Kelas"])})' style="width:100%;min-height:92px;text-align:left;border:1px solid var(--line);border-radius:14px;padding:12px;background:${st.warna};cursor:pointer">
-                  <strong>${esc(k["Nama Kelas"])}</strong><br>
-                  <small>${esc(k["Nama Paket"]||"")} · ${esc(k["Nama Pengajar"]||"Belum ada pengajar")}</small><br>
-                  <span>${st.ikon} ${isi}/${kap} siswa · ${st.teks}</span>
-                </button>
-              </td>`;
-            }).join("")}</tr>`;
-          }).join("")}</tbody>
-        </table>
-      </div>`;
-  }
-
-  function openKelasDetail(idKelas){
-    const k=(db.kelas||[]).find(x=>String(x["ID Kelas"])===String(idKelas));
-    if(!k) return;
-    const peserta=(db.peserta||[]).filter(p=>String(p["ID Kelas"])===String(idKelas)&&["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase()));
-    const kap=Number(k["Kapasitas"]||8);
-    const tersedia=(db.siswa||[]).filter(s=>{
-      if(String(s["Status Aktif"]||"").toLowerCase()!=="aktif") return false;
-      if(peserta.some(p=>String(p["ID Siswa"])===String(s["ID Siswa"]))) return false;
-
-      const paketPeserta=(db.peserta||[])
-        .filter(p=>String(p["ID Siswa"])===String(s["ID Siswa"]) &&
-                   ["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase()))
-        .map(p=>String(p["ID Paket"]||""))
-        .filter(Boolean);
-
-      // Data lama yang belum mempunyai paket tetap ditampilkan agar admin masih dapat menempatkan.
-      return !paketPeserta.length || paketPeserta.includes(String(k["ID Paket"]||""));
-    });
-    document.getElementById("kelasDetailTitle").textContent=k["Nama Kelas"];
-    document.getElementById("kelasDetailBody").innerHTML=`
-      <div class="grid grid-3" style="margin-bottom:14px">
-        <div class="card"><small>Jadwal</small><strong style="display:block">${esc(k["Hari"]||"-")} ${esc(k["Jam Mulai"]||"")}–${esc(k["Jam Selesai"]||"")}</strong></div>
-        <div class="card"><small>Ruang</small><strong style="display:block">${esc(k["Ruang"]||"-")}</strong></div>
-        <div class="card"><small>Kapasitas</small><strong style="display:block">${peserta.length}/${kap} siswa</strong></div>
-      </div>
-      <p><b>Paket:</b> ${esc(k["Nama Paket"]||"-")} &nbsp; · &nbsp; <b>Pengajar:</b> ${esc(k["Nama Pengajar"]||"-")}</p>
-      <div class="field">
-        <label>Tempatkan Peserta ke Jadwal Kelas</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <select id="pilihSiswaPenempatan" style="flex:1;min-width:240px" ${peserta.length>=kap?"disabled":""}>
-            <option value="">Pilih siswa aktif</option>
-            ${tersedia.map(s=>`<option value="${attr(s["ID Siswa"])}">${esc(s["Nama Siswa"])} · ${esc(s["Jenjang"]||"")}</option>`).join("")}
-          </select>
-          <button class="btn btn-primary" onclick='tempatkanSiswa(${JSON.stringify(idKelas)})' ${peserta.length>=kap?"disabled":""}>+ Tempatkan</button>
-        </div>
-        ${peserta.length>=kap?'<small style="color:var(--red)">Kelas sudah penuh.</small>':'<small>Pilih siswa lalu klik <b>Tempatkan</b>. Sistem memeriksa kapasitas dan bentrok jadwal siswa.</small>'}
-      </div>
-      <h4 style="margin-top:20px">Daftar Peserta</h4>
-      ${peserta.length?`<div class="table-wrap"><table><thead><tr><th>No.</th><th>Nama Siswa</th><th>Tanggal Masuk</th><th>Status</th></tr></thead><tbody>
-        ${peserta.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p["Nama Siswa"])}</td><td>${esc(p["Tanggal Masuk"]||"-")}</td><td>${badge(p["Status Aktif"])}</td></tr>`).join("")}
-      </tbody></table></div>`:empty("Belum ada siswa pada kelas ini.")}
-    `;
-    document.getElementById("kelasDetailModal").classList.add("open");
-  }
-
-  function closeKelasDetail(){
-    document.getElementById("kelasDetailModal").classList.remove("open");
-  }
-
-  async function tempatkanSiswa(idKelas){
-    const idSiswa=document.getElementById("pilihSiswaPenempatan")?.value;
-    if(!idSiswa){alert("Pilih siswa terlebih dahulu.");return;}
-    try{
-      const r=await jsonp("tempatkanSiswa",{key:API_KEY,data:JSON.stringify({idSiswa,idKelas,tanggalMasuk:today()})});
-      if(!r.status) throw new Error(r.message||"Penempatan gagal.");
-      closeKelasDetail();
-      await loadBootstrap();
-      renderPapanJadwal();
-      renderKelas();
-      openKelasDetail(idKelas);
-      toast(r.message || "Peserta berhasil ditempatkan.");
-    }catch(e){alert(e.message||"Penempatan gagal.");}
+    ` : empty("Belum ada kelas.");
   }
 
   function isiFilterPesertaKelas(){
@@ -2159,112 +1905,26 @@ Sanggar Mam Is Learning Hub`;
     });
   }
 
-
-  async function sinkronJadwalKelas(){
-    try{
-      const r=await jsonp("sinkronJadwalKelas",{key:API_KEY});
-      if(!r.status) throw new Error(r.message||"Sinkronisasi gagal.");
-      await loadBootstrap();
-      setKelasTab("jadwal");
-      toast(r.message||"Jadwal berhasil disinkronkan.");
-    }catch(e){
-      alert(e.message||"Sinkronisasi jadwal gagal.");
-    }
-  }
-
-
-  async function pulihkanHargaPaket(){
-    if(!confirm("Pulihkan biaya Paket Program dari data kelas/program lama?")) return;
-    try{
-      const r=await jsonp("pulihkanHargaPaket",{key:API_KEY});
-      if(!r.status) throw new Error(r.message||"Pemulihan harga gagal.");
-      await loadBootstrap();
-      setKelasTab("paket");
-      toast(r.message||"Harga paket berhasil dipulihkan.");
-      if(r.belumDitemukan && r.belumDitemukan.length){
-        alert("Harga belum ditemukan untuk: "+r.belumDitemukan.join(", "));
-      }
-    }catch(e){
-      alert(e.message||"Pemulihan harga gagal.");
-    }
-  }catch(e){
-      alert(e.message||"Pemulihan paket gagal.");
-    }
-  }
-
-
-  async function hapusPaket(idPaket,nama){
-    if(!confirm(`Hapus Paket Program “${nama}”? Paket yang masih dipakai kelas aktif tidak dapat dihapus.`)) return;
-    try{
-      const r=await jsonp("deletePaket",{key:API_KEY,id:idPaket});
-      if(!r.status) throw new Error(r.message||"Paket gagal dihapus.");
-      await loadBootstrap();
-      setKelasTab("paket");
-      toast(r.message||"Paket berhasil dihapus.");
-    }catch(e){
-      alert(e.message||"Paket gagal dihapus.");
-    }
-  }
-
-  function openPaketModal(r=null){
-    openDynamicForm("paket",r,{
-      title:r?"Edit Paket Program":"Tambah Paket Program",
-      fields:[
-        field("namaPaket","Nama Paket","text",r?.["Nama Paket"],true),
-        field("jenjang","Jenjang","select",r?.["Jenjang"]||"",true,["TK","SD","SMP","SMA","Umum"]),
-        field("kategori","Kategori","select",r?.["Kategori"]||"",true,["English","Matematika","Membaca","Mapel","TKA","Lainnya"]),
-        field("biayaBulanan","Biaya Bulanan","number",r?.["Biaya Bulanan"]||0),
-        field("deskripsi","Deskripsi","textarea",r?.["Deskripsi"]||""),
-        field("statusPaket","Status","select",r?.["Status Paket"]||"Aktif",true,["Aktif","Tidak Aktif"])
-      ]
-    });
-  }
-
-  function openKelasModal(r=null,preset={}){
-    if(!(db.paket||[]).length){
-      alert("Paket Program masih kosong. Klik tombol “Buat Paket Awal” terlebih dahulu, atau buat paket secara manual.");
-      setKelasTab("paket");
-      return;
-    }
-    const pengajarOptions = [{value:"",label:"Belum ditentukan"}].concat(db.pengajar.filter(x=>String(x["Status Aktif"]||"").toLowerCase()==="aktif").map(x=>({
+  function openKelasModal(r=null){
+    const pengajarOptions = db.pengajar.map(x=>({
       value:x["ID Pengajar"]+"||"+x["Nama Pengajar"],
       label:x["Nama Pengajar"]
-    })));
-    const paketOptions=[{value:"||",label:"Pilih Paket"}].concat((db.paket||[]).filter(x=>String(x["Status Paket"]||"").toLowerCase()==="aktif").map(x=>({
-      value:x["ID Paket"]+"||"+x["Nama Paket"],
-      label:x["Nama Paket"]+" · "+x["Jenjang"]+" · "+rupiah(x["Biaya Bulanan"]||0)
-    })));
-    const hari=preset.hari||r?.["Hari"]||"Senin";
-    const mulai=preset.jamMulai||r?.["Jam Mulai"]||"14:00";
-    const selesai=preset.jamSelesai||r?.["Jam Selesai"]||"15:00";
-    const ruang=preset.ruang||r?.["Ruang"]||"Ruang 1";
+    }));
 
     openDynamicForm("kelas",r,{
-      title:r?"Edit Kelas & Jadwal":"Tambah Kelas & Jadwal",
+      title:r?"Edit Kelas":"Tambah Kelas",
       fields:[
-        field("paketGabung","Paket Program","select",r?(r["ID Paket"]+"||"+r["Nama Paket"]):"||",true,paketOptions),
-        field("namaKelasOtomatis","Nama Kelas Otomatis","text",
-          r?.["Nama Kelas"] || "Akan dibuat otomatis dari Paket - Hari - Jam",false),
-        field("hari","Hari","select",hari,true,["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]),
-        field("jamMulai","Jam Mulai","time",mulai,true),
-        field("jamSelesai","Jam Selesai","time",selesai,true),
-        field("ruang","Ruang","select",ruang,true,["Ruang 1","Ruang 2","Ruang 3"]),
-        field("kapasitas","Kapasitas Siswa","number",r?.["Kapasitas"]||8,true),
+        field("namaKelas","Nama Kelas","text",r?.["Nama Kelas"],true),
+        field("jenjang","Jenjang","select",r?.["Jenjang"],true,["TK","SD","SMP","SMA","Umum"]),
+        field("kategori","Kategori","text",r?.["Kategori"]),
         field("pengajarGabung","Pengajar","select",
           r ? (r["ID Pengajar"]+"||"+r["Nama Pengajar"]) : "",
           false,pengajarOptions),
+        field("biayaBulanan","Biaya Bulanan","number",r?.["Biaya Bulanan"] || 0),
+        field("jadwal","Jadwal","text",r?.["Jadwal"]),
         field("statusKelas","Status","select",r?.["Status Kelas"] || "Aktif",true,["Aktif","Tidak Aktif"])
       ]
     });
-
-    setTimeout(()=>{
-      const auto=document.querySelector('[name="namaKelasOtomatis"]');
-      if(auto){
-        auto.readOnly=true;
-        auto.style.background="#f1f5f9";
-        auto.style.color="#64748b";
-      }
-    },0);
   }
 
   function openPesertaModal(){
@@ -2385,27 +2045,11 @@ Sanggar Mam Is Learning Hub`;
         }else action="addPengajar";
       }
 
-      if(currentForm==="paket"){
-        if(editingData){
-          action="updatePaket";
-          payload.idPaket=editingData["ID Paket"];
-        }else action="addPaket";
-      }
-
       if(currentForm==="kelas"){
         const [idPengajar,namaPengajar] = String(values.pengajarGabung || "||").split("||");
-        const [idPaket,namaPaket] = String(values.paketGabung || "||").split("||");
         delete payload.pengajarGabung;
-        delete payload.paketGabung;
-        delete payload.namaKelasOtomatis;
         payload.idPengajar=idPengajar || "";
         payload.namaPengajar=namaPengajar || "";
-        payload.idPaket=idPaket || "";
-        payload.namaPaket=namaPaket || "";
-        const paket=(db.paket||[]).find(p=>String(p["ID Paket"])===String(idPaket))||{};
-        payload.jenjang=paket["Jenjang"]||"";
-        payload.kategori=paket["Kategori"]||"";
-        payload.biayaBulanan=paket["Biaya Bulanan"]||0;
 
         if(editingData){
           action="updateKelas";
