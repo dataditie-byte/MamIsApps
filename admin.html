@@ -485,7 +485,10 @@
       .toolbar input,.toolbar select{width:100%}
       .field.full{grid-column:auto}
     }
-  </style>
+  
+#papanJadwalKelas td{vertical-align:top}
+#jadwalDetailModal .card{box-shadow:none;border:1px solid var(--line)}
+</style>
 </head>
 
 <body>
@@ -530,7 +533,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v6.1</small>
+        <small>Admin Learning Hub v6.6</small>
       </div>
     </div>
 
@@ -544,7 +547,7 @@
       <button class="nav-btn" onclick="openPage('pendaftaran',this)">📝 Pendaftaran</button>
       <button class="nav-btn" onclick="openPage('siswa',this)">👨‍🎓 Siswa</button>
       <button class="nav-btn" onclick="openPage('pengajar',this)">👩‍🏫 Pengajar</button>
-      <button class="nav-btn" onclick="openPage('kelas',this)">🎓 Kelas</button>
+      <button class="nav-btn" onclick="openPage('kelas',this)">🗓️ Kelas & Jadwal</button>
       <button class="nav-btn" onclick="openPage('peserta',this)">👥 Peserta Kelas</button>
       <button class="nav-btn" onclick="openPage('materi',this)">📚 Materi</button>
       <button class="nav-btn" onclick="openPage('pengumuman',this)">📢 Pengumuman</button>
@@ -682,15 +685,62 @@
         <div class="table-wrap" id="pengajarTable"></div>
       </section>
 
+      
       <section class="page" id="page-kelas">
         <div class="section-head">
-          <div><h3>Data Kelas</h3><p>Program, jadwal, pengajar, dan biaya</p></div>
-          <button class="btn btn-primary" onclick="openKelasModal()">+ Tambah Kelas</button>
+          <div>
+            <h3>Kelas & Jadwal</h3>
+            <p>Program dan biaya tetap memakai data lama. Jadwal operasional dikelola terpisah berdasarkan hari, jam, ruang, pengajar, dan peserta.</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-light" onclick="openKelasModal()">+ Program Kelas</button>
+            <button class="btn btn-primary" onclick="openJadwalModal()">+ Jadwal Kelas</button>
+          </div>
         </div>
-        <div class="table-wrap" id="kelasTable"></div>
-      </section>
 
-      <section class="page" id="page-peserta">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="tabPapanJadwal" onclick="setTabKelasJadwal('papan')">Papan Jadwal</button>
+          <button class="btn btn-light" id="tabDaftarJadwal" onclick="setTabKelasJadwal('daftar')">Daftar Jadwal</button>
+          <button class="btn btn-light" id="tabProgramKelas" onclick="setTabKelasJadwal('program')">Program & Biaya</button>
+
+          <select id="filterHariJadwal" onchange="renderPapanJadwal()">
+            <option>Senin</option>
+            <option>Selasa</option>
+            <option>Rabu</option>
+            <option>Kamis</option>
+            <option>Jumat</option>
+            <option>Sabtu</option>
+            <option>Minggu</option>
+          </select>
+        </div>
+
+        <div id="panelPapanJadwal">
+          <div class="card" style="margin-bottom:14px;background:#eff6ff">
+            <strong>Cara menggunakan:</strong>
+            klik kotak ruang yang kosong untuk membuat jadwal. Klik kelas yang sudah terisi untuk melihat peserta, menambahkan siswa, atau mengedit jadwal.
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:13px">
+              <span>🟢 Masih tersedia</span>
+              <span>🟡 Hampir penuh</span>
+              <span>🔴 Penuh</span>
+              <span>⚪ Ruang kosong</span>
+            </div>
+          </div>
+
+          <div id="papanJadwalKelas"></div>
+        </div>
+
+        <div id="panelDaftarJadwal" style="display:none">
+          <div class="table-wrap" id="jadwalKelasTable"></div>
+        </div>
+
+        <div id="panelProgramKelas" style="display:none">
+          <div class="table-wrap" id="kelasTable"></div>
+        </div>
+      </section>
+<section class="page" id="page-peserta">
         <div class="section-head">
           <div><h3>Peserta Kelas & Penilaian</h3><p>Monitoring peserta dan penilaian perkembangan setiap tiga bulan</p></div>
         </div>
@@ -825,6 +875,15 @@
   </div>
 </div>
 
+
+<div class="modal" id="jadwalDetailModal">
+  <div class="modal-box" style="max-width:780px">
+    <button class="modal-close" onclick="closeJadwalDetail()">×</button>
+    <h3 id="jadwalDetailTitle">Detail Jadwal Kelas</h3>
+    <div id="jadwalDetailBody"></div>
+  </div>
+</div>
+
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
   const API_KEY = "MAMIS-2026";
@@ -948,6 +1007,8 @@
         siswa:res.siswa || [],
         pengajar:res.pengajar || [],
         kelas:res.kelas || [],
+        jadwalKelas:res.jadwalKelas || [],
+        pesertaJadwal:res.pesertaJadwal || [],
         peserta:res.peserta || [],
         penilaian:res.penilaian || [],
         pembayaran:res.pembayaran || [],
@@ -981,6 +1042,8 @@
     renderSiswa();
     renderPengajar();
     renderKelas();
+    renderDaftarJadwal();
+    renderPapanJadwal();
     renderPeserta();
     renderMateri();
     renderPengumuman();
@@ -1181,6 +1244,512 @@
         `).join("")}</tbody>
       </table>
     ` : empty("Belum ada pengajar.");
+  }
+
+
+  let tabKelasJadwalAktif="papan";
+
+  function setTabKelasJadwal(tab){
+    tabKelasJadwalAktif=tab;
+
+    document.getElementById("panelPapanJadwal").style.display=tab==="papan"?"block":"none";
+    document.getElementById("panelDaftarJadwal").style.display=tab==="daftar"?"block":"none";
+    document.getElementById("panelProgramKelas").style.display=tab==="program"?"block":"none";
+
+    document.getElementById("tabPapanJadwal").className="btn "+(tab==="papan"?"btn-primary":"btn-light");
+    document.getElementById("tabDaftarJadwal").className="btn "+(tab==="daftar"?"btn-primary":"btn-light");
+    document.getElementById("tabProgramKelas").className="btn "+(tab==="program"?"btn-primary":"btn-light");
+
+    if(tab==="papan") renderPapanJadwal();
+    if(tab==="daftar") renderDaftarJadwal();
+    if(tab==="program") renderKelas();
+  }
+
+  function jamNormal(v){
+    const s=String(v||"").trim().replace(".",":");
+    const m=s.match(/(\d{1,2}):(\d{2})/);
+    return m
+      ? `${String(Number(m[1])).padStart(2,"0")}:${String(Number(m[2])).padStart(2,"0")}`
+      : s;
+  }
+
+  function pesertaAktifPadaJadwal(idJadwal){
+    return (db.pesertaJadwal||[]).filter(p=>
+      String(p["ID Jadwal"])===String(idJadwal) &&
+      ["","aktif","active","ya"].includes(
+        String(p["Status Aktif"]||"").trim().toLowerCase()
+      )
+    );
+  }
+
+  function slotJadwalMingguan(){
+    const slots=new Set([
+      "09:00–10:00",
+      "10:00–11:00",
+      "11:00–12:00",
+      "13:00–15:00",
+      "14:00–15:00",
+      "15:00–16:00",
+      "16:00–17:00",
+      "17:00–18:30",
+      "18:30–20:00"
+    ]);
+
+    (db.jadwalKelas||[]).forEach(j=>{
+      if(j["Jam Mulai"]&&j["Jam Selesai"]){
+        slots.add(`${jamNormal(j["Jam Mulai"])}–${jamNormal(j["Jam Selesai"])}`);
+      }
+    });
+
+    return [...slots].sort((a,b)=>{
+      const [am]=a.split("–");
+      const [bm]=b.split("–");
+      return am.localeCompare(bm);
+    });
+  }
+
+  function statusKapasitasJadwal(isi,kapasitas){
+    if(isi>=kapasitas){
+      return {bg:"#fee2e2",ikon:"🔴",teks:"Penuh"};
+    }
+    if(isi>=Math.max(1,Math.ceil(kapasitas*.75))){
+      return {bg:"#fef3c7",ikon:"🟡",teks:"Hampir penuh"};
+    }
+    return {bg:"#dcfce7",ikon:"🟢",teks:"Tersedia"};
+  }
+
+  function renderPapanJadwal(){
+    const target=document.getElementById("papanJadwalKelas");
+    if(!target) return;
+
+    const hari=document.getElementById("filterHariJadwal")?.value||"Senin";
+    const ruang=["Ruang 1","Ruang 2","Ruang 3"];
+    const slots=slotJadwalMingguan();
+
+    const data=(db.jadwalKelas||[]).filter(j=>
+      String(j["Hari"]||"").trim().toLowerCase()===hari.toLowerCase() &&
+      ["","aktif","active","ya"].includes(
+        String(j["Status Jadwal"]||"").trim().toLowerCase()
+      )
+    );
+
+    target.innerHTML=`
+      <div class="table-wrap">
+        <table style="min-width:920px">
+          <thead>
+            <tr>
+              <th style="width:135px">Jam</th>
+              ${ruang.map(r=>`<th>${r}</th>`).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${slots.map(slot=>{
+              const [mulai,selesai]=slot.split("–");
+
+              return `
+                <tr>
+                  <td><strong>${esc(slot)}</strong></td>
+
+                  ${ruang.map(namaRuang=>{
+                    const jadwal=data.find(j=>
+                      String(j["Ruang"]||"").trim()===namaRuang &&
+                      jamNormal(j["Jam Mulai"])===mulai &&
+                      jamNormal(j["Jam Selesai"])===selesai
+                    );
+
+                    if(!jadwal){
+                      return `
+                        <td>
+                          <button class="btn btn-light"
+                                  style="width:100%;min-height:105px;border-style:dashed"
+                                  onclick='openJadwalModal(null,${JSON.stringify({
+                                    hari,
+                                    jamMulai:mulai,
+                                    jamSelesai:selesai,
+                                    ruang:namaRuang
+                                  })})'>
+                            ＋ Kelas tersedia<br>
+                            <small>${namaRuang}</small>
+                          </button>
+                        </td>`;
+                    }
+
+                    const isi=pesertaAktifPadaJadwal(jadwal["ID Jadwal"]).length;
+                    const kapasitas=Math.max(1,Number(jadwal["Kapasitas"]||8));
+                    const status=statusKapasitasJadwal(isi,kapasitas);
+
+                    return `
+                      <td>
+                        <button
+                          onclick='openJadwalDetail(${JSON.stringify(jadwal["ID Jadwal"])})'
+                          style="width:100%;min-height:105px;text-align:left;
+                                 border:1px solid var(--line);border-radius:14px;
+                                 padding:12px;background:${status.bg};cursor:pointer">
+                          <strong>${esc(jadwal["Nama Program"]||jadwal["Nama Jadwal"])}</strong><br>
+                          <small>
+                            ${esc(jadwal["Nama Pengajar"]||"Pengajar belum ditentukan")}
+                          </small><br>
+                          <span>
+                            ${status.ikon} ${isi}/${kapasitas} siswa · ${status.teks}
+                          </span>
+                        </button>
+                      </td>`;
+                  }).join("")}
+                </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderDaftarJadwal(){
+    const el=document.getElementById("jadwalKelasTable");
+    if(!el) return;
+
+    const rows=(db.jadwalKelas||[]).slice().sort((a,b)=>
+      `${a["Hari"]||""}${jamNormal(a["Jam Mulai"])}`.localeCompare(
+        `${b["Hari"]||""}${jamNormal(b["Jam Mulai"])}`
+      )
+    );
+
+    el.innerHTML=rows.length ? `
+      <table>
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Hari/Jam</th>
+            <th>Ruang</th>
+            <th>Pengajar</th>
+            <th>Peserta</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${rows.map(r=>{
+            const isi=pesertaAktifPadaJadwal(r["ID Jadwal"]).length;
+            const kapasitas=Math.max(1,Number(r["Kapasitas"]||8));
+
+            return `
+              <tr>
+                <td>
+                  <strong>${esc(r["Nama Program"]||"-")}</strong><br>
+                  <small>${esc(r["Nama Jadwal"]||"")}</small>
+                </td>
+                <td>
+                  ${esc(r["Hari"]||"-")}<br>
+                  <small>${esc(jamNormal(r["Jam Mulai"]))}–${esc(jamNormal(r["Jam Selesai"]))}</small>
+                </td>
+                <td>${esc(r["Ruang"]||"-")}</td>
+                <td>${esc(r["Nama Pengajar"]||"-")}</td>
+                <td>${isi}/${kapasitas}</td>
+                <td>${badge(r["Status Jadwal"]||"Aktif")}</td>
+                <td>
+                  <div class="actions">
+                    <button class="btn btn-primary"
+                            onclick='openJadwalDetail(${JSON.stringify(r["ID Jadwal"])})'>
+                      Peserta
+                    </button>
+
+                    <button class="btn btn-light"
+                            onclick='openJadwalModal(${JSON.stringify(r)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn btn-danger"
+                            onclick='hapusJadwalKelas(${JSON.stringify(r["ID Jadwal"])},${JSON.stringify(r["Nama Jadwal"]||"")})'>
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    ` : empty("Belum ada jadwal kelas.");
+  }
+
+  function openJadwalModal(r=null,preset={}){
+    const programOptions=(db.kelas||[])
+      .filter(k=>String(k["Status Kelas"]||"").toLowerCase()==="aktif")
+      .map(k=>({
+        value:k["ID Kelas"]+"||"+k["Nama Kelas"],
+        label:k["Nama Kelas"]+" · "+rupiah(k["Biaya Bulanan"]||0)
+      }));
+
+    const pengajarOptions=[
+      {value:"||",label:"Belum ditentukan"}
+    ].concat(
+      (db.pengajar||[])
+        .filter(p=>String(p["Status Aktif"]||"").toLowerCase()==="aktif")
+        .map(p=>({
+          value:p["ID Pengajar"]+"||"+p["Nama Pengajar"],
+          label:p["Nama Pengajar"]
+        }))
+    );
+
+    openDynamicForm("jadwalKelas",r,{
+      title:r?"Edit Jadwal Kelas":"Tambah Jadwal Kelas",
+      fields:[
+        field(
+          "programGabung",
+          "Program Kelas",
+          "select",
+          r ? r["ID Kelas"]+"||"+r["Nama Program"] : "",
+          true,
+          programOptions
+        ),
+        field(
+          "hari",
+          "Hari",
+          "select",
+          preset.hari||r?.["Hari"]||"Senin",
+          true,
+          ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
+        ),
+        field(
+          "jamMulai",
+          "Jam Mulai",
+          "time",
+          preset.jamMulai||jamNormal(r?.["Jam Mulai"])||"14:00",
+          true
+        ),
+        field(
+          "jamSelesai",
+          "Jam Selesai",
+          "time",
+          preset.jamSelesai||jamNormal(r?.["Jam Selesai"])||"15:00",
+          true
+        ),
+        field(
+          "ruang",
+          "Ruang",
+          "select",
+          preset.ruang||r?.["Ruang"]||"Ruang 1",
+          true,
+          ["Ruang 1","Ruang 2","Ruang 3"]
+        ),
+        field(
+          "kapasitas",
+          "Kapasitas Siswa",
+          "number",
+          r?.["Kapasitas"]||8,
+          true
+        ),
+        field(
+          "pengajarGabung",
+          "Pengajar",
+          "select",
+          r ? r["ID Pengajar"]+"||"+r["Nama Pengajar"] : "||",
+          false,
+          pengajarOptions
+        ),
+        field(
+          "statusJadwal",
+          "Status",
+          "select",
+          r?.["Status Jadwal"]||"Aktif",
+          true,
+          ["Aktif","Tidak Aktif"]
+        ),
+        field(
+          "catatan",
+          "Catatan",
+          "textarea",
+          r?.["Catatan"]||""
+        )
+      ]
+    });
+  }
+
+  function openJadwalDetail(idJadwal){
+    const jadwal=(db.jadwalKelas||[]).find(j=>
+      String(j["ID Jadwal"])===String(idJadwal)
+    );
+
+    if(!jadwal) return;
+
+    const peserta=pesertaAktifPadaJadwal(idJadwal);
+    const kapasitas=Math.max(1,Number(jadwal["Kapasitas"]||8));
+
+    const siswaTersedia=(db.siswa||[]).filter(s=>
+      String(s["Status Aktif"]||"").toLowerCase()==="aktif" &&
+      !peserta.some(p=>String(p["ID Siswa"])===String(s["ID Siswa"]))
+    );
+
+    document.getElementById("jadwalDetailTitle").textContent=
+      jadwal["Nama Program"]||"Detail Jadwal Kelas";
+
+    document.getElementById("jadwalDetailBody").innerHTML=`
+      <div class="grid grid-3" style="margin-bottom:14px">
+        <div class="card">
+          <small>Hari dan Jam</small>
+          <strong style="display:block">
+            ${esc(jadwal["Hari"]||"-")}
+            ${esc(jamNormal(jadwal["Jam Mulai"]))}–${esc(jamNormal(jadwal["Jam Selesai"]))}
+          </strong>
+        </div>
+
+        <div class="card">
+          <small>Ruang</small>
+          <strong style="display:block">${esc(jadwal["Ruang"]||"-")}</strong>
+        </div>
+
+        <div class="card">
+          <small>Kapasitas</small>
+          <strong style="display:block">${peserta.length}/${kapasitas} siswa</strong>
+        </div>
+      </div>
+
+      <p>
+        <b>Pengajar:</b> ${esc(jadwal["Nama Pengajar"]||"Belum ditentukan")}
+        &nbsp; · &nbsp;
+        <b>Status:</b> ${esc(jadwal["Status Jadwal"]||"Aktif")}
+      </p>
+
+      <div class="field">
+        <label>Tambahkan Peserta</label>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="pilihSiswaJadwal"
+                  style="flex:1;min-width:260px"
+                  ${peserta.length>=kapasitas?"disabled":""}>
+            <option value="">Pilih siswa aktif</option>
+            ${siswaTersedia.map(s=>`
+              <option value="${attr(s["ID Siswa"])}">
+                ${esc(s["Nama Siswa"])} · ${esc(s["Jenjang"]||"")}
+              </option>
+            `).join("")}
+          </select>
+
+          <button class="btn btn-primary"
+                  onclick='tambahkanPesertaJadwal(${JSON.stringify(idJadwal)})'
+                  ${peserta.length>=kapasitas?"disabled":""}>
+            + Tambahkan
+          </button>
+        </div>
+
+        <small>
+          Sistem memeriksa kapasitas, peserta ganda, dan bentrok jadwal siswa.
+        </small>
+      </div>
+
+      <h4 style="margin-top:20px">Daftar Peserta</h4>
+
+      ${peserta.length ? `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Nama Siswa</th>
+                <th>Tanggal Masuk</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${peserta.map((p,i)=>`
+                <tr>
+                  <td>${i+1}</td>
+                  <td><strong>${esc(p["Nama Siswa"])}</strong></td>
+                  <td>${esc(p["Tanggal Masuk"]||"-")}</td>
+                  <td>
+                    <button class="btn btn-danger"
+                            onclick='keluarkanPesertaJadwal(${JSON.stringify(p["ID Peserta Jadwal"])},${JSON.stringify(idJadwal)},${JSON.stringify(p["Nama Siswa"]||"")})'>
+                      Keluarkan
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      ` : empty("Belum ada siswa pada jadwal kelas ini.")}
+
+      <div class="actions" style="margin-top:16px">
+        <button class="btn btn-light"
+                onclick='closeJadwalDetail();openJadwalModal(${JSON.stringify(jadwal)})'>
+          Edit Jadwal
+        </button>
+      </div>
+    `;
+
+    document.getElementById("jadwalDetailModal").classList.add("open");
+  }
+
+  function closeJadwalDetail(){
+    document.getElementById("jadwalDetailModal").classList.remove("open");
+  }
+
+  async function tambahkanPesertaJadwal(idJadwal){
+    const idSiswa=document.getElementById("pilihSiswaJadwal")?.value;
+
+    if(!idSiswa){
+      alert("Pilih siswa terlebih dahulu.");
+      return;
+    }
+
+    try{
+      const r=await jsonp("addPesertaJadwal",{
+        key:API_KEY,
+        data:JSON.stringify({
+          idJadwal,
+          idSiswa,
+          tanggalMasuk:today()
+        })
+      });
+
+      if(!r.status) throw new Error(r.message||"Peserta gagal ditambahkan.");
+
+      closeJadwalDetail();
+      await loadBootstrap();
+      openJadwalDetail(idJadwal);
+      toast(r.message||"Peserta berhasil ditambahkan.");
+    }catch(e){
+      alert(e.message||"Peserta gagal ditambahkan.");
+    }
+  }
+
+  async function keluarkanPesertaJadwal(idPesertaJadwal,idJadwal,nama){
+    if(!confirm(`Keluarkan ${nama||"siswa"} dari jadwal kelas ini?`)) return;
+
+    try{
+      const r=await jsonp("removePesertaJadwal",{
+        key:API_KEY,
+        id:idPesertaJadwal
+      });
+
+      if(!r.status) throw new Error(r.message||"Peserta gagal dikeluarkan.");
+
+      closeJadwalDetail();
+      await loadBootstrap();
+      openJadwalDetail(idJadwal);
+      toast(r.message||"Peserta berhasil dikeluarkan.");
+    }catch(e){
+      alert(e.message||"Peserta gagal dikeluarkan.");
+    }
+  }
+
+  async function hapusJadwalKelas(idJadwal,nama){
+    if(!confirm(`Hapus jadwal “${nama||"kelas ini"}”?`)) return;
+
+    try{
+      const r=await jsonp("deleteJadwalKelas",{
+        key:API_KEY,
+        id:idJadwal
+      });
+
+      if(!r.status) throw new Error(r.message||"Jadwal gagal dihapus.");
+
+      await loadBootstrap();
+      setTabKelasJadwal("daftar");
+      toast(r.message||"Jadwal berhasil dihapus.");
+    }catch(e){
+      alert(e.message||"Jadwal gagal dihapus.");
+    }
   }
 
   function renderKelas(){
@@ -2055,6 +2624,26 @@ Sanggar Mam Is Learning Hub`;
           action="updateKelas";
           payload.idKelas=editingData["ID Kelas"];
         }else action="addKelas";
+      }
+
+      if(currentForm==="jadwalKelas"){
+        const [idKelas,namaProgram]=String(values.programGabung||"||").split("||");
+        const [idPengajar,namaPengajar]=String(values.pengajarGabung||"||").split("||");
+
+        delete payload.programGabung;
+        delete payload.pengajarGabung;
+
+        payload.idKelas=idKelas||"";
+        payload.namaProgram=namaProgram||"";
+        payload.idPengajar=idPengajar||"";
+        payload.namaPengajar=namaPengajar||"";
+
+        if(editingData){
+          action="updateJadwalKelas";
+          payload.idJadwal=editingData["ID Jadwal"];
+        }else{
+          action="addJadwalKelas";
+        }
       }
 
       if(currentForm==="peserta"){
