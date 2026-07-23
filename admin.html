@@ -534,7 +534,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v7.1</small>
+        <small>Admin Learning Hub v7.2</small>
       </div>
     </div>
 
@@ -688,7 +688,7 @@
 
       <section class="page" id="page-kelas">
         <div class="section-head">
-          <div><h3>Paket, Kelas & Jadwal</h3><p>Atur paket pendaftaran, tiga ruang belajar, jadwal, pengajar, kapasitas, dan penempatan siswa.</p></div>
+          <div><h3>Paket, Kelas & Jadwal</h3><p>Paket Program menjadi master tunggal. Saat membuat kelas, pilih paket dari dropdown agar nama selalu seragam.</p></div>
           <div class="actions">
             <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
             <button class="btn btn-light" onclick="buatPaketAwal()">⚡ Buat Paket Awal</button>
@@ -867,6 +867,14 @@
 </div>
 
 
+
+
+<div id="appToast" role="status" aria-live="polite"
+     style="display:none;position:fixed;right:22px;bottom:22px;z-index:9999;
+            max-width:380px;padding:14px 18px;border-radius:14px;
+            background:#173b63;color:#fff;font-weight:700;
+            box-shadow:0 12px 32px rgba(15,39,66,.28)">
+</div>
 
 <div class="modal" id="kelasDetailModal">
   <div class="modal-box" style="max-width:760px">
@@ -1362,10 +1370,19 @@
     if(!k) return;
     const peserta=(db.peserta||[]).filter(p=>String(p["ID Kelas"])===String(idKelas)&&String(p["Status Aktif"]||"").toLowerCase()==="aktif");
     const kap=Number(k["Kapasitas"]||8);
-    const tersedia=(db.siswa||[]).filter(s=>
-      String(s["Status Aktif"]||"").toLowerCase()==="aktif" &&
-      !peserta.some(p=>String(p["ID Siswa"])===String(s["ID Siswa"]))
-    );
+    const tersedia=(db.siswa||[]).filter(s=>{
+      if(String(s["Status Aktif"]||"").toLowerCase()!=="aktif") return false;
+      if(peserta.some(p=>String(p["ID Siswa"])===String(s["ID Siswa"]))) return false;
+
+      const paketPeserta=(db.peserta||[])
+        .filter(p=>String(p["ID Siswa"])===String(s["ID Siswa"]) &&
+                   String(p["Status Aktif"]||"").toLowerCase()==="aktif")
+        .map(p=>String(p["ID Paket"]||""))
+        .filter(Boolean);
+
+      // Data lama yang belum mempunyai paket tetap ditampilkan agar admin masih dapat menempatkan.
+      return !paketPeserta.length || paketPeserta.includes(String(k["ID Paket"]||""));
+    });
     document.getElementById("kelasDetailTitle").textContent=k["Nama Kelas"];
     document.getElementById("kelasDetailBody").innerHTML=`
       <div class="grid grid-3" style="margin-bottom:14px">
@@ -2121,9 +2138,9 @@ Sanggar Mam Is Learning Hub`;
     try{
       const r=await jsonp("seedPaketDefault",{key:API_KEY});
       if(!r.status) throw new Error(r.message||"Gagal membuat paket awal.");
-      toast(r.message);
       await loadBootstrap();
       setKelasTab("paket");
+      toast(r.message || "Paket awal berhasil dibuat.");
     }catch(e){
       alert(e.message||"Gagal membuat paket awal.");
     }
@@ -2155,7 +2172,7 @@ Sanggar Mam Is Learning Hub`;
     })));
     const paketOptions=[{value:"||",label:"Pilih Paket"}].concat((db.paket||[]).filter(x=>String(x["Status Paket"]||"").toLowerCase()==="aktif").map(x=>({
       value:x["ID Paket"]+"||"+x["Nama Paket"],
-      label:x["Nama Paket"]+" · "+x["Jenjang"]
+      label:x["Nama Paket"]+" · "+x["Jenjang"]+" · "+rupiah(x["Biaya Bulanan"]||0)
     })));
     const hari=preset.hari||r?.["Hari"]||"Senin";
     const mulai=preset.jamMulai||r?.["Jam Mulai"]||"14:00";
@@ -2166,7 +2183,8 @@ Sanggar Mam Is Learning Hub`;
       title:r?"Edit Kelas & Jadwal":"Tambah Kelas & Jadwal",
       fields:[
         field("paketGabung","Paket Program","select",r?(r["ID Paket"]+"||"+r["Nama Paket"]):"||",true,paketOptions),
-        field("namaKelas","Nama Kelas","text",r?.["Nama Kelas"]||"",false),
+        field("namaKelasOtomatis","Nama Kelas Otomatis","text",
+          r?.["Nama Kelas"] || "Akan dibuat otomatis dari Paket - Hari - Jam",false),
         field("hari","Hari","select",hari,true,["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]),
         field("jamMulai","Jam Mulai","time",mulai,true),
         field("jamSelesai","Jam Selesai","time",selesai,true),
@@ -2178,6 +2196,15 @@ Sanggar Mam Is Learning Hub`;
         field("statusKelas","Status","select",r?.["Status Kelas"] || "Aktif",true,["Aktif","Tidak Aktif"])
       ]
     });
+
+    setTimeout(()=>{
+      const auto=document.querySelector('[name="namaKelasOtomatis"]');
+      if(auto){
+        auto.readOnly=true;
+        auto.style.background="#f1f5f9";
+        auto.style.color="#64748b";
+      }
+    },0);
   }
 
   function openPesertaModal(){
@@ -2310,6 +2337,7 @@ Sanggar Mam Is Learning Hub`;
         const [idPaket,namaPaket] = String(values.paketGabung || "||").split("||");
         delete payload.pengajarGabung;
         delete payload.paketGabung;
+        delete payload.namaKelasOtomatis;
         payload.idPengajar=idPengajar || "";
         payload.namaPengajar=namaPengajar || "";
         payload.idPaket=idPaket || "";
@@ -2318,7 +2346,6 @@ Sanggar Mam Is Learning Hub`;
         payload.jenjang=paket["Jenjang"]||"";
         payload.kategori=paket["Kategori"]||"";
         payload.biayaBulanan=paket["Biaya Bulanan"]||0;
-        if(!payload.namaKelas) payload.namaKelas=[namaPaket,payload.hari,payload.jamMulai].filter(Boolean).join(" ");
 
         if(editingData){
           action="updateKelas";
