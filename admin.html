@@ -534,7 +534,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v7.4</small>
+        <small>Admin Learning Hub v8.0</small>
       </div>
     </div>
 
@@ -688,10 +688,10 @@
 
       <section class="page" id="page-kelas">
         <div class="section-head">
-          <div><h3>Paket, Kelas & Jadwal</h3><p>Paket Program menjadi master tunggal. Saat membuat kelas, pilih paket dari dropdown agar nama selalu seragam.</p></div>
+          <div><h3>Paket, Kelas & Jadwal</h3><p>Paket Program adalah master pendaftaran dan harga. Kelas Jadwal hanya mengatur hari, jam, ruang, pengajar, dan peserta.</p></div>
           <div class="actions">
             <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
-            <button class="btn btn-light" onclick="buatPaketAwal()">⚡ Buat Paket Awal</button>
+            <button class="btn btn-light" onclick="pulihkanPaketLama()">↻ Pulihkan Paket & Harga Lama</button>
             <button class="btn btn-light" onclick="sinkronJadwalKelas()">↻ Sinkron Jadwal</button>
             <button class="btn btn-primary" onclick="openKelasModal()">+ Kelas & Jadwal</button>
           </div>
@@ -1276,7 +1276,10 @@
             <td>${esc(r["Kategori"]||"-")}</td>
             <td>${rupiah(r["Biaya Bulanan"]||0)}</td>
             <td>${badge(r["Status Paket"]||"Aktif")}</td>
-            <td><button class="btn btn-light" onclick='openPaketModal(${JSON.stringify(r)})'>Edit</button></td>
+            <td><div class="actions">
+              <button class="btn btn-light" onclick='openPaketModal(${JSON.stringify(r)})'>Edit</button>
+              <button class="btn btn-danger" onclick='hapusPaket(${JSON.stringify(r["ID Paket"])},${JSON.stringify(r["Nama Paket"])})'>Hapus</button>
+            </div></td>
           </tr>`).join("")}</tbody>
       </table>`:empty("Belum ada paket program.");
   }
@@ -2169,20 +2172,31 @@ Sanggar Mam Is Learning Hub`;
     }
   }
 
-  async function buatPaketAwal(){
-    if((db.paket||[]).length){
-      if(!confirm("Paket Program sudah tersedia. Tetap periksa daftar paket yang ada.")) return;
-      setKelasTab("paket");
-      return;
-    }
+
+  async function pulihkanPaketLama(){
+    if(!confirm("Pulihkan nama paket dan harga dari data kelas/program lama? Data paket yang sudah benar tidak akan dihapus.")) return;
     try{
-      const r=await jsonp("seedPaketDefault",{key:API_KEY});
-      if(!r.status) throw new Error(r.message||"Gagal membuat paket awal.");
+      const r=await jsonp("pulihkanPaketLama",{key:API_KEY});
+      if(!r.status) throw new Error(r.message||"Pemulihan paket gagal.");
       await loadBootstrap();
       setKelasTab("paket");
-      toast(r.message || "Paket awal berhasil dibuat.");
+      toast(r.message||"Paket dan harga lama berhasil dipulihkan.");
     }catch(e){
-      alert(e.message||"Gagal membuat paket awal.");
+      alert(e.message||"Pemulihan paket gagal.");
+    }
+  }
+
+
+  async function hapusPaket(idPaket,nama){
+    if(!confirm(`Hapus Paket Program “${nama}”? Paket yang masih dipakai kelas aktif tidak dapat dihapus.`)) return;
+    try{
+      const r=await jsonp("deletePaket",{key:API_KEY,id:idPaket});
+      if(!r.status) throw new Error(r.message||"Paket gagal dihapus.");
+      await loadBootstrap();
+      setKelasTab("paket");
+      toast(r.message||"Paket berhasil dihapus.");
+    }catch(e){
+      alert(e.message||"Paket gagal dihapus.");
     }
   }
 
