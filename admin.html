@@ -534,7 +534,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v7.0</small>
+        <small>Admin Learning Hub v7.1</small>
       </div>
     </div>
 
@@ -691,6 +691,7 @@
           <div><h3>Paket, Kelas & Jadwal</h3><p>Atur paket pendaftaran, tiga ruang belajar, jadwal, pengajar, kapasitas, dan penempatan siswa.</p></div>
           <div class="actions">
             <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
+            <button class="btn btn-light" onclick="buatPaketAwal()">⚡ Buat Paket Awal</button>
             <button class="btn btn-primary" onclick="openKelasModal()">+ Kelas & Jadwal</button>
           </div>
         </div>
@@ -701,11 +702,17 @@
           <button class="btn btn-light" id="tabPaketBtn" onclick="setKelasTab('paket')">Paket Program</button>
           <select id="jadwalHari" onchange="renderPapanJadwal()">
             <option>Senin</option><option>Selasa</option><option>Rabu</option>
-            <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+            <option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
           </select>
         </div>
 
         <div id="kelasTabJadwal">
+          <div class="card" style="margin-bottom:14px;background:#eff6ff">
+            <strong>Cara memakai:</strong>
+            1) Pastikan Paket Program sudah tersedia,
+            2) klik kotak ruang kosong untuk membuat kelas,
+            3) klik kelas yang sudah dibuat untuk menempatkan peserta.
+          </div>
           <div class="card" style="margin-bottom:14px">
             <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px">
               <span>🟢 Tersedia</span><span>🟡 Hampir penuh</span>
@@ -1291,7 +1298,7 @@
             <td>${isi}/${kap}</td>
             <td>${badge(r["Status Kelas"])}</td>
             <td><div class="actions">
-              <button class="btn btn-light" onclick='openKelasDetail(${JSON.stringify(r["ID Kelas"])})'>Peserta</button>
+              <button class="btn btn-primary" onclick='openKelasDetail(${JSON.stringify(r["ID Kelas"])})'>+ Peserta</button>
               <button class="btn btn-light" onclick='openKelasModal(${JSON.stringify(r)})'>Edit</button>
             </div></td>
           </tr>`;
@@ -1368,7 +1375,7 @@
       </div>
       <p><b>Paket:</b> ${esc(k["Nama Paket"]||"-")} &nbsp; · &nbsp; <b>Pengajar:</b> ${esc(k["Nama Pengajar"]||"-")}</p>
       <div class="field">
-        <label>Tambahkan siswa ke kelas ini</label>
+        <label>Tempatkan Peserta ke Jadwal Kelas</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <select id="pilihSiswaPenempatan" style="flex:1;min-width:240px" ${peserta.length>=kap?"disabled":""}>
             <option value="">Pilih siswa aktif</option>
@@ -1376,7 +1383,7 @@
           </select>
           <button class="btn btn-primary" onclick='tempatkanSiswa(${JSON.stringify(idKelas)})' ${peserta.length>=kap?"disabled":""}>+ Tempatkan</button>
         </div>
-        ${peserta.length>=kap?'<small style="color:var(--red)">Kelas sudah penuh.</small>':'<small>Sistem otomatis memeriksa kapasitas dan bentrok jadwal siswa.</small>'}
+        ${peserta.length>=kap?'<small style="color:var(--red)">Kelas sudah penuh.</small>':'<small>Pilih siswa lalu klik <b>Tempatkan</b>. Sistem memeriksa kapasitas dan bentrok jadwal siswa.</small>'}
       </div>
       <h4 style="margin-top:20px">Daftar Peserta</h4>
       ${peserta.length?`<div class="table-wrap"><table><thead><tr><th>No.</th><th>Nama Siswa</th><th>Tanggal Masuk</th><th>Status</th></tr></thead><tbody>
@@ -2105,6 +2112,23 @@ Sanggar Mam Is Learning Hub`;
     });
   }
 
+  async function buatPaketAwal(){
+    if((db.paket||[]).length){
+      if(!confirm("Paket Program sudah tersedia. Tetap periksa daftar paket yang ada.")) return;
+      setKelasTab("paket");
+      return;
+    }
+    try{
+      const r=await jsonp("seedPaketDefault",{key:API_KEY});
+      if(!r.status) throw new Error(r.message||"Gagal membuat paket awal.");
+      toast(r.message);
+      await loadBootstrap();
+      setKelasTab("paket");
+    }catch(e){
+      alert(e.message||"Gagal membuat paket awal.");
+    }
+  }
+
   function openPaketModal(r=null){
     openDynamicForm("paket",r,{
       title:r?"Edit Paket Program":"Tambah Paket Program",
@@ -2120,6 +2144,11 @@ Sanggar Mam Is Learning Hub`;
   }
 
   function openKelasModal(r=null,preset={}){
+    if(!(db.paket||[]).length){
+      alert("Paket Program masih kosong. Klik tombol “Buat Paket Awal” terlebih dahulu, atau buat paket secara manual.");
+      setKelasTab("paket");
+      return;
+    }
     const pengajarOptions = [{value:"",label:"Belum ditentukan"}].concat(db.pengajar.filter(x=>String(x["Status Aktif"]||"").toLowerCase()==="aktif").map(x=>({
       value:x["ID Pengajar"]+"||"+x["Nama Pengajar"],
       label:x["Nama Pengajar"]
@@ -2138,7 +2167,7 @@ Sanggar Mam Is Learning Hub`;
       fields:[
         field("paketGabung","Paket Program","select",r?(r["ID Paket"]+"||"+r["Nama Paket"]):"||",true,paketOptions),
         field("namaKelas","Nama Kelas","text",r?.["Nama Kelas"]||"",false),
-        field("hari","Hari","select",hari,true,["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"]),
+        field("hari","Hari","select",hari,true,["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]),
         field("jamMulai","Jam Mulai","time",mulai,true),
         field("jamSelesai","Jam Selesai","time",selesai,true),
         field("ruang","Ruang","select",ruang,true,["Ruang 1","Ruang 2","Ruang 3"]),
