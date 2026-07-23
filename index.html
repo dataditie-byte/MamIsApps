@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png?v=9">
-<link rel="manifest" href="manifest.json?v=9">
+<link rel="apple-touch-icon" href="icon-192.png?v=10">
+<link rel="manifest" href="manifest.json?v=10">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Mam Is Learning Hub</title>
 <style>
@@ -97,7 +97,7 @@
     </div>
 
     <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);text-align:center">
-      © <span id="year"></span> Sanggar Mam Is Learning Hub · Web v7.5
+      © <span id="year"></span> Sanggar Mam Is Learning Hub · Web v8.0
     </div>
   </div>
 </footer>
@@ -224,8 +224,8 @@ function v(id){
 }
 
 
-const CACHE_KELAS_KEY="mamis_paket_program_v1";
-const CACHE_TIME_KEY="mamis_paket_program_v1_time";
+const CACHE_KELAS_KEY="mamis_paket_program_v8";
+const CACHE_TIME_KEY="mamis_paket_program_v8_time";
 let syncingKelas=false;
 
 function normalizeKelas(data){
@@ -289,7 +289,7 @@ async function bacaKelasJsonLokal(){
   try{
     var ctrl = typeof AbortController!=="undefined" ? new AbortController() : null;
     var timer = ctrl ? setTimeout(function(){ctrl.abort();},5000) : null;
-    var res = await fetch("./kelas.json?v=9&t="+Date.now(),{
+    var res = await fetch("./kelas.json?v=10&t="+Date.now(),{
       cache:"no-store",
       signal:ctrl ? ctrl.signal : undefined
     });
@@ -386,7 +386,7 @@ function render(){
       <span class="pill">${esc(k.jenjang||"")}</span>
       <span class="pill">${esc(k.kategori||"Kelas")}</span>
       <p>${esc(k.jadwal||"Jadwal kelas ditentukan admin setelah verifikasi")}</p>
-      <div class="price">${rupiah(k.biaya)}/bulan</div>
+      <div class="price">${Number(k.biaya)>0 ? rupiah(k.biaya)+"/bulan" : "Biaya dikonfirmasi admin"}</div>
       <button class="btn btn-primary" style="margin-top:12px"
         onclick="pilih('${esc(k.idKelas)}')">Pilih</button>
     </article>
@@ -397,7 +397,7 @@ function render(){
       <input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()">
       <span>
         <b>${esc(k.namaKelas)}</b><br>
-        <small>${rupiah(k.biaya)}/bulan · Jadwal ditentukan admin</small>
+        <small>${Number(k.biaya)>0 ? rupiah(k.biaya)+"/bulan" : "Biaya dikonfirmasi admin"} · Jadwal ditentukan admin</small>
       </span>
     </label>
   `).join("");
@@ -617,11 +617,11 @@ async function perbaikiAplikasi(){
       await Promise.all(regs.map(function(r){return r.unregister();}));
     }
   }catch(e){}
-  location.replace(location.pathname+"?v=9&t="+Date.now());
+  location.replace(location.pathname+"?v=10&t="+Date.now());
 }
 
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js?v=9",{scope:"./",updateViaCache:"none"})
+  navigator.serviceWorker.register("./service-worker.js?v=10",{scope:"./",updateViaCache:"none"})
     .then(reg=>{
       reg.update();
       console.log("Service worker aktif.");
