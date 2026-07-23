@@ -534,7 +534,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v7.2</small>
+        <small>Admin Learning Hub v7.4</small>
       </div>
     </div>
 
@@ -692,6 +692,7 @@
           <div class="actions">
             <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
             <button class="btn btn-light" onclick="buatPaketAwal()">⚡ Buat Paket Awal</button>
+            <button class="btn btn-light" onclick="sinkronJadwalKelas()">↻ Sinkron Jadwal</button>
             <button class="btn btn-primary" onclick="openKelasModal()">+ Kelas & Jadwal</button>
           </div>
         </div>
@@ -1283,7 +1284,7 @@
   function jumlahPesertaKelas(idKelas){
     return (db.peserta||[]).filter(p=>
       String(p["ID Kelas"])===String(idKelas) &&
-      String(p["Status Aktif"]||"").toLowerCase()==="aktif"
+      ["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase())
     ).length;
   }
 
@@ -1315,10 +1316,30 @@
     ` : empty("Belum ada kelas dan jadwal.");
   }
 
+
+  function normHariJadwal(v){
+    const s=String(v||"").trim().toLowerCase();
+    const map={monday:"Senin",tuesday:"Selasa",wednesday:"Rabu",thursday:"Kamis",friday:"Jumat",saturday:"Sabtu",sunday:"Minggu"};
+    if(map[s]) return map[s];
+    return String(v||"").trim().replace(/^./,c=>c.toUpperCase());
+  }
+
+  function normJamJadwal(v){
+    const s=String(v||"").trim().replace(".",":");
+    const m=s.match(/(\d{1,2}):(\d{2})/);
+    return m ? `${String(Number(m[1])).padStart(2,"0")}:${String(Number(m[2])).padStart(2,"0")}` : s;
+  }
+
+  function normRuangJadwal(v){
+    const s=String(v||"").trim().toLowerCase().replace(/\s+/g," ");
+    const m=s.match(/(?:ruang\s*)?([123])/);
+    return m ? `Ruang ${m[1]}` : String(v||"").trim();
+  }
+
   function slotJadwal(){
     const set=new Set(["09:00–10:00","10:00–11:00","11:00–12:00","13:00–15:00","14:00–15:00","15:00–16:00","16:00–17:00","17:00–18:30","18:30–20:00"]);
     (db.kelas||[]).forEach(k=>{
-      if(k["Jam Mulai"]&&k["Jam Selesai"]) set.add(`${k["Jam Mulai"]}–${k["Jam Selesai"]}`);
+      if(k["Jam Mulai"]&&k["Jam Selesai"]) set.add(`${normJamJadwal(k["Jam Mulai"])}–${normJamJadwal(k["Jam Selesai"])}`);
     });
     return [...set].sort((a,b)=>a.localeCompare(b));
   }
@@ -1336,7 +1357,7 @@
     const ruang=["Ruang 1","Ruang 2","Ruang 3"];
     const slots=slotJadwal();
     const kelasHari=(db.kelas||[]).filter(k=>
-      String(k["Hari"]||"")===hari &&
+      normHariJadwal(k["Hari"])===normHariJadwal(hari) &&
       String(k["Status Kelas"]||"").toLowerCase()==="aktif"
     );
 
@@ -1347,7 +1368,11 @@
           <tbody>${slots.map(slot=>{
             const [mulai,selesai]=slot.split("–");
             return `<tr><td><strong>${esc(slot)}</strong></td>${ruang.map(r=>{
-              const k=kelasHari.find(x=>String(x["Ruang"])===r && String(x["Jam Mulai"])===mulai && String(x["Jam Selesai"])===selesai);
+              const k=kelasHari.find(x=>
+                normRuangJadwal(x["Ruang"])===normRuangJadwal(r) &&
+                normJamJadwal(x["Jam Mulai"])===normJamJadwal(mulai) &&
+                normJamJadwal(x["Jam Selesai"])===normJamJadwal(selesai)
+              );
               if(!k) return `<td><button class="btn btn-light" style="width:100%;min-height:92px;border-style:dashed" onclick='openKelasModal(null,${JSON.stringify({hari,jamMulai:mulai,jamSelesai:selesai,ruang:r})})'>＋ Kelas tersedia<br><small>${r}</small></button></td>`;
               const isi=jumlahPesertaKelas(k["ID Kelas"]);
               const kap=Number(k["Kapasitas"]||8);
@@ -1368,7 +1393,7 @@
   function openKelasDetail(idKelas){
     const k=(db.kelas||[]).find(x=>String(x["ID Kelas"])===String(idKelas));
     if(!k) return;
-    const peserta=(db.peserta||[]).filter(p=>String(p["ID Kelas"])===String(idKelas)&&String(p["Status Aktif"]||"").toLowerCase()==="aktif");
+    const peserta=(db.peserta||[]).filter(p=>String(p["ID Kelas"])===String(idKelas)&&["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase()));
     const kap=Number(k["Kapasitas"]||8);
     const tersedia=(db.siswa||[]).filter(s=>{
       if(String(s["Status Aktif"]||"").toLowerCase()!=="aktif") return false;
@@ -1376,7 +1401,7 @@
 
       const paketPeserta=(db.peserta||[])
         .filter(p=>String(p["ID Siswa"])===String(s["ID Siswa"]) &&
-                   String(p["Status Aktif"]||"").toLowerCase()==="aktif")
+                   ["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase()))
         .map(p=>String(p["ID Paket"]||""))
         .filter(Boolean);
 
@@ -1420,10 +1445,12 @@
     try{
       const r=await jsonp("tempatkanSiswa",{key:API_KEY,data:JSON.stringify({idSiswa,idKelas,tanggalMasuk:today()})});
       if(!r.status) throw new Error(r.message||"Penempatan gagal.");
-      toast(r.message);
       closeKelasDetail();
       await loadBootstrap();
+      renderPapanJadwal();
+      renderKelas();
       openKelasDetail(idKelas);
+      toast(r.message || "Peserta berhasil ditempatkan.");
     }catch(e){alert(e.message||"Penempatan gagal.");}
   }
 
@@ -2127,6 +2154,19 @@ Sanggar Mam Is Learning Hub`;
         field("statusAktif","Status","select",r?.["Status Aktif"] || "Aktif",true,["Aktif","Tidak Aktif"])
       ]
     });
+  }
+
+
+  async function sinkronJadwalKelas(){
+    try{
+      const r=await jsonp("sinkronJadwalKelas",{key:API_KEY});
+      if(!r.status) throw new Error(r.message||"Sinkronisasi gagal.");
+      await loadBootstrap();
+      setKelasTab("jadwal");
+      toast(r.message||"Jadwal berhasil disinkronkan.");
+    }catch(e){
+      alert(e.message||"Sinkronisasi jadwal gagal.");
+    }
   }
 
   async function buatPaketAwal(){
