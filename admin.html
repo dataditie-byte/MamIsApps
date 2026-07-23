@@ -534,7 +534,7 @@
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <strong>Sanggar Mam Is</strong>
-        <small>Admin Learning Hub v8.0</small>
+        <small>Admin Learning Hub v8.1</small>
       </div>
     </div>
 
@@ -691,7 +691,7 @@
           <div><h3>Paket, Kelas & Jadwal</h3><p>Paket Program adalah master pendaftaran dan harga. Kelas Jadwal hanya mengatur hari, jam, ruang, pengajar, dan peserta.</p></div>
           <div class="actions">
             <button class="btn btn-light" onclick="openPaketModal()">+ Paket Program</button>
-            <button class="btn btn-light" onclick="pulihkanPaketLama()">↻ Pulihkan Paket & Harga Lama</button>
+            <button class="btn btn-light" onclick="pulihkanHargaPaket()">↻ Pulihkan Harga Lama</button>
             <button class="btn btn-light" onclick="sinkronJadwalKelas()">↻ Sinkron Jadwal</button>
             <button class="btn btn-primary" onclick="openKelasModal()">+ Kelas & Jadwal</button>
           </div>
@@ -2173,15 +2173,21 @@ Sanggar Mam Is Learning Hub`;
   }
 
 
-  async function pulihkanPaketLama(){
-    if(!confirm("Pulihkan nama paket dan harga dari data kelas/program lama? Data paket yang sudah benar tidak akan dihapus.")) return;
+  async function pulihkanHargaPaket(){
+    if(!confirm("Pulihkan biaya Paket Program dari data kelas/program lama?")) return;
     try{
-      const r=await jsonp("pulihkanPaketLama",{key:API_KEY});
-      if(!r.status) throw new Error(r.message||"Pemulihan paket gagal.");
+      const r=await jsonp("pulihkanHargaPaket",{key:API_KEY});
+      if(!r.status) throw new Error(r.message||"Pemulihan harga gagal.");
       await loadBootstrap();
       setKelasTab("paket");
-      toast(r.message||"Paket dan harga lama berhasil dipulihkan.");
+      toast(r.message||"Harga paket berhasil dipulihkan.");
+      if(r.belumDitemukan && r.belumDitemukan.length){
+        alert("Harga belum ditemukan untuk: "+r.belumDitemukan.join(", "));
+      }
     }catch(e){
+      alert(e.message||"Pemulihan harga gagal.");
+    }
+  }catch(e){
       alert(e.message||"Pemulihan paket gagal.");
     }
   }
