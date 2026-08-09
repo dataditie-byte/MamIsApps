@@ -488,6 +488,24 @@
   
 #papanJadwalKelas td{vertical-align:top}
 #jadwalDetailModal .card{box-shadow:none;border:1px solid var(--line)}
+
+
+  /* Pemilih siswa jadwal: filter jenjang + pencarian nama */
+  .student-picker{border:1px solid var(--line);border-radius:16px;background:#f8fbff;padding:12px}
+  .student-picker-tools{display:grid;grid-template-columns:180px 1fr;gap:9px;margin-bottom:10px}
+  .student-picker-results{display:grid;gap:8px;max-height:310px;overflow:auto;padding-right:3px}
+  .student-pick-item{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:13px;padding:10px 12px;cursor:pointer;color:var(--ink)}
+  .student-pick-item:hover{border-color:#93b8e8;background:#f7fbff}
+  .student-pick-item.selected{border:2px solid var(--blue);background:#eef6ff}
+  .student-pick-item.in-current{cursor:not-allowed;background:#f1f5f9;opacity:.82}
+  .student-pick-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .student-pick-meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .student-pick-schedules{font-size:11px;color:#475569;margin-top:6px;line-height:1.45}
+  .student-badge{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap;background:#eaf4ff;color:var(--navy)}
+  .student-badge.current{background:#dcfce7;color:#166534}
+  .student-selected-info{margin-top:9px;padding:9px 10px;border-radius:11px;background:#eaf4ff;color:var(--navy);font-size:12px;font-weight:700}
+  @media(max-width:620px){.student-picker-tools{grid-template-columns:1fr}}
+
 </style>
 </head>
 
@@ -1595,9 +1613,10 @@
     const peserta=pesertaAktifPadaJadwal(idJadwal);
     const kapasitas=Math.max(1,Number(jadwal["Kapasitas"]||8));
 
+    // Semua siswa aktif tetap tersedia pada pencarian. Siswa yang sudah
+    // mengikuti jadwal lain tidak disembunyikan karena dapat mengambil kelas tambahan.
     const siswaTersedia=(db.siswa||[]).filter(s=>
-      String(s["Status Aktif"]||"").toLowerCase()==="aktif" &&
-      !peserta.some(p=>String(p["ID Siswa"])===String(s["ID Siswa"]))
+      String(s["Status Aktif"]||"").toLowerCase()==="aktif"
     );
 
     document.getElementById("jadwalDetailTitle").textContent=
@@ -1633,27 +1652,35 @@
       <div class="field">
         <label>Tambahkan Peserta</label>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <select id="pilihSiswaJadwal"
-                  style="flex:1;min-width:260px"
-                  ${peserta.length>=kapasitas?"disabled":""}>
-            <option value="">Pilih siswa aktif</option>
-            ${siswaTersedia.map(s=>`
-              <option value="${attr(s["ID Siswa"])}">
-                ${esc(s["Nama Siswa"])} · ${esc(s["Jenjang"]||"")}
-              </option>
-            `).join("")}
-          </select>
+        <div class="student-picker">
+          <div class="student-picker-tools">
+            <select id="filterJenjangJadwal"
+                    onchange='renderPilihanSiswaJadwal(${JSON.stringify(idJadwal)})'
+                    ${peserta.length>=kapasitas?"disabled":""}>
+              ${opsiJenjangSiswaJadwal(jadwal["ID Kelas"])}
+            </select>
+            <input id="cariSiswaJadwal" type="search"
+                   placeholder="Ketik nama siswa..."
+                   autocomplete="off"
+                   oninput='renderPilihanSiswaJadwal(${JSON.stringify(idJadwal)})'
+                   ${peserta.length>=kapasitas?"disabled":""}>
+          </div>
 
-          <button class="btn btn-primary"
+          <input type="hidden" id="pilihSiswaJadwal" value="">
+          <div id="hasilCariSiswaJadwal" class="student-picker-results"></div>
+          <div id="siswaJadwalTerpilih" class="student-selected-info" style="display:none"></div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:9px">
+          <button class="btn btn-primary" id="btnTambahPesertaJadwal"
                   onclick='tambahkanPesertaJadwal(${JSON.stringify(idJadwal)})'
                   ${peserta.length>=kapasitas?"disabled":""}>
-            + Tambahkan
+            + Tambahkan ke Jadwal
           </button>
         </div>
 
         <small>
-          Sistem memeriksa kapasitas, peserta ganda, dan bentrok jadwal siswa.
+          Semua siswa aktif tetap dapat dicari. Siswa yang mengikuti kelas lain tetap dapat dipilih untuk kelas tambahan. Sistem tetap memeriksa kapasitas, peserta ganda, dan bentrok jadwal siswa.
         </small>
       </div>
 
@@ -1699,6 +1726,105 @@
     `;
 
     document.getElementById("jadwalDetailModal").classList.add("open");
+    renderPilihanSiswaJadwal(idJadwal,true);
+  }
+
+  function opsiJenjangSiswaJadwal(idKelas){
+    const program=(db.kelas||[]).find(k=>String(k["ID Kelas"])===String(idKelas));
+    const defaultJenjang=String(program?.["Jenjang"]||"").trim();
+    const jenjang=[...new Set((db.siswa||[])
+      .filter(s=>String(s["Status Aktif"]||"").toLowerCase()==="aktif")
+      .map(s=>String(s["Jenjang"]||"").trim())
+      .filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,"id"));
+
+    return `<option value="">Semua jenjang</option>`+
+      jenjang.map(j=>`<option value="${attr(j)}" ${j===defaultJenjang?"selected":""}>${esc(j)}</option>`).join("");
+  }
+
+  function jadwalYangDiikutiSiswa(idSiswa){
+    const links=(db.pesertaJadwal||[]).filter(p=>
+      String(p["ID Siswa"])===String(idSiswa) &&
+      ["","aktif","active","ya"].includes(String(p["Status Aktif"]||"").trim().toLowerCase())
+    );
+    return links.map(p=>{
+      const j=(db.jadwalKelas||[]).find(x=>String(x["ID Jadwal"])===String(p["ID Jadwal"]));
+      return j||null;
+    }).filter(Boolean);
+  }
+
+  function renderPilihanSiswaJadwal(idJadwal,reset=false){
+    const hasil=document.getElementById("hasilCariSiswaJadwal");
+    const filterEl=document.getElementById("filterJenjangJadwal");
+    const cariEl=document.getElementById("cariSiswaJadwal");
+    const hidden=document.getElementById("pilihSiswaJadwal");
+    if(!hasil||!filterEl||!cariEl||!hidden) return;
+
+    if(reset){
+      hidden.value="";
+      cariEl.value="";
+    }
+
+    const filter=String(filterEl.value||"").trim().toLowerCase();
+    const q=String(cariEl.value||"").trim().toLowerCase();
+    const pesertaKini=new Set(pesertaAktifPadaJadwal(idJadwal).map(p=>String(p["ID Siswa"])));
+
+    let rows=(db.siswa||[]).filter(s=>String(s["Status Aktif"]||"").toLowerCase()==="aktif");
+    if(filter) rows=rows.filter(s=>String(s["Jenjang"]||"").trim().toLowerCase()===filter);
+    if(q) rows=rows.filter(s=>{
+      const hay=[s["Nama Siswa"],s["Kelas Sekolah"],s["Nama Sekolah"]].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+
+    rows.sort((a,b)=>String(a["Nama Siswa"]||"").localeCompare(String(b["Nama Siswa"]||""),"id"));
+
+    if(!rows.length){
+      hasil.innerHTML=`<div class="empty" style="padding:15px">Tidak ada siswa yang sesuai filter/pencarian.</div>`;
+      return;
+    }
+
+    hasil.innerHTML=rows.map(s=>{
+      const id=String(s["ID Siswa"]||"");
+      const current=pesertaKini.has(id);
+      const jadwal=jadwalYangDiikutiSiswa(id);
+      const jadwalLain=jadwal.filter(j=>String(j["ID Jadwal"])!==String(idJadwal));
+      const selected=String(hidden.value)===id;
+      const meta=[s["Jenjang"],s["Kelas Sekolah"],s["Nama Sekolah"]].filter(Boolean).join(" · ")||"Data sekolah belum diisi";
+      const jadwalText=jadwalLain.length
+        ? jadwalLain.slice(0,3).map(j=>`${esc(j["Nama Program"]||j["Nama Jadwal"]||"Kelas")} · ${esc(j["Hari"]||"")} ${esc(jamNormal(j["Jam Mulai"]))}`).join("<br>")+
+          (jadwalLain.length>3?`<br>+ ${jadwalLain.length-3} jadwal lainnya`:"")
+        : "Belum mengikuti jadwal lain";
+
+      return `<button type="button"
+        class="student-pick-item ${selected?"selected":""} ${current?"in-current":""}"
+        ${current?"disabled":""}
+        onclick='pilihSiswaUntukJadwal(${JSON.stringify(idJadwal)},${JSON.stringify(id)},${JSON.stringify(String(s["Nama Siswa"]||""))})'>
+        <div class="student-pick-head">
+          <div>
+            <strong>${esc(s["Nama Siswa"]||"-")}</strong>
+            <div class="student-pick-meta">${esc(meta)}</div>
+          </div>
+          ${current
+            ? `<span class="student-badge current">Sudah di jadwal ini</span>`
+            : jadwalLain.length
+              ? `<span class="student-badge">${jadwalLain.length} jadwal aktif</span>`
+              : `<span class="student-badge">Belum dijadwalkan</span>`}
+        </div>
+        <div class="student-pick-schedules">${jadwalText}</div>
+      </button>`;
+    }).join("");
+  }
+
+  function pilihSiswaUntukJadwal(idJadwal,idSiswa,namaSiswa){
+    const hidden=document.getElementById("pilihSiswaJadwal");
+    const info=document.getElementById("siswaJadwalTerpilih");
+    if(!hidden) return;
+    hidden.value=idSiswa;
+    if(info){
+      info.style.display="block";
+      info.innerHTML=`Dipilih: <strong>${esc(namaSiswa)}</strong>`;
+    }
+    renderPilihanSiswaJadwal(idJadwal);
   }
 
   function closeJadwalDetail(){
