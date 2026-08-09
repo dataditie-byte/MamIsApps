@@ -690,10 +690,10 @@
         <div class="section-head">
           <div>
             <h3>Kelas & Jadwal</h3>
-            <p>Program dan biaya tetap memakai data lama. Jadwal operasional dikelola terpisah berdasarkan hari, jam, ruang, pengajar, dan peserta.</p>
+            <p>Kelola Program Belajar beserta deskripsi, materi, dan biaya. Jadwal operasional tetap dikelola terpisah berdasarkan hari, jam, ruang, pengajar, dan peserta.</p>
           </div>
           <div class="actions">
-            <button class="btn btn-light" onclick="openKelasModal()">+ Program Kelas</button>
+            <button class="btn btn-light" onclick="openKelasModal()">+ Program Belajar</button>
             <button class="btn btn-primary" onclick="openJadwalModal()">+ Jadwal Kelas</button>
           </div>
         </div>
@@ -701,7 +701,7 @@
         <div class="toolbar">
           <button class="btn btn-primary" id="tabPapanJadwal" onclick="setTabKelasJadwal('papan')">Papan Jadwal</button>
           <button class="btn btn-light" id="tabDaftarJadwal" onclick="setTabKelasJadwal('daftar')">Daftar Jadwal</button>
-          <button class="btn btn-light" id="tabProgramKelas" onclick="setTabKelasJadwal('program')">Program & Biaya</button>
+          <button class="btn btn-light" id="tabProgramKelas" onclick="setTabKelasJadwal('program')">Program Belajar</button>
 
           <select id="filterHariJadwal" onchange="renderPapanJadwal()">
             <option>Senin</option>
@@ -1773,24 +1773,32 @@
     }
   }
 
+  function ringkasMateriProgram(value){
+    const items=String(value||"").split(/\r?\n|[;•]+/).map(x=>x.trim()).filter(Boolean);
+    if(!items.length) return "Belum diisi";
+    const shown=items.slice(0,3).join(", ");
+    return shown+(items.length>3?` +${items.length-3} lainnya`:"");
+  }
+
   function renderKelas(){
     document.getElementById("kelasTable").innerHTML = db.kelas.length ? `
       <table>
-        <thead><tr><th>ID</th><th>Kelas</th><th>Jenjang</th><th>Pengajar</th><th>Jadwal</th><th>Biaya</th><th>Status</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>Program</th><th>Jenjang</th><th>Deskripsi & Materi</th><th>Biaya</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody>${db.kelas.map(r=>`
           <tr>
-            <td>${esc(r["ID Kelas"])}</td>
-            <td>${esc(r["Nama Kelas"])}</td>
+            <td><strong>${esc(r["Nama Kelas"])}</strong><br><small>${esc(r["Kategori"]||"Program Belajar")} · ${esc(r["ID Kelas"])}</small></td>
             <td>${esc(r["Jenjang"])}</td>
-            <td>${esc(r["Nama Pengajar"] || "-")}</td>
-            <td>${esc(r["Jadwal"] || "-")}</td>
+            <td style="min-width:300px">
+              <div>${esc(r["Deskripsi Program"] || "Belum ada deskripsi program.")}</div>
+              <small><b>Materi:</b> ${esc(ringkasMateriProgram(r["Materi Program"]))}</small>
+            </td>
             <td>${rupiah(r["Biaya Bulanan"] || 0)}</td>
             <td>${badge(r["Status Kelas"])}</td>
-            <td><button class="btn btn-light" onclick='openKelasModal(${JSON.stringify(r)})'>Edit</button></td>
+            <td><button class="btn btn-light" onclick='openKelasModal(${JSON.stringify(r)})'>Edit Program</button></td>
           </tr>
         `).join("")}</tbody>
       </table>
-    ` : empty("Belum ada kelas.");
+    ` : empty("Belum ada program belajar.");
   }
 
   function isiFilterPesertaKelas(){
@@ -2496,23 +2504,25 @@ Sanggar Mam Is Learning Hub`;
   }
 
   function openKelasModal(r=null){
-    const pengajarOptions = db.pengajar.map(x=>({
+    const pengajarOptions = [{value:"",label:"Belum ditentukan"}].concat(db.pengajar.map(x=>({
       value:x["ID Pengajar"]+"||"+x["Nama Pengajar"],
       label:x["Nama Pengajar"]
-    }));
+    })));
 
     openDynamicForm("kelas",r,{
-      title:r?"Edit Kelas":"Tambah Kelas",
+      title:r?"Edit Program Belajar":"Tambah Program Belajar",
       fields:[
-        field("namaKelas","Nama Kelas","text",r?.["Nama Kelas"],true),
+        field("namaKelas","Nama Program","text",r?.["Nama Kelas"],true),
         field("jenjang","Jenjang","select",r?.["Jenjang"],true,["TK","SD","SMP","SMA","Umum"]),
-        field("kategori","Kategori","text",r?.["Kategori"]),
-        field("pengajarGabung","Pengajar","select",
-          r ? (r["ID Pengajar"]+"||"+r["Nama Pengajar"]) : "",
+        field("kategori","Mata Pelajaran / Kategori","text",r?.["Kategori"]),
+        field("deskripsiProgram","Deskripsi Program","textarea",r?.["Deskripsi Program"]),
+        field("materiProgram","Materi yang Dipelajari — satu materi per baris","textarea",r?.["Materi Program"]),
+        field("pengajarGabung","Pengajar Utama (opsional)","select",
+          r && r["ID Pengajar"] ? (r["ID Pengajar"]+"||"+r["Nama Pengajar"]) : "",
           false,pengajarOptions),
         field("biayaBulanan","Biaya Bulanan","number",r?.["Biaya Bulanan"] || 0),
-        field("jadwal","Jadwal","text",r?.["Jadwal"]),
-        field("statusKelas","Status","select",r?.["Status Kelas"] || "Aktif",true,["Aktif","Tidak Aktif"])
+        field("jadwal","Informasi Jadwal Publik (opsional)","text",r?.["Jadwal"] || "Jadwal dikonfirmasi admin"),
+        field("statusKelas","Status Program","select",r?.["Status Kelas"] || "Aktif",true,["Aktif","Tidak Aktif"])
       ]
     });
   }

@@ -1,0 +1,22 @@
+SANGGAR MAM IS — UPDATE PROGRAM BELAJAR
+
+1. Buka Apps Script yang saat ini dipakai Sanggar Mam Is.
+2. Backup Code.gs lama.
+3. Ganti seluruh Code.gs dengan file Code.gs dalam folder ini.
+4. Save.
+5. Jalankan setupDatabase() SATU KALI dari editor.
+   Fungsi ini akan menambahkan header baru tanpa menghapus data lama:
+   - Deskripsi Program
+   - Materi Program
+6. Beri izin jika Apps Script meminta otorisasi.
+7. Deploy > Manage deployments > Edit > pilih New version > Deploy.
+   URL Web App /exec tetap dapat dipakai oleh halaman GitHub.
+8. Buka admin.html dan uji Edit Program Belajar.
+9. Isi Deskripsi Program dan Materi Program (satu materi per baris), lalu Simpan.
+10. Buka index.html dan tekan Perbarui Semua Kelas untuk melihat hasilnya.
+
+PENTING:
+- Biaya Bulanan TIDAK dihapus dari database.
+- Harga hanya disembunyikan dari kartu Program Belajar publik.
+- Harga tetap dipakai untuk pendaftaran dan perhitungan pembayaran.
+- Kelas & Jadwal operasional tetap terpisah pada Jadwal_Kelas/Peserta_Jadwal.

@@ -7,7 +7,9 @@
       "jenjang": "TK/SD",
       "kategori": "Dasar",
       "biaya": 125000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan kemampuan dasar membaca, menulis, dan berhitung melalui aktivitas bertahap yang sesuai perkembangan anak.",
+      "materi": "Pengenalan huruf dan bunyi\nMembaca suku kata dan kata sederhana\nMenulis huruf, kata, dan kalimat sederhana\nKonsep angka dan bilangan\nPenjumlahan dan pengurangan dasar\nLatihan konsentrasi dan kesiapan belajar"
     },
     {
       "idKelas": "KLS-BACA",
@@ -15,7 +17,9 @@
       "jenjang": "TK/SD",
       "kategori": "Dasar",
       "biaya": 125000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Program penguatan kemampuan membaca untuk membantu siswa meningkatkan kelancaran, pemahaman, dan kepercayaan diri dalam membaca.",
+      "materi": "Pengenalan huruf dan bunyi\nMembaca suku kata\nMembaca kata dan kalimat\nKelancaran membaca\nPemahaman bacaan sederhana\nLatihan membaca terarah"
     },
     {
       "idKelas": "KLS-MAT-SD",
@@ -23,7 +27,9 @@
       "jenjang": "SD",
       "kategori": "Matematika",
       "biaya": 150000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan Matematika SD untuk memperkuat konsep dasar, ketelitian berhitung, dan kemampuan menyelesaikan soal.",
+      "materi": "Bilangan dan operasi hitung\nPecahan dan desimal\nPengukuran\nBangun datar dan bangun ruang\nPola dan penyajian data\nLatihan soal dan pemecahan masalah"
     },
     {
       "idKelas": "KLS-MAPEL-SD",
@@ -31,7 +37,9 @@
       "jenjang": "SD",
       "kategori": "Mata Pelajaran",
       "biaya": 200000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan mata pelajaran utama SD yang disesuaikan dengan jenjang kelas dan kebutuhan belajar siswa.",
+      "materi": "Matematika dasar\nBahasa Indonesia\nIPAS\nPenguatan literasi dan numerasi\nPendampingan tugas sekolah\nLatihan dan evaluasi belajar"
     },
     {
       "idKelas": "KLS-MAPEL-SMP",
@@ -39,7 +47,9 @@
       "jenjang": "SMP",
       "kategori": "Mata Pelajaran",
       "biaya": 225000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan mata pelajaran SMP untuk memperkuat pemahaman konsep, latihan soal, dan kesiapan menghadapi evaluasi sekolah.",
+      "materi": "Matematika\nBahasa Indonesia\nBahasa Inggris\nIPA\nPenguatan literasi dan numerasi\nLatihan soal dan persiapan evaluasi"
     },
     {
       "idKelas": "KLS-MAPEL-SMA",
@@ -47,7 +57,9 @@
       "jenjang": "SMA",
       "kategori": "Mata Pelajaran",
       "biaya": 250000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan mata pelajaran SMA yang berfokus pada penguatan konsep, latihan soal, dan kesiapan menghadapi evaluasi akademik.",
+      "materi": "Matematika\nBahasa Indonesia\nBahasa Inggris\nMateri sesuai peminatan dan kebutuhan siswa\nLatihan soal berbasis kompetensi\nPersiapan asesmen dan TKA"
     },
     {
       "idKelas": "KLS-E-SD",
@@ -55,7 +67,9 @@
       "jenjang": "SD",
       "kategori": "Bahasa Inggris",
       "biaya": 125000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pembelajaran Bahasa Inggris SD yang menyenangkan untuk membangun kosakata, pemahaman dasar, dan keberanian menggunakan bahasa Inggris.",
+      "materi": "Vocabulary dasar\nSimple expressions\nListening dasar\nReading sederhana\nGrammar dasar\nLatihan percakapan"
     },
     {
       "idKelas": "KLS-E-SMP",
@@ -63,7 +77,9 @@
       "jenjang": "SMP",
       "kategori": "Bahasa Inggris",
       "biaya": 150000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Penguatan Bahasa Inggris SMP untuk membantu siswa memahami grammar, teks, kosakata, serta meningkatkan kemampuan berkomunikasi.",
+      "materi": "Vocabulary\nGrammar\nReading comprehension\nListening\nWriting dasar\nLatihan soal dan conversation"
     },
     {
       "idKelas": "KLS-E-SMA",
@@ -71,7 +87,9 @@
       "jenjang": "SMA",
       "kategori": "Bahasa Inggris",
       "biaya": 200000,
-      "jadwal": "Jadwal dikonfirmasi admin"
+      "jadwal": "Jadwal dikonfirmasi admin",
+      "deskripsi": "Pendampingan Bahasa Inggris SMA untuk memperkuat pemahaman teks, grammar, kosakata, dan kesiapan menghadapi evaluasi akademik.",
+      "materi": "Reading comprehension\nVocabulary in context\nGrammar and sentence structure\nFunctional text\nListening dan writing\nLatihan soal dan persiapan TKA"
     }
   ]
 }

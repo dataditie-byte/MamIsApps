@@ -1,0 +1,15 @@
+SANGGAR MAM IS LEARNING HUB — FINAL FRONTEND v10
+
+Perubahan utama:
+- Harga tidak tampil di kartu Program Belajar publik.
+- Deskripsi Program dan Materi yang Dipelajari tampil di kartu publik.
+- Harga tetap tampil di tahap pendaftaran dan tetap dipakai perhitungan.
+- Admin: Tambah/Edit Program Belajar mendukung Deskripsi Program dan Materi Program.
+- Admin: tab Program & Biaya dirapikan menjadi Program Belajar.
+- Tulisan versi teknis pada footer publik dihapus.
+- kelas.json diperkaya dengan contoh deskripsi/materi sebagai fallback.
+- cache PWA dinaikkan ke v10.
+- file manifest duplikat dengan nama "manifest .json" dihapus.
+
+Untuk tes lokal: buka folder ini di VS Code lalu jalankan index.html dengan Live Server.
+Untuk penyimpanan field baru ke server, terapkan PATCH_CODE_GS_PROGRAM_BELAJAR.txt pada Apps Script terbaru.

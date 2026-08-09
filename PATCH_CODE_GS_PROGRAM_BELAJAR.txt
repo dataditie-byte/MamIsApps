@@ -1,0 +1,24 @@
+SANGGAR MAM IS — PATCH CODE.GS PROGRAM BELAJAR
+
+PENTING: repo GitHub tidak berisi Code.gs Apps Script, jadi file frontend final ini sudah siap, tetapi dua field baru harus ditambahkan ke Apps Script agar edit dari Admin tersimpan di Spreadsheet dan tampil di publik.
+
+1. Pada sheet Kelas tambahkan header (tanpa menghapus data lama):
+   Deskripsi Program
+   Materi Program
+
+2. Pada SCHEMA.Kelas pastikan urutan/header mencakup:
+   ID Kelas, Nama Kelas, Jenjang, Kategori, Deskripsi Program, Materi Program, ID Pengajar, Nama Pengajar, Biaya Bulanan, Status Kelas, Jadwal
+
+3. Pada addKelas_ simpan:
+   'Deskripsi Program': d.deskripsiProgram || '',
+   'Materi Program': d.materiProgram || '',
+
+4. Pada updateKelas_ simpan:
+   'Deskripsi Program': d.deskripsiProgram || '',
+   'Materi Program': d.materiProgram || '',
+
+5. Pada getPublicData_ objek kelas tambahkan:
+   deskripsi: r['Deskripsi Program'] || '',
+   materi: r['Materi Program'] || '',
+
+Jangan menghapus Biaya Bulanan. Harga tetap dibutuhkan untuk pendaftaran/tagihan, hanya disembunyikan dari kartu Program Belajar publik.
