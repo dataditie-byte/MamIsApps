@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Sanggar Mam Is Learning Hub",
+  "name": "Sanggar Belajar Mam Is Learning Hub",
   "short_name": "Mam Is",
-  "description": "Portal belajar, materi, latihan CBT, absensi, pembayaran, dan informasi Sanggar Mam Is.",
+  "description": "Portal belajar, materi, latihan CBT, absensi, pembayaran, dan informasi Sanggar Belajar Mam Is.",
   "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",

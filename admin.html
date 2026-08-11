@@ -7,10 +7,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#173b63">
-  <meta name="description" content="Dashboard Admin Sanggar Mam Is Learning Hub">
+  <meta name="description" content="Dashboard Admin Sanggar Belajar Mam Is Learning Hub">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="logo-mam-is.png">
-  <title>Admin | Sanggar Mam Is Learning Hub</title>
+  <title>Admin | Sanggar Belajar Mam Is Learning Hub</title>
 
   <style>
     :root{
@@ -514,10 +514,10 @@
 <section class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-brand">
-      <img src="logo-mam-is.png" alt="Logo Sanggar Mam Is" onerror="this.style.display='none'">
+      <img src="logo-mam-is.png" alt="Logo Sanggar Belajar Mam Is" onerror="this.style.display='none'">
       <div>
         <h1>Dashboard Admin</h1>
-        <p>Sanggar Mam Is Learning Hub · Admin v5.3.0</p>
+        <p>Sanggar Belajar Mam Is Learning Hub · Admin v5.3.0</p>
       </div>
     </div>
 
@@ -550,7 +550,7 @@
     <div class="brand">
       <img src="logo-mam-is.png" alt="Logo" onerror="this.style.display='none'">
       <div>
-        <strong>Sanggar Mam Is</strong>
+        <strong>Sanggar Belajar Mam Is</strong>
         <small>Admin Learning Hub v6.6.2</small>
       </div>
     </div>
@@ -585,7 +585,7 @@
         <button class="menu-mobile" onclick="toggleSidebar()">☰</button>
         <div>
           <h2 id="pageTitle">Dashboard</h2>
-          <p id="pageSubtitle">Ringkasan operasional Sanggar Mam Is</p>
+          <p id="pageSubtitle">Ringkasan operasional Sanggar Belajar Mam Is</p>
         </div>
       </div>
 
@@ -681,7 +681,7 @@
 
       <section class="page" id="page-siswa">
         <div class="section-head">
-          <div><h3>Data Siswa</h3><p>Kelola siswa Sanggar Mam Is</p></div>
+          <div><h3>Data Siswa</h3><p>Kelola siswa Sanggar Belajar Mam Is</p></div>
           <button class="btn btn-primary" onclick="openSiswaModal()">+ Tambah Siswa</button>
         </div>
         <div class="toolbar">
@@ -2432,7 +2432,7 @@
 
     const pesan = `Assalamu'alaikum Bapak/Ibu.
 
-Kami dari Sanggar Mam Is sedang memverifikasi pendaftaran:
+Kami dari Sanggar Belajar Mam Is sedang memverifikasi pendaftaran:
 
 Nomor Pendaftaran: ${r["ID Pendaftaran"] || "-"}
 Nama Siswa: ${r["Nama Siswa"] || "-"}
@@ -2443,7 +2443,7 @@ Nominal Dibayar: ${rupiah(r["Nominal Dibayar"] || 0)}
 Mohon kirimkan foto bukti pembayaran pada percakapan ini bila belum dikirim.
 
 Terima kasih.
-Sanggar Mam Is Learning Hub`;
+Sanggar Belajar Mam Is Learning Hub`;
 
     window.open(`https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`,"_blank","noopener");
   }
@@ -3014,7 +3014,7 @@ Sanggar Mam Is Learning Hub`;
 
     return `Assalamu'alaikum.
 
-Berikut akun Portal ${peran} Sanggar Mam Is:
+Berikut akun Portal ${peran} Sanggar Belajar Mam Is:
 
 Nama: ${nama}
 Username: ${username}
@@ -3026,7 +3026,7 @@ ${portalUrl}
 Mohon simpan username dan PIN ini serta tidak membagikannya kepada pihak lain.
 
 Terima kasih.
-Sanggar Mam Is Learning Hub`;
+Sanggar Belajar Mam Is Learning Hub`;
   }
 
   async function salinInformasiAkun(){
@@ -3152,7 +3152,7 @@ Sanggar Mam Is Learning Hub`;
     if(button) button.classList.add("active");
 
     const meta = {
-      dashboard:["Dashboard","Ringkasan operasional Sanggar Mam Is"],
+      dashboard:["Dashboard","Ringkasan operasional Sanggar Belajar Mam Is"],
       pendaftaran:["Pendaftaran","Kelola calon siswa baru"],
       siswa:["Siswa","Data siswa aktif dan akun"],
       pengajar:["Pengajar","Data tenaga pengajar"],

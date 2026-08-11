@@ -1,4 +1,4 @@
-SANGGAR MAM IS LEARNING HUB — FINAL FRONTEND v10
+SANGGAR BELAJAR MAM IS LEARNING HUB — FINAL FRONTEND v10
 
 Perubahan utama:
 - Harga tidak tampil di kartu Program Belajar publik.
