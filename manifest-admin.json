@@ -1,9 +1,9 @@
 {
-  "id": "./public-app",
-  "name": "Sanggar Belajar Mam Is",
-  "short_name": "Mam Is",
-  "description": "Portal belajar, materi, latihan CBT, absensi, pembayaran, dan informasi Sanggar Belajar Mam Is.",
-  "start_url": "./index.html?source=pwa-v12",
+  "id": "./admin-app",
+  "name": "Admin Sanggar Belajar Mam Is",
+  "short_name": "Admin Mam Is",
+  "description": "Akses administrasi Sanggar Belajar Mam Is.",
+  "start_url": "./admin.html?source=admin-pwa-v12",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -42,32 +42,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Portal Siswa",
-      "short_name": "Siswa",
-      "url": "./siswa.html",
-      "icons": [
-        {
-          "src": "./icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Dashboard Admin",
-      "short_name": "Admin",
-      "url": "./admin.html",
-      "icons": [
-        {
-          "src": "./icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
     }
   ]
 }

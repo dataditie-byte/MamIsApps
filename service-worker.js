@@ -1,5 +1,5 @@
-const CACHE_NAME="mamis-learning-hub-v11";
-const ASSETS=["./offline.html","./manifest.json","./logo-mam-is.png","./icon-192.png","./icon-512.png"];
+const CACHE_NAME="mamis-learning-hub-v12";
+const ASSETS=["./offline.html","./manifest.json","./manifest-admin.json","./logo-mam-is.png","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install",function(event){
   event.waitUntil(

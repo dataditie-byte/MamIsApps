@@ -1,0 +1,10 @@
+SANGGAR BELAJAR MAM IS — FINAL V12
+
+- Paket ini khusus file web/GitHub Pages.
+- Backend Apps Script yang sudah live tidak diubah dan tidak disertakan agar tidak tertimpa.
+- Pendaftaran berada di pendaftaran.html; halaman utama tidak menampilkan nominal biaya.
+- Kontak Admin WhatsApp: 081318997525. Desktop menampilkan ikon + teks, HP ikon WhatsApp bulat saja.
+- Modal Kelas & Jadwal Admin dibatasi tinggi layar dan tombol tutup tetap terlihat.
+- PWA publik memakai manifest.json.
+- PWA Admin memakai manifest-admin.json dan membuka langsung admin.html.
+- Setelah update, hapus shortcut/PWA Admin lama di Android lalu buka admin.html dan Tambahkan ke layar utama kembali.

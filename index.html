@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="icon-192.png?v=11">
-<link rel="manifest" href="manifest.json?v=11">
+<link rel="manifest" href="manifest.json?v=12">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Belajar Mam Is Learning Hub</title>
 <style>
@@ -26,8 +26,9 @@
 
 .wa-float{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;align-items:center;gap:9px;background:#16a34a;color:#fff;padding:12px 15px;border-radius:999px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.22)}
 .wa-float:hover{transform:translateY(-1px)}
-.wa-float .wa-icon{font-size:20px;line-height:1}
-@media(max-width:620px){.wa-float{right:12px;bottom:12px;padding:11px 13px}.wa-float .wa-label{display:none}}
+.wa-float .wa-icon{width:22px;height:22px;display:block;flex:0 0 22px}
+.wa-float .wa-icon svg{width:100%;height:100%;display:block;fill:currentColor}
+@media(max-width:620px){.wa-float{right:14px;bottom:18px;width:52px;height:52px;padding:0;justify-content:center;border-radius:50%}.wa-float .wa-icon{width:27px;height:27px;flex-basis:27px}.wa-float .wa-label{display:none}}
 </style>
 </head>
 <body>
@@ -85,553 +86,120 @@
 </footer>
 
 
-<a class="wa-float" href="https://wa.me/6281318997525?text=Halo%20Admin%20Sanggar%20Belajar%20Mam%20Is%2C%20saya%20ingin%20bertanya." target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp"><span class="wa-icon">💬</span><span class="wa-label">Kontak Admin</span></a>
+<a class="wa-float" href="https://wa.me/6281318997525?text=Halo%20Admin%20Sanggar%20Belajar%20Mam%20Is%2C%20saya%20ingin%20bertanya." target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp"><span class="wa-icon" aria-hidden="true"><svg viewBox="0 0 32 32" role="img"><path d="M19.11 17.36c-.28-.14-1.66-.82-1.92-.91-.26-.09-.45-.14-.64.14-.19.28-.73.91-.9 1.1-.17.19-.33.21-.61.07-.28-.14-1.18-.44-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.64-1.54-.87-2.11-.23-.55-.47-.48-.64-.49h-.54c-.19 0-.49.07-.75.35-.26.28-.99.97-.99 2.36s1.01 2.73 1.15 2.92c.14.19 1.99 3.04 4.82 4.26.67.29 1.2.46 1.61.59.68.21 1.29.18 1.78.11.54-.08 1.66-.68 1.9-1.33.23-.65.23-1.21.16-1.33-.07-.12-.26-.19-.54-.33zM16.03 4.4c-6.42 0-11.64 5.21-11.64 11.63 0 2.05.54 4.07 1.56 5.84L4.3 27.9l6.18-1.62a11.59 11.59 0 0 0 5.55 1.41h.01c6.41 0 11.63-5.22 11.63-11.64 0-3.11-1.21-6.03-3.41-8.23a11.56 11.56 0 0 0-8.23-3.42zm0 21.32h-.01c-1.73 0-3.43-.47-4.91-1.34l-.35-.21-3.67.96.98-3.58-.23-.37a9.63 9.63 0 0 1-1.48-5.14c0-5.34 4.35-9.68 9.69-9.68 2.59 0 5.02 1.01 6.85 2.84a9.61 9.61 0 0 1 2.83 6.85c-.01 5.34-4.36 9.67-9.7 9.67z"/></svg></span><span class="wa-label">Kontak Admin</span></a>
 
 <script>
-
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
-const WA_SANGGAR="6281318997525";
-const BIAYA_PENDAFTARAN=30000;
-function setKelasChecklistHtml(html){const el=document.getElementById("kelasChecklist");if(el)el.innerHTML=html;}
-
-
+const CACHE_KELAS_KEY="mamis_semua_kelas_v3";
+const CACHE_TIME_KEY="mamis_semua_kelas_v3_time";
 let kelas=[];
+let syncingKelas=false;
 let deferredPrompt=null;
+
+function esc(x){
+  return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
+}
 
 function api(action,params={},timeoutMs=12000){
   return new Promise((resolve,reject)=>{
     const cb="cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
-    const s=document.createElement("script");
+    const node=document.createElement("script");
     let done=false;
-
-    const timer=setTimeout(()=>{
-      if(done) return;
-      done=true;
-      delete window[cb];
-      s.remove();
-      reject(new Error("Koneksi server terlalu lama."));
-    },timeoutMs);
-
-    window[cb]=data=>{
-      if(done) return;
-      done=true;
-      clearTimeout(timer);
-      resolve(data);
-      delete window[cb];
-      s.remove();
-    };
-
-    params.action=action;
-    params.callback=cb;
-    params._ts=Date.now();
-    var qs=[];
-    Object.keys(params).forEach(function(key){
-      qs.push(encodeURIComponent(key)+"="+encodeURIComponent(params[key]==null?"":String(params[key])));
-    });
-    s.src=API_URL+"?"+qs.join("&");
-
-    s.onerror=()=>{
-      if(done) return;
-      done=true;
-      clearTimeout(timer);
-      delete window[cb];
-      s.remove();
-      reject(new Error("Gagal terhubung ke server."));
-    };
-
-    s.async=true;
-    s.crossOrigin="anonymous";
-    (document.head||document.documentElement).appendChild(s);
+    const timer=setTimeout(()=>finish(new Error("Koneksi server terlalu lama.")),timeoutMs);
+    function finish(err,data){
+      if(done) return; done=true; clearTimeout(timer); delete window[cb]; node.remove();
+      err?reject(err):resolve(data);
+    }
+    window[cb]=data=>finish(null,data);
+    params.action=action; params.callback=cb; params._ts=Date.now();
+    node.src=API_URL+"?"+Object.keys(params).map(k=>encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":String(params[k]))).join("&");
+    node.onerror=()=>finish(new Error("Gagal terhubung ke server."));
+    node.async=true; document.head.appendChild(node);
   });
 }
-
-async function apiRetry(action,params={},attempts=4){
-  let lastError=null;
-  for(let i=1;i<=attempts;i++){
-    try{
-      const timeout=i===1 ? 9000 : 15000;
-      return await api(action,params,timeout);
-    }catch(err){
-      lastError=err;
-      if(i<attempts){
-        const delay=Math.min(4500,900*i)+Math.floor(Math.random()*500);
-        await new Promise(r=>setTimeout(r,delay));
-      }
-    }
-  }
-  throw lastError || new Error("Server tidak merespons.");
-}
-
-function rupiah(n){
-  return new Intl.NumberFormat("id-ID",{
-    style:"currency",
-    currency:"IDR",
-    minimumFractionDigits:0
-  }).format(Number(n||0));
-}
-
-function esc(x){
-  return String(x==null?"":x)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
-
-function phoneNasional(x){
-  let n=String(x||"").replace(/\D/g,"");
-  if(!n) return "";
-  if(n.startsWith("0062")) n=n.slice(4);
-  if(n.startsWith("62")) n=n.slice(2);
-  n=n.replace(/^0+/,"");
-  if(n.startsWith("8")) n="0"+n;
-  if(!/^08\d{8,11}$/.test(n)) throw new Error("Nomor WhatsApp belum valid. Contoh: 081234567890.");
-  return n;
-}
-
-function phone(x){
-  const n=phoneNasional(x);
-  return n ? "62"+n.slice(1) : "";
-}
-
-function rapikanNomorWa(input){
-  const awal=String(input.value||"").trim();
-  if(!awal) return;
-  try{
-    input.value=phoneNasional(awal);
-    input.setCustomValidity("");
-  }catch(e){
-    input.setCustomValidity(e.message);
-    input.reportValidity();
-  }
-}
-
-function v(id){
-  return document.getElementById(id).value.trim();
-}
-
-
-const CACHE_KELAS_KEY="mamis_semua_kelas_v3";
-const CACHE_TIME_KEY="mamis_semua_kelas_v3_time";
-let syncingKelas=false;
 
 function normalizeKelas(data){
   if(!Array.isArray(data)) return [];
   const seen=new Set();
   return data.map(k=>({
-    idKelas:String(k.idKelas != null ? k.idKelas : (k["ID Kelas"] != null ? k["ID Kelas"] : "")).trim(),
-    namaKelas:String(k.namaKelas != null ? k.namaKelas : (k["Nama Kelas"] != null ? k["Nama Kelas"] : "")).trim(),
-    jenjang:String(k.jenjang != null ? k.jenjang : (k["Jenjang"] != null ? k["Jenjang"] : "")).trim(),
-    kategori:String(k.kategori != null ? k.kategori : (k["Kategori"] != null ? k["Kategori"] : "Kelas")).trim(),
-    deskripsi:String(k.deskripsi != null ? k.deskripsi : (k.deskripsiProgram != null ? k.deskripsiProgram : (k["Deskripsi Program"] != null ? k["Deskripsi Program"] : ""))).trim(),
-    materi:String(k.materi != null ? k.materi : (k.materiProgram != null ? k.materiProgram : (k["Materi Program"] != null ? k["Materi Program"] : ""))).trim(),
-    biaya:Number(k.biaya != null ? k.biaya : (k["Biaya Bulanan"] != null ? k["Biaya Bulanan"] : 0)),
-    jadwal:String(k.jadwal != null ? k.jadwal : (k["Jadwal"] != null ? k["Jadwal"] : "")).trim()
-  })).filter(k=>{
-    if(!k.idKelas || !k.namaKelas || seen.has(k.idKelas)) return false;
-    seen.add(k.idKelas);
-    return true;
-  });
+    idKelas:String(k.idKelas ?? k["ID Kelas"] ?? "").trim(),
+    namaKelas:String(k.namaKelas ?? k["Nama Kelas"] ?? "").trim(),
+    jenjang:String(k.jenjang ?? k["Jenjang"] ?? "").trim(),
+    kategori:String(k.kategori ?? k["Kategori"] ?? "Program Belajar").trim(),
+    deskripsi:String(k.deskripsi ?? k.deskripsiProgram ?? k["Deskripsi Program"] ?? "").trim(),
+    materi:String(k.materi ?? k.materiProgram ?? k["Materi Program"] ?? "").trim(),
+    jadwal:String(k.jadwal ?? k["Jadwal"] ?? "").trim()
+  })).filter(k=>k.idKelas&&k.namaKelas&&!seen.has(k.idKelas)&&seen.add(k.idKelas));
 }
 
 function bacaCacheKelas(){
-  const keys=[CACHE_KELAS_KEY,"mamis_public_kelas"];
-  for(const key of keys){
-    try{
-      const parsed=JSON.parse(localStorage.getItem(key)||"[]");
-      const normalized=normalizeKelas(parsed);
-      if(normalized.length) return normalized;
-    }catch(e){}
+  for(const key of [CACHE_KELAS_KEY,"mamis_public_kelas"]){
+    try{const x=normalizeKelas(JSON.parse(localStorage.getItem(key)||"[]")); if(x.length)return x;}catch(e){}
   }
   return [];
 }
-
 function simpanCacheKelas(items){
   localStorage.setItem(CACHE_KELAS_KEY,JSON.stringify(items));
   localStorage.setItem(CACHE_TIME_KEY,String(Date.now()));
-  // Tetap isi kunci lama supaya versi halaman lain dapat membaca seluruh kelas.
   localStorage.setItem("mamis_public_kelas",JSON.stringify(items));
   localStorage.setItem("mamis_public_kelas_time",String(Date.now()));
 }
-
 function setServerStatus(text,type="wait"){
-  const el=document.getElementById("serverStatus");
-  if(!el) return;
-  const cls=type==="ok"?"ok":type==="offline"?"offline":"";
-  el.innerHTML=`<span class="sync-dot ${cls}"></span>${esc(text)}`;
+  const el=document.getElementById("serverStatus"); if(!el)return;
+  el.innerHTML=`<span class="sync-dot ${type==="ok"?"ok":type==="offline"?"offline":""}"></span>${esc(text)}`;
 }
-
-function renderSkeleton(){
-  const cards=Array.from({length:6},()=>`
-    <article class="card skeleton-card" aria-hidden="true">
-      <div class="skeleton-line medium"></div>
-      <div class="skeleton-line short"></div>
-      <div class="skeleton-line"></div>
-      <div class="skeleton-line medium"></div>
-    </article>`).join("");
-  document.getElementById("programList").innerHTML=cards;
-  setKelasChecklistHtml('<div class="empty">Sedang mengambil seluruh kelas aktif...</div>');
-}
-
-
-async function bacaKelasJsonLokal(){
-  try{
-    var ctrl = typeof AbortController!=="undefined" ? new AbortController() : null;
-    var timer = ctrl ? setTimeout(function(){ctrl.abort();},5000) : null;
-    var res = await fetch("./kelas.json?v=9&t="+Date.now(),{
-      cache:"no-store",
-      signal:ctrl ? ctrl.signal : undefined
-    });
-    if(timer) clearTimeout(timer);
-    if(!res.ok) return [];
-    var data=await res.json();
-    return normalizeKelas(Array.isArray(data)?data:(data.kelas||[]));
-  }catch(e){
-    return [];
-  }
-}
-
-async function sinkronKelas(options){
-  options=options||{};
-  var manual=!!options.manual;
-  if(syncingKelas) return;
-  syncingKelas=true;
-  const btn=document.getElementById("refreshKelasBtn");
-  if(btn){btn.disabled=true;btn.textContent="↻ Menyinkronkan...";}
-  setServerStatus(manual?"Memperbarui seluruh kelas dari server...":"Sinkronisasi seluruh kelas berjalan di latar belakang.");
-
-  try{
-    const r=await apiRetry("getPublicData",{},4);
-    const semua=normalizeKelas(r && r.kelas);
-    if(!(r && r.status)) throw new Error((r && r.message)||"Server menolak permintaan.");
-    if(!semua.length) throw new Error("Server belum mengirim data kelas aktif.");
-
-    kelas=semua;
-    simpanCacheKelas(kelas);
-    render();
-    setServerStatus(`${kelas.length} kelas aktif sudah tersinkron.`, "ok");
-  }catch(err){
-    if(!kelas.length){
-      var lokal=await bacaKelasJsonLokal();
-      if(lokal.length){
-        kelas=lokal;
-        simpanCacheKelas(kelas);
-        render();
-        setServerStatus(kelas.length+" kelas ditampilkan dari cadangan GitHub.", "offline");
-        return;
-      }
-    }
-    if(kelas.length){
-      setServerStatus(kelas.length+" kelas tersimpan ditampilkan. Koneksi server sedang lambat.", "offline");
-    }else{
-      document.getElementById("programList").innerHTML=`
-        <div class="empty" style="grid-column:1/-1">
-          <b>Daftar kelas belum berhasil dimuat.</b><br>
-          Sambungkan internet lalu tekan <b>Perbarui Semua Kelas</b>.<br>
-          <small>${esc(err.message||"Koneksi server lambat.")}</small>
-        </div>`;
-      setKelasChecklistHtml('<div class="empty">Daftar kelas belum tersedia. Tekan Perbarui Semua Kelas.</div>');
-      setServerStatus("Belum ada data kelas tersimpan di perangkat ini.", "offline");
-    }
-  }finally{
-    syncingKelas=false;
-    if(btn){btn.disabled=false;btn.textContent="↻ Perbarui Semua Kelas";}
-  }
-}
-
-async function refreshSemuaKelas(){
-  await sinkronKelas({manual:true});
-}
-
-async function load(){
-  kelas=bacaCacheKelas();
-
-  if(kelas.length){
-    render();
-    const t=Number(localStorage.getItem(CACHE_TIME_KEY)||localStorage.getItem("mamis_public_kelas_time")||0);
-    const age=t ? Math.round((Date.now()-t)/60000) : null;
-    setServerStatus(`${kelas.length} kelas tersimpan ditampilkan${age!==null?` · diperbarui ${age} menit lalu`:""}.`);
-  }else{
-    renderSkeleton();
-  }
-
-  // Selalu ambil ulang seluruh data kelas; cache hanya mempercepat tampilan awal.
-  await sinkronKelas();
-}
-
-function materiLines(value){
-  return String(value||"")
-    .split(/\r?\n|[;•]+/)
-    .map(x=>x.trim())
-    .filter(Boolean);
-}
-
+function materiLines(value){return String(value||"").split(/\r?\n|[;•]+/).map(x=>x.trim()).filter(Boolean);}
 function render(){
   const list=document.getElementById("programList");
-  const checks=document.getElementById("kelasChecklist");
-
-  if(!kelas.length){
-    list.innerHTML='<div class="empty" style="grid-column:1/-1">Belum ada kelas aktif yang diterima dari server.</div>';
-    if(checks) checks.innerHTML='<div class="empty">Belum ada kelas aktif yang diterima dari server.</div>';
-    return;
-  }
-
+  if(!kelas.length){list.innerHTML='<div class="empty" style="grid-column:1/-1">Belum ada program aktif.</div>';return;}
   list.innerHTML=kelas.map(k=>{
     const materi=materiLines(k.materi);
-    return `
-    <article class="card program">
+    return `<article class="card program">
       <h3>${esc(k.namaKelas)}</h3>
-      <span class="pill">${esc(k.jenjang||"")}</span>
-      <span class="pill">${esc(k.kategori||"Program Belajar")}</span>
+      <span class="pill">${esc(k.jenjang||"")}</span><span class="pill">${esc(k.kategori||"Program Belajar")}</span>
       <p class="program-description">${esc(k.deskripsi||"Program pembelajaran terarah sesuai jenjang dan kebutuhan belajar siswa.")}</p>
-      ${materi.length ? `
-        <div class="program-material">
-          <strong>Materi yang dipelajari</strong>
-          <ul>${materi.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>
-        </div>` : ""}
+      ${materi.length?`<div class="program-material"><strong>Materi yang dipelajari</strong><ul>${materi.map(m=>`<li>${esc(m)}</li>`).join("")}</ul></div>`:""}
       <p class="program-schedule"><b>Jadwal:</b> ${esc(k.jadwal||"Dikonfirmasi admin sesuai kelas yang tersedia")}</p>
-      <button class="btn btn-primary" style="margin-top:12px"
-        onclick="pilih('${esc(k.idKelas)}')">Pilih & Lanjut Daftar</button>
+      <a class="btn btn-primary" style="margin-top:12px" href="pendaftaran.html?kelas=${encodeURIComponent(k.idKelas)}">Pilih & Lanjut Daftar</a>
     </article>`;
   }).join("");
-
-  if(checks) checks.innerHTML=kelas.map(k=>`
-    <label class="class-choice">
-      <input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()">
-      <span>
-        <b>${esc(k.namaKelas)}</b><br>
-        <small>${esc(k.jadwal||"")} · ${rupiah(k.biaya)}/bulan</small>
-      </span>
-    </label>
-  `).join("");
 }
-
-function pilih(id){
-  location.href="pendaftaran.html?kelas="+encodeURIComponent(id);
+async function bacaKelasJsonLokal(){
+  try{const r=await fetch("./kelas.json?v=12&t="+Date.now(),{cache:"no-store"}); if(!r.ok)return []; const d=await r.json(); return normalizeKelas(Array.isArray(d)?d:(d.kelas||[]));}catch(e){return [];}
 }
-
-function terpilih(){
-  return [...document.querySelectorAll('input[name="kelas"]:checked')].map(x=>x.value);
-}
-
-function hitung(){
-  let noWaNasional="";
+async function sinkronKelas(manual=false){
+  if(syncingKelas)return; syncingKelas=true;
+  const btn=document.getElementById("refreshKelasBtn"); if(btn){btn.disabled=true;btn.textContent="↻ Menyinkronkan...";}
+  setServerStatus(manual?"Memperbarui program dari server...":"Menyinkronkan program...");
   try{
-    noWaNasional=phoneNasional(v("noWa"));
-    document.getElementById("noWa").value=noWaNasional;
-  }catch(e){
-    status(e.message,"err");
-    document.getElementById("noWa").focus();
-    return;
-  }
-
-  const ids=terpilih();
-  const items=kelas.filter(k=>ids.includes(String(k.idKelas)));
-  const totalKelas=items.reduce((n,k)=>n+Number(k.biaya||0),0);
-  const totalAwal=totalKelas+BIAYA_PENDAFTARAN;
-
-  const rincian=items.length
-    ? items.map(k=>`
-        <div class="summary-row">
-          <span>${esc(k.namaKelas)}</span>
-          <b>${rupiah(k.biaya)}/bulan</b>
-        </div>
-      `).join("")
-    : '<div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div>';
-
-  document.getElementById("ringkasan").innerHTML=`
-    <div class="summary-row">
-      <span>Biaya pendaftaran siswa baru</span>
-      <b>${rupiah(BIAYA_PENDAFTARAN)}</b>
-    </div>
-    ${rincian}
-    <div class="summary-row summary-total">
-      <span>Total pembayaran awal</span>
-      <span>${rupiah(totalAwal)}</span>
-    </div>
-  `;
-
-  document.getElementById("nominalDibayar").value=totalAwal;
+    const r=await api("getPublicData",{},15000); const semua=normalizeKelas(r&&r.kelas);
+    if(!(r&&r.status)||!semua.length) throw new Error((r&&r.message)||"Data program belum tersedia.");
+    kelas=semua; simpanCacheKelas(kelas); render(); setServerStatus(`${kelas.length} program aktif tersinkron.`,"ok");
+  }catch(err){
+    if(!kelas.length){const lokal=await bacaKelasJsonLokal(); if(lokal.length){kelas=lokal;simpanCacheKelas(kelas);render();}}
+    setServerStatus(kelas.length?`${kelas.length} program tersimpan ditampilkan.`:"Program belum dapat dimuat.","offline");
+  }finally{syncingKelas=false;if(btn){btn.disabled=false;btn.textContent="↻ Perbarui Semua Kelas";}}
 }
-
-function status(msg,type){
-  const e=document.getElementById("status");
-  e.className="status "+type;
-  e.textContent=msg;
-}
-
-async function kirim(ev){
-  ev.preventDefault();
-
-  const ids=terpilih();
-  if(!ids.length){
-    status("Pilih minimal satu kelas.","err");
-    return;
-  }
-
-  const selected=kelas.filter(k=>ids.includes(String(k.idKelas)));
-  const totalKelas=selected.reduce((n,k)=>n+Number(k.biaya||0),0);
-  const total=totalKelas+BIAYA_PENDAFTARAN;
-
-  if(Number(v("nominalDibayar"))<total){
-    status("Nominal pembayaran kurang dari total pembayaran awal.","err");
-    return;
-  }
-
-  const btn=document.getElementById("btnKirim");
-  btn.disabled=true;
-  btn.textContent="Mengirim...";
-  status("Menyimpan pendaftaran...","wait");
-
-  try{
-    const data={
-      namaSiswa:v("namaSiswa"),
-      jenisKelamin:v("jenisKelamin"),
-      jenjang:v("jenjang"),
-      kelasSekolah:v("kelasSekolah"),
-      namaSekolah:v("namaSekolah"),
-      namaOrtu:v("namaOrtu"),
-      noWa:noWaNasional,
-      alamat:v("alamat"),
-      idKelasList:ids,
-      bulanMulai:v("bulanMulai"),
-      metodeBayar:v("metodeBayar"),
-      namaPengirim:v("namaPengirim"),
-      tanggalBayar:v("tanggalBayar"),
-      nominalDibayar:v("nominalDibayar"),
-      biayaPendaftaran:BIAYA_PENDAFTARAN,
-      catatan:v("catatan"),
-      buktiPembayaran:"DIKIRIM VIA WHATSAPP"
-    };
-
-    const r=await api("addPendaftaran",{data:JSON.stringify(data)});
-    if(!r.status) throw new Error(r.message||"Pendaftaran gagal.");
-
-    status(
-      `Pendaftaran berhasil disimpan. Nomor: ${r.idPendaftaran}. Silakan kirim bukti melalui WhatsApp.`,
-      "ok"
-    );
-
-    const daftarKelas=selected.map(k=>`- ${k.namaKelas}: ${rupiah(k.biaya)}`).join("\n");
-    const pesan=`Assalamu'alaikum Admin Sanggar Belajar Mam Is.
-
-Saya mengirim bukti pembayaran untuk pendaftaran:
-
-Nomor Pendaftaran: ${r.idPendaftaran}
-Nama Siswa: ${v("namaSiswa")}
-Bulan Mulai: ${v("bulanMulai")}
-
-Kelas yang dipilih:
-${daftarKelas}
-
-Biaya Pendaftaran: ${rupiah(BIAYA_PENDAFTARAN)}
-Total Kelas Bulanan: ${rupiah(totalKelas)}
-Total Pembayaran Awal: ${rupiah(total)}
-Nominal Dibayar: ${rupiah(v("nominalDibayar"))}
-Nama Pengirim: ${v("namaPengirim")||"-"}
-
-Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
-
-    window.open(
-      `https://wa.me/${WA_SANGGAR}?text=${encodeURIComponent(pesan)}`,
-      "_blank",
-      "noopener"
-    );
-
-    document.getElementById("formDaftar").reset();
-    setDefaults();
-    hitung();
-  }catch(e){
-    status(e.message||"Pendaftaran gagal.","err");
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Kirim Pendaftaran";
-  }
-}
-
-function setDefaults(){
-  const d=new Date();
-  document.getElementById("tanggalBayar").value=d.toISOString().slice(0,10);
-  document.getElementById("bulanMulai").value=d.toISOString().slice(0,7);
-}
-
-/* PWA INSTALL */
-window.addEventListener("beforeinstallprompt",event=>{
-  event.preventDefault();
-  deferredPrompt=event;
-  const btn=document.getElementById("installBtn");
-  const hint=document.getElementById("installHint");
-  if(btn) btn.style.display="inline-flex";
-  if(hint) hint.style.display="none";
-});
-
-document.getElementById("installBtn").addEventListener("click",async()=>{
-  if(!deferredPrompt){
-    alert("Chrome belum menyiapkan instalasi otomatis. Buka menu ⋮ lalu pilih Instal aplikasi atau Tambahkan ke layar utama. Pastikan situs dibuka langsung di Chrome, bukan browser WhatsApp.");
-    return;
-  }
-
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt=null;
-  document.getElementById("installBtn").style.display="none";
-});
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const isStandalone=window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true;
-  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const btn=document.getElementById("installBtn");
-  const hint=document.getElementById("installHint");
-
-  if(isStandalone){
-    if(btn) btn.style.display="none";
-    if(hint) hint.style.display="none";
-    return;
-  }
-
-  if(isMobile){
-    if(btn) btn.style.display="inline-flex";
-    if(hint) hint.style.display="block";
-  }
-});
-
-window.addEventListener("appinstalled",()=>{
-  deferredPrompt=null;
-  document.getElementById("installBtn").style.display="none";
-});
-
-
+async function refreshSemuaKelas(){await sinkronKelas(true);}
 async function perbaikiAplikasi(){
   try{
-    localStorage.removeItem(CACHE_KELAS_KEY);
-    localStorage.removeItem(CACHE_TIME_KEY);
-    localStorage.removeItem("mamis_public_kelas");
-    localStorage.removeItem("mamis_public_kelas_time");
-    if("caches" in window){
-      var names=await caches.keys();
-      await Promise.all(names.map(function(n){return caches.delete(n);}));
-    }
-    if("serviceWorker" in navigator){
-      var regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(function(r){return r.unregister();}));
-    }
+    if("serviceWorker" in navigator){const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister()));}
+    if("caches" in window){const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k)));}
   }catch(e){}
-  location.replace(location.pathname+"?v=11&t="+Date.now());
+  location.reload(true);
 }
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js?v=11",{scope:"./",updateViaCache:"none"})
-    .then(reg=>{
-      reg.update();
-      console.log("Service worker aktif.");
-    })
-    .catch(err=>{
-      console.error("Service worker gagal:",err);
-    });
-}
-
-document.getElementById("year").textContent=new Date().getFullYear();
-load();
-
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById("installBtn");if(b)b.style.display="inline-flex";});
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("year").textContent=new Date().getFullYear();
+  const cached=bacaCacheKelas(); if(cached.length){kelas=cached;render();setServerStatus(`${kelas.length} program tersimpan ditampilkan.`);} else setServerStatus("Memuat program...");
+  sinkronKelas(false);
+  const btn=document.getElementById("installBtn");
+  if(btn) btn.addEventListener("click",async()=>{
+    if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return;}
+    const hint=document.getElementById("installHint");if(hint)hint.style.display="block";
+  });
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js?v=12",{scope:"./",updateViaCache:"none"}).catch(()=>{});
+});
 </script>
 </body></html>

@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="icon-192.png?v=11">
-<link rel="manifest" href="manifest.json?v=11">
+<link rel="manifest" href="manifest.json?v=12">
 <link rel="icon" href="logo-mam-is.png">
 <title>Sanggar Belajar Mam Is Learning Hub</title>
 <style>
@@ -26,8 +26,9 @@
 
 .wa-float{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;align-items:center;gap:9px;background:#16a34a;color:#fff;padding:12px 15px;border-radius:999px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.22)}
 .wa-float:hover{transform:translateY(-1px)}
-.wa-float .wa-icon{font-size:20px;line-height:1}
-@media(max-width:620px){.wa-float{right:12px;bottom:12px;padding:11px 13px}.wa-float .wa-label{display:none}}
+.wa-float .wa-icon{width:22px;height:22px;display:block;flex:0 0 22px}
+.wa-float .wa-icon svg{width:100%;height:100%;display:block;fill:currentColor}
+@media(max-width:620px){.wa-float{right:14px;bottom:18px;width:52px;height:52px;padding:0;justify-content:center;border-radius:50%}.wa-float .wa-icon{width:27px;height:27px;flex-basis:27px}.wa-float .wa-label{display:none}}
 </style>
 </head>
 <body>
@@ -108,7 +109,7 @@
 </footer>
 
 
-<a class="wa-float" href="https://wa.me/6281318997525?text=Halo%20Admin%20Sanggar%20Belajar%20Mam%20Is%2C%20saya%20ingin%20bertanya." target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp"><span class="wa-icon">💬</span><span class="wa-label">Kontak Admin</span></a>
+<a class="wa-float" href="https://wa.me/6281318997525?text=Halo%20Admin%20Sanggar%20Belajar%20Mam%20Is%2C%20saya%20ingin%20bertanya." target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp"><span class="wa-icon" aria-hidden="true"><svg viewBox="0 0 32 32" role="img"><path d="M19.11 17.36c-.28-.14-1.66-.82-1.92-.91-.26-.09-.45-.14-.64.14-.19.28-.73.91-.9 1.1-.17.19-.33.21-.61.07-.28-.14-1.18-.44-2.25-1.39-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.64-1.54-.87-2.11-.23-.55-.47-.48-.64-.49h-.54c-.19 0-.49.07-.75.35-.26.28-.99.97-.99 2.36s1.01 2.73 1.15 2.92c.14.19 1.99 3.04 4.82 4.26.67.29 1.2.46 1.61.59.68.21 1.29.18 1.78.11.54-.08 1.66-.68 1.9-1.33.23-.65.23-1.21.16-1.33-.07-.12-.26-.19-.54-.33zM16.03 4.4c-6.42 0-11.64 5.21-11.64 11.63 0 2.05.54 4.07 1.56 5.84L4.3 27.9l6.18-1.62a11.59 11.59 0 0 0 5.55 1.41h.01c6.41 0 11.63-5.22 11.63-11.64 0-3.11-1.21-6.03-3.41-8.23a11.56 11.56 0 0 0-8.23-3.42zm0 21.32h-.01c-1.73 0-3.43-.47-4.91-1.34l-.35-.21-3.67.96.98-3.58-.23-.37a9.63 9.63 0 0 1-1.48-5.14c0-5.34 4.35-9.68 9.69-9.68 2.59 0 5.02 1.01 6.85 2.84a9.61 9.61 0 0 1 2.83 6.85c-.01 5.34-4.36 9.67-9.7 9.67z"/></svg></span><span class="wa-label">Kontak Admin</span></a>
 
 <script>
 
@@ -657,7 +658,7 @@ async function perbaikiAplikasi(){
 }
 
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js?v=11",{scope:"./",updateViaCache:"none"})
+  navigator.serviceWorker.register("./service-worker.js?v=12",{scope:"./",updateViaCache:"none"})
     .then(reg=>{
       reg.update();
       console.log("Service worker aktif.");
