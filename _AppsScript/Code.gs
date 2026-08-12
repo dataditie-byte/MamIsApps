@@ -1,5 +1,5 @@
 /**
- * SANGGAR BELAJAR MAM IS LEARNING HUB
+ * SANGGAR MAM IS LEARNING HUB
  * Backend Google Apps Script - Versi Final Dasar
  *
  * LANGKAH AWAL:
@@ -20,7 +20,7 @@ const BIAYA_PENDAFTARAN_SISWA_BARU = 30000;
 const CONFIG = {
   SPREADSHEET_ID: '',
   API_KEY: 'MAMIS-2026',
-  APP_NAME: 'Sanggar Belajar Mam Is Learning Hub',
+  APP_NAME: 'Sanggar Mam Is Learning Hub',
   SESSION_HOURS: 12,
   TIMEZONE: 'Asia/Jakarta',
   ADMIN_USERNAME: 'admin',
@@ -326,7 +326,7 @@ function setupDatabase() {
 
   return {
     status:true,
-    message:'Database Sanggar Belajar Mam Is berhasil disiapkan.',
+    message:'Database Sanggar Mam Is berhasil disiapkan.',
     sheets:Object.keys(SCHEMA)
   };
 }
@@ -346,7 +346,7 @@ function buatAdminAwal() {
   appendObject_('Akun',{
     'ID Akun':idAkun,
     'ID Siswa':'ADMIN',
-    'Nama Siswa':'Administrator Sanggar Belajar Mam Is',
+    'Nama Siswa':'Administrator Sanggar Mam Is',
     'Username':CONFIG.ADMIN_USERNAME,
     'PIN Hash':hash_(CONFIG.ADMIN_PIN_AWAL),
     'Peran':'Admin',
@@ -770,7 +770,7 @@ function addPendaftaran_(d) {
 
   return {
     status:true,
-    message:'Pendaftaran berhasil dikirim. Admin Sanggar Belajar Mam Is akan menghubungi orang tua/wali.',
+    message:'Pendaftaran berhasil dikirim. Admin Sanggar Mam Is akan menghubungi orang tua/wali.',
     idPendaftaran:id
   };
 }
@@ -1847,7 +1847,7 @@ function simpanBuktiPembayaran_(dataUrl,namaFile,namaSiswa) {
     try { folder = DriveApp.getFolderById(folderId); } catch(e) {}
   }
   if (!folder) {
-    folder = DriveApp.createFolder('Bukti Pembayaran Sanggar Belajar Mam Is');
+    folder = DriveApp.createFolder('Bukti Pembayaran Sanggar Mam Is');
     props.setProperty('MAMIS_BUKTI_FOLDER_ID',folder.getId());
   }
 
@@ -3491,7 +3491,7 @@ function validasiJadwalOperasional_(d,idJadwal){
 
   /*
    * Pengajar diperbolehkan mengampu lebih dari satu kelas pada waktu yang sama.
-   * Kondisi operasional Sanggar Belajar Mam Is memungkinkan satu pengajar menangani
+   * Kondisi operasional Sanggar Mam Is memungkinkan satu pengajar menangani
    * maksimal tiga kelas paralel di tiga ruang.
    *
    * Karena itu, bentrok pengajar tidak ditolak.

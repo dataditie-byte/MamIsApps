@@ -43,7 +43,30 @@
 </div></div><div class="grid grid-3" id="programList"><div class="empty">Memuat program...</div></div></div></section>
 
 <section id="cara-daftar"><div class="container"><div class="section-head"><h2>Cara Bergabung Sangat Mudah</h2><p>Orang tua cukup memilih kelas, mengisi data, mengunggah bukti pembayaran, dan menunggu verifikasi admin.</p></div><div class="grid grid-3"><article class="card"><h3 style="color:var(--navy)">1. Pilih Program</h3><p>Pilih satu atau beberapa kelas sesuai kebutuhan siswa.</p></article><article class="card"><h3 style="color:var(--navy)">2. Isi Data & Pembayaran</h3><p>Lengkapi data siswa, lihat total biaya bulanan, lalu unggah bukti pembayaran.</p></article><article class="card"><h3 style="color:var(--navy)">3. Akun Diaktifkan</h3><p>Setelah diverifikasi, username dan PIN dikirim melalui WhatsApp.</p></article></div></div></section>
-<section style="padding-top:0"><div class="container"><div class="card" style="text-align:center;padding:30px"><h2 style="margin:0 0 8px;color:var(--navy)">Siap Bergabung?</h2><p style="margin:0 0 18px;color:var(--muted)">Lanjutkan ke halaman pendaftaran untuk memilih program dan melihat rincian biaya.</p><a class="btn btn-primary" href="pendaftaran.html">Buka Pendaftaran</a></div></div></section>
+<section id="daftar"><div class="container register"><aside class="info"><h2>Pendaftaran Siswa Baru</h2><p>Isi data dengan benar agar admin dapat menghubungi orang tua atau wali.</p><ul><li>Pilih satu atau beberapa kelas yang tersedia.</li><li>Total biaya bulanan dihitung otomatis.</li><li>Kirim bukti pembayaran melalui WhatsApp untuk verifikasi.</li><li>Username dan PIN diberikan setelah pembayaran diterima.</li><li>Materi dan CBT terbuka sesuai kelas aktif.</li></ul><p><b>Biaya pendaftaran siswa baru: Rp30.000.</b></p></aside>
+
+<div class="form-card"><form id="formDaftar" onsubmit="kirim(event)"><div class="form-grid">
+<div class="field"><label>Nama siswa *</label><input id="namaSiswa" required></div>
+<div class="field"><label>Jenis kelamin</label><select id="jenisKelamin"><option value="">Pilih</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+<div class="field"><label>Jenjang *</label><select id="jenjang" required><option value="">Pilih</option><option>TK</option><option>SD</option><option>SMP</option><option>SMA</option><option>Umum</option></select></div>
+<div class="field"><label>Kelas sekolah</label><input id="kelasSekolah" placeholder="Contoh: Kelas X"></div>
+<div class="field"><label>Nama sekolah</label><input id="namaSekolah"></div>
+<div class="field"><label>Bulan mulai *</label><input id="bulanMulai" type="month" required></div>
+<div class="field"><label>Nama orang tua/wali *</label><input id="namaOrtu" required></div>
+<div class="field"><label>Nomor WhatsApp *</label><input id="noWa" required type="tel" inputmode="numeric" autocomplete="tel" placeholder="Contoh: 081234567890" onblur="rapikanNomorWa(this)"><small>Format 08…, 8…, 62…, atau +62… akan diseragamkan otomatis.</small></div>
+<div class="field full"><label>Alamat</label><textarea id="alamat"></textarea></div>
+
+<div class="field full"><label>Pilih kelas *</label><div class="class-list" id="kelasChecklist"><div class="empty">Memuat kelas...</div></div></div>
+<div class="field full"><div class="summary" id="ringkasan"><div class="summary-row"><span>Biaya pendaftaran siswa baru</span><b>Rp30.000</b></div><div class="summary-row"><span>Belum ada kelas dipilih</span><b>Rp0</b></div><div class="summary-row summary-total"><span>Total pembayaran awal</span><span id="totalText">Rp30.000</span></div></div></div>
+
+<div class="field"><label>Metode pembayaran</label><select id="metodeBayar"><option>Transfer Bank</option><option>QRIS</option><option>Tunai</option></select></div>
+<div class="field"><label>Nama pengirim</label><input id="namaPengirim"></div>
+<div class="field"><label>Tanggal pembayaran *</label><input id="tanggalBayar" type="date" required></div>
+<div class="field"><label>Nominal dibayar *</label><input id="nominalDibayar" type="number" min="0" required></div>
+<div class="field full"><div class="summary"><b>Bukti pembayaran dikirim melalui WhatsApp setelah formulir berhasil disimpan.</b><br><small>WhatsApp akan terbuka dengan pesan otomatis. Lampirkan foto bukti transfer pada percakapan tersebut.</small></div></div>
+<div class="field full"><label>Catatan kebutuhan belajar</label><textarea id="catatan"></textarea></div>
+<div class="field full"><button class="btn btn-primary" style="width:100%" id="btnKirim">Kirim Pendaftaran</button><div class="status" id="status"></div></div>
+</div></form></div></div></section>
 
 <footer>
   <div class="container">
@@ -92,8 +115,6 @@
 const API_URL="https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
 const WA_SANGGAR="6281318997525";
 const BIAYA_PENDAFTARAN=30000;
-function setKelasChecklistHtml(html){const el=document.getElementById("kelasChecklist");if(el)el.innerHTML=html;}
-
 
 let kelas=[];
 let deferredPrompt=null;
@@ -270,7 +291,7 @@ function renderSkeleton(){
       <div class="skeleton-line medium"></div>
     </article>`).join("");
   document.getElementById("programList").innerHTML=cards;
-  setKelasChecklistHtml('<div class="empty">Sedang mengambil seluruh kelas aktif...</div>');
+  document.getElementById("kelasChecklist").innerHTML='<div class="empty">Sedang mengambil seluruh kelas aktif...</div>';
 }
 
 
@@ -330,7 +351,7 @@ async function sinkronKelas(options){
           Sambungkan internet lalu tekan <b>Perbarui Semua Kelas</b>.<br>
           <small>${esc(err.message||"Koneksi server lambat.")}</small>
         </div>`;
-      setKelasChecklistHtml('<div class="empty">Daftar kelas belum tersedia. Tekan Perbarui Semua Kelas.</div>');
+      document.getElementById("kelasChecklist").innerHTML='<div class="empty">Daftar kelas belum tersedia. Tekan Perbarui Semua Kelas.</div>';
       setServerStatus("Belum ada data kelas tersimpan di perangkat ini.", "offline");
     }
   }finally{
@@ -372,7 +393,7 @@ function render(){
 
   if(!kelas.length){
     list.innerHTML='<div class="empty" style="grid-column:1/-1">Belum ada kelas aktif yang diterima dari server.</div>';
-    if(checks) checks.innerHTML='<div class="empty">Belum ada kelas aktif yang diterima dari server.</div>';
+    checks.innerHTML='<div class="empty">Belum ada kelas aktif yang diterima dari server.</div>';
     return;
   }
 
@@ -391,11 +412,11 @@ function render(){
         </div>` : ""}
       <p class="program-schedule"><b>Jadwal:</b> ${esc(k.jadwal||"Dikonfirmasi admin sesuai kelas yang tersedia")}</p>
       <button class="btn btn-primary" style="margin-top:12px"
-        onclick="pilih('${esc(k.idKelas)}')">Pilih & Lanjut Daftar</button>
+        onclick="pilih('${esc(k.idKelas)}')">Pilih Program</button>
     </article>`;
   }).join("");
 
-  if(checks) checks.innerHTML=kelas.map(k=>`
+  checks.innerHTML=kelas.map(k=>`
     <label class="class-choice">
       <input type="checkbox" name="kelas" value="${esc(k.idKelas)}" onchange="hitung()">
       <span>
@@ -407,7 +428,11 @@ function render(){
 }
 
 function pilih(id){
-  location.href="pendaftaran.html?kelas="+encodeURIComponent(id);
+  const box=[...document.querySelectorAll('input[name="kelas"]')]
+    .find(x=>String(x.value)===String(id));
+  if(box) box.checked=true;
+  hitung();
+  document.getElementById("daftar").scrollIntoView({behavior:"smooth"});
 }
 
 function terpilih(){
@@ -549,6 +574,18 @@ Saya akan melampirkan foto bukti pembayaran pada pesan berikutnya.`;
   }
 }
 
+
+function pilihDariQuery(){
+  const id=new URLSearchParams(location.search).get("kelas");
+  if(!id) return;
+  const coba=()=>{
+    const box=[...document.querySelectorAll('input[name="kelas"]')].find(x=>String(x.value)===String(id));
+    if(box){box.checked=true;hitung();document.getElementById("daftar")?.scrollIntoView({behavior:"smooth"});return true;}
+    return false;
+  };
+  if(!coba()) setTimeout(coba,900);
+}
+
 function setDefaults(){
   const d=new Date();
   document.getElementById("tanggalBayar").value=d.toISOString().slice(0,10);
@@ -631,7 +668,10 @@ if("serviceWorker" in navigator){
 }
 
 document.getElementById("year").textContent=new Date().getFullYear();
+setDefaults();
+hitung();
 load();
+pilihDariQuery();
 
 </script>
 </body></html>

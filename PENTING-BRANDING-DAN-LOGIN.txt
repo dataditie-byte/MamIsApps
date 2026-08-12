@@ -1,0 +1,7 @@
+SANGGAR BELAJAR MAM IS — FIX LOGIN / BRANDING
+
+1. Paket ini dibuat dari versi MamIsApps-main yang sebelumnya berjalan.
+2. Logika admin, API_URL, API_KEY, login, service worker, kelas.json, dan fungsi aplikasi TIDAK diubah.
+3. Perubahan hanya pada nama yang terlihat di halaman/manifest: Sanggar Mam Is -> Sanggar Belajar Mam Is.
+4. JANGAN mengganti Apps Script Code.gs hanya untuk perubahan branding ini. Gunakan Code.gs yang saat ini sudah live/berfungsi.
+5. Folder _AppsScript dan file Code.gs_MamIs_FINAL_ProgramBelajar.txt dalam paket ini dikembalikan ke versi sebelumnya sebagai referensi.

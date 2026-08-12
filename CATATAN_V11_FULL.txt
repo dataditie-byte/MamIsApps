@@ -1,0 +1,9 @@
+SANGGAR BELAJAR MAM IS - V11 FULL
+
+1. index.html: halaman utama bersih, tidak menampilkan formulir/nominal biaya.
+2. pendaftaran.html: formulir dan rincian biaya dipindahkan ke halaman khusus.
+3. Tombol Pilih Program mengarah ke pendaftaran.html dan otomatis memilih program.
+4. Tombol WhatsApp Admin melayang: 081318997525 (wa.me 6281318997525).
+5. admin.html: modal Kelas & Jadwal diperkecil, scroll internal, tombol tutup selalu terlihat.
+6. Backend/API/Code.gs tidak diubah.
+7. service worker cache dinaikkan ke v11.

@@ -506,6 +506,28 @@
   .student-selected-info{margin-top:9px;padding:9px 10px;border-radius:11px;background:#eaf4ff;color:var(--navy);font-size:12px;font-weight:700}
   @media(max-width:620px){.student-picker-tools{grid-template-columns:1fr}}
 
+
+
+    /* Modal kelas & jadwal: ringkas, aman di laptop/HP, tombol tutup selalu terlihat */
+    .modal{overflow:hidden}
+    .modal-card{width:min(720px,calc(100vw - 28px));max-height:88dvh;overflow:auto;padding:0 18px 18px}
+    .modal-head{position:sticky;top:0;z-index:8;background:#fff;padding:16px 2px 12px;margin:0 0 12px;border-bottom:1px solid var(--line)}
+    .modal-head .close{flex:0 0 38px;cursor:pointer;box-shadow:0 3px 12px rgba(15,39,66,.12)}
+    .modal-box{position:relative;width:min(720px,calc(100vw - 28px));max-height:88dvh;overflow:auto;background:#fff;border-radius:20px;padding:18px;box-shadow:0 25px 70px rgba(0,0,0,.3)}
+    .modal-box>h3{position:sticky;top:-18px;z-index:6;background:#fff;margin:-18px -18px 14px;padding:18px 58px 12px 18px;border-bottom:1px solid var(--line)}
+    .modal-close{position:sticky;top:10px;float:right;z-index:10;width:38px;height:38px;border:0;border-radius:50%;background:#eef4fa;color:var(--navy);font-size:24px;font-weight:900;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(15,39,66,.18)}
+    #jadwalDetailModal .student-picker-results{max-height:min(34vh,300px)}
+    #jadwalDetailModal .grid.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media(max-width:680px){
+      .modal{padding:8px;align-items:flex-start}
+      .modal-card,.modal-box{width:100%;max-height:96dvh;border-radius:16px}
+      .modal-card{padding:0 12px 14px}
+      .modal-box{padding:14px}
+      .modal-box>h3{top:-14px;margin:-14px -14px 12px;padding:16px 52px 10px 14px}
+      #jadwalDetailModal .grid.grid-3{grid-template-columns:1fr}
+      #jadwalDetailModal .student-picker-results{max-height:38vh}
+    }
+
 </style>
 </head>
 

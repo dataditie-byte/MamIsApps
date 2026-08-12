@@ -1,4 +1,4 @@
-SANGGAR BELAJAR MAM IS — PATCH CODE.GS PROGRAM BELAJAR
+SANGGAR MAM IS — PATCH CODE.GS PROGRAM BELAJAR
 
 PENTING: repo GitHub tidak berisi Code.gs Apps Script, jadi file frontend final ini sudah siap, tetapi dua field baru harus ditambahkan ke Apps Script agar edit dari Admin tersimpan di Spreadsheet dan tampil di publik.
 

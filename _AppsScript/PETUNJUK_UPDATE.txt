@@ -1,6 +1,6 @@
-SANGGAR BELAJAR MAM IS — UPDATE PROGRAM BELAJAR
+SANGGAR MAM IS — UPDATE PROGRAM BELAJAR
 
-1. Buka Apps Script yang saat ini dipakai Sanggar Belajar Mam Is.
+1. Buka Apps Script yang saat ini dipakai Sanggar Mam Is.
 2. Backup Code.gs lama.
 3. Ganti seluruh Code.gs dengan file Code.gs dalam folder ini.
 4. Save.
