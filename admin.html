@@ -588,6 +588,7 @@
       <button class="nav-btn" onclick="openPage('siswa',this)">👨‍🎓 Siswa</button>
       <button class="nav-btn" onclick="openPage('pengajar',this)">👩‍🏫 Pengajar</button>
       <button class="nav-btn" onclick="openPage('kelas',this)">🗓️ Kelas & Jadwal</button>
+      <button class="nav-btn" onclick="openPage('jadwalPengajar',this)">👩‍🏫 Jadwal Pengajar</button>
       <button class="nav-btn" onclick="openPage('peserta',this)">👥 Peserta Kelas</button>
       <button class="nav-btn" onclick="openPage('materi',this)">📚 Materi</button>
       <button class="nav-btn" onclick="openPage('pengumuman',this)">📢 Pengumuman</button>
@@ -861,6 +862,20 @@
         <div class="table-wrap" id="pengumumanTable"></div>
       </section>
 
+      <section class="page" id="page-jadwalPengajar">
+        <div class="section-head">
+          <div><h3>Jadwal Pengajar</h3><p>Lihat siapa yang bertugas pada hari tertentu dan jumlah jadwal mengajar masing-masing pengajar.</p></div>
+        </div>
+        <div class="toolbar" style="margin-bottom:14px">
+          <select id="filterHariPengajarAdmin" onchange="renderJadwalPengajarAdmin()">
+            <option value="Semua">Semua Hari</option><option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
+          </select>
+          <input id="cariPengajarJadwalAdmin" placeholder="Cari nama pengajar / kelas / ruang..." oninput="renderJadwalPengajarAdmin()">
+        </div>
+        <div id="ringkasanJadwalPengajarAdmin" class="grid grid-4" style="margin-bottom:14px"></div>
+        <div class="table-wrap" id="jadwalPengajarAdminTable"></div>
+      </section>
+
       <section class="page" id="page-akun">
         <div class="section-head">
           <div><h3>Akun Siswa & Pengajar</h3><p>Lihat username yang sudah terdata atau reset PIN bila lupa</p></div>
@@ -1105,6 +1120,7 @@
     renderKelas();
     renderDaftarJadwal();
     renderPapanJadwal();
+    renderJadwalPengajarAdmin();
     renderPeserta();
     renderMateri();
     renderPengumuman();
@@ -2263,17 +2279,20 @@
   function renderAkun(){
     document.getElementById("akunTable").innerHTML = db.akun.length ? `
       <table>
-        <thead><tr><th>ID Akun</th><th>Nama</th><th>Username</th><th>Peran</th><th>Status</th><th>Login Terakhir</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>ID Akun</th><th>Nama</th><th>Username</th><th>PIN</th><th>Peran</th><th>Status</th><th>Login Terakhir</th><th>Aksi</th></tr></thead>
         <tbody>${db.akun.map(r=>`
           <tr>
             <td>${esc(r["ID Akun"])}</td>
             <td>${esc(r["Nama Siswa"])}</td>
             <td><strong>${esc(r["Username"])}</strong></td>
+            <td>${r["PIN Akses"] ? `<b>${esc(r["PIN Akses"])}</b>` : `<span style="color:var(--orange)">Belum tersimpan</span>`}</td>
             <td>${badge(r["Peran"])}</td>
             <td>${badge(r["Status Akun"])}</td>
             <td>${esc(r["Login Terakhir"] || "-")}</td>
             <td><div class="actions">
-              <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat / Edit Akun</button>
+              <button class="btn btn-green" onclick="lihatAkun('${attr(r["ID Akun"])}')">Lihat</button>
+              <button class="btn btn-light" onclick="editAkunPengguna('${attr(r["ID Akun"])}')">Edit</button>
+              <button class="btn btn-orange" onclick="resetPin('${attr(r["ID Akun"])}','${attr(r["Nama Siswa"])}')">Reset PIN</button>
             </div></td>
           </tr>
         `).join("")}</tbody>
@@ -2533,10 +2552,10 @@ Sanggar Belajar Mam Is Learning Hub`;
 
   async function resetPin(idAkun,nama){
     const akun = db.akun.find(a=>String(a["ID Akun"])===String(idAkun));
-    const pinBaru = prompt("Masukkan PIN baru 6 digit untuk " + nama + ". Kosongkan untuk PIN otomatis.");
+    const pinBaru = prompt("Masukkan PIN baru 4-8 digit untuk " + nama + ". Kosongkan untuk PIN otomatis.");
     if(pinBaru === null) return;
-    if(pinBaru.trim() && !/^\d{6}$/.test(pinBaru.trim())){
-      alert("PIN harus terdiri dari 6 digit angka.");
+    if(pinBaru.trim() && !/^\d{4,8}$/.test(pinBaru.trim())){
+      alert("PIN harus terdiri dari 4 sampai 8 digit angka.");
       return;
     }
 
@@ -3166,6 +3185,43 @@ Sanggar Belajar Mam Is Learning Hub`;
     document.getElementById("formModal").classList.add("open");
   }
 
+  function effectiveJadwalAdmin(){
+    const operational=(db.jadwalKelas||[]).map(j=>{
+      const k=(db.kelas||[]).find(x=>String(x["ID Kelas"])===String(j["ID Kelas"]))||{};
+      return Object.assign({},j,{"Nama Program":j["Nama Program"]||k["Nama Kelas"]||"","Nama Kelas":k["Nama Kelas"]||j["Nama Program"]||"","Jenjang":k["Jenjang"]||""});
+    });
+    const covered=new Set(operational.map(j=>String(j["ID Kelas"])));
+    const legacy=(db.kelas||[]).filter(k=>String(k["Status Kelas"]||"").toLowerCase()==="aktif"&&String(k["Jadwal"]||"").trim()&&!covered.has(String(k["ID Kelas"]))).map(k=>({
+      "ID Jadwal":"LEGACY-"+k["ID Kelas"],"ID Kelas":k["ID Kelas"],"Nama Program":k["Nama Kelas"],"Nama Kelas":k["Nama Kelas"],"Jenjang":k["Jenjang"]||"","Nama Jadwal":k["Jadwal"],"Hari":"","Jam Mulai":"","Jam Selesai":"","Ruang":"","Kapasitas":"","ID Pengajar":k["ID Pengajar"]||"","Nama Pengajar":k["Nama Pengajar"]||"","Status Jadwal":"Aktif"
+    }));
+    return operational.concat(legacy);
+  }
+
+  function renderJadwalPengajarAdmin(){
+    const target=document.getElementById("jadwalPengajarAdminTable");
+    const summary=document.getElementById("ringkasanJadwalPengajarAdmin");
+    if(!target||!summary)return;
+    const hari=document.getElementById("filterHariPengajarAdmin")?.value||"Semua";
+    const q=String(document.getElementById("cariPengajarJadwalAdmin")?.value||"").trim().toLowerCase();
+    const all=effectiveJadwalAdmin().filter(j=>String(j["Status Jadwal"]||"Aktif").toLowerCase()!=="tidak aktif");
+    const filtered=all.filter(j=>{
+      const day=hari==="Semua"||String(j["Hari"]||"").toLowerCase()===hari.toLowerCase();
+      const hay=[j["Nama Pengajar"],j["Nama Kelas"],j["Nama Program"],j["Ruang"],j["Nama Jadwal"]].join(" ").toLowerCase();
+      return day&&(!q||hay.includes(q));
+    }).sort((a,b)=>String(a["Jam Mulai"]||"").localeCompare(String(b["Jam Mulai"]||"")));
+    const guruHari={}; const guruMinggu={};
+    filtered.forEach(j=>{const n=j["Nama Pengajar"]||"Belum ditentukan";guruHari[n]=(guruHari[n]||0)+1;});
+    all.forEach(j=>{const n=j["Nama Pengajar"]||"Belum ditentukan";guruMinggu[n]=(guruMinggu[n]||0)+1;});
+    summary.innerHTML=`<div class="card summary-card"><strong>Slot ${esc(hari)}</strong><b>${filtered.length}</b><small>jadwal mengajar</small></div><div class="card summary-card"><strong>Pengajar Bertugas</strong><b>${Object.keys(guruHari).length}</b><small>orang</small></div><div class="card summary-card"><strong>Total Jadwal Aktif</strong><b>${all.length}</b><small>seluruh hari</small></div><div class="card summary-card"><strong>Filter Hari</strong><b>${esc(hari)}</b><small>hari dipilih</small></div>`;
+    if(!filtered.length){target.innerHTML=empty("Belum ada jadwal pengajar untuk filter tersebut.");return;}
+    const grouped=Object.keys(guruHari).sort((a,b)=>a.localeCompare(b,"id")).map(n=>{
+      const rows=filtered.filter(j=>(j["Nama Pengajar"]||"Belum ditentukan")===n);
+      const detail=rows.map(j=>`<div style="margin:3px 0"><b>${esc(j["Jam Mulai"]||"")}${j["Jam Selesai"]?`–${esc(j["Jam Selesai"])}`:""}</b> · ${esc(j["Nama Kelas"]||j["Nama Program"]||"-")}${j["Ruang"]?` · Ruang ${esc(j["Ruang"])}`:""}</div>`).join("");
+      return `<tr><td><strong>${esc(n)}</strong></td><td><b>${rows.length}</b></td><td><b>${guruMinggu[n]||rows.length}</b></td><td>${detail}</td></tr>`;
+    }).join("");
+    target.innerHTML=`<table><thead><tr><th>Pengajar</th><th>Jumlah Mengajar ${esc(hari)}</th><th>Total Jadwal/Minggu</th><th>Rincian</th></tr></thead><tbody>${grouped}</tbody></table>`;
+  }
+
   function openPage(page,button){
     document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
     document.getElementById("page-"+page).classList.add("active");
@@ -3182,7 +3238,8 @@ Sanggar Belajar Mam Is Learning Hub`;
       peserta:["Peserta Kelas & Penilaian","Monitoring kelas dan penilaian triwulan"],
       materi:["Materi","Konten belajar siswa"],
       pengumuman:["Pengumuman","Informasi untuk siswa"],
-      akun:["Akun Pengguna","Username siswa dan pengajar serta reset PIN"],
+      jadwalPengajar:["Jadwal Pengajar","Siapa yang bertugas dan berapa jumlah jadwal mengajarnya"],
+      akun:["Akun Pengguna","Username siswa dan pengajar serta PIN yang tersimpan"],
       absensi:["Absensi","Riwayat kehadiran"],
       pembayaran:["Pembayaran","Tagihan dan pelunasan"],
       hasil:["Hasil Latihan","Nilai dan perkembangan belajar"]
