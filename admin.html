@@ -528,6 +528,76 @@
       #jadwalDetailModal .student-picker-results{max-height:38vh}
     }
 
+
+/* ADMIN JADWAL PENGAJAR V2 */
+.jpa-hero{
+  background:linear-gradient(135deg,#f0fdf4 0%,#eef6ff 52%,#ffffff 100%);
+  border:1px solid #dcefe4;
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:var(--shadow);
+}
+.jpa-hero-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.jpa-kicker{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#16803c;margin-bottom:4px}
+.jpa-title{font-size:24px;font-weight:900;color:var(--navy);margin:0}
+.jpa-desc{margin:5px 0 0;color:var(--muted);font-size:13px;max-width:720px;line-height:1.5}
+.jpa-actions{display:flex;gap:8px;flex-wrap:wrap}
+.jpa-week{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(145px,1fr));
+  gap:10px;
+  margin-top:14px;
+  overflow:auto;
+  padding-bottom:4px;
+}
+.jpa-day{
+  background:#fff;border:1px solid #e7edf4;border-radius:16px;min-height:148px;
+  overflow:hidden;box-shadow:0 4px 14px rgba(15,39,66,.05);
+}
+.jpa-day-head{padding:10px 11px;background:#f7fafc;border-bottom:1px solid #edf1f6}
+.jpa-day-name{font-size:12px;font-weight:900;color:var(--navy)}
+.jpa-day-count{font-size:11px;color:var(--muted);margin-top:2px}
+.jpa-day-body{padding:9px;display:grid;gap:7px}
+.jpa-slot{
+  border-left:4px solid #22c55e;background:#f8fffa;border-radius:10px;padding:8px 9px;
+}
+.jpa-slot-time{font-size:11px;font-weight:900;color:#166534}
+.jpa-slot-class{font-size:12px;font-weight:800;color:var(--navy);margin-top:2px}
+.jpa-slot-teacher{font-size:11px;color:#475569;margin-top:2px}
+.jpa-slot-room{font-size:10px;color:#64748b;margin-top:2px}
+.jpa-empty{font-size:11px;color:#94a3b8;padding:10px 2px;text-align:center}
+.jpa-teachers{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;
+}
+.jpa-teacher{
+  background:#fff;border:1px solid #e8edf3;border-radius:17px;padding:13px;box-shadow:var(--shadow);
+}
+.jpa-teacher-head{display:flex;align-items:center;gap:10px}
+.jpa-avatar{
+  width:42px;height:42px;border-radius:13px;background:#e8f5ec;color:#16733a;
+  display:grid;place-items:center;font-weight:900;font-size:16px;flex:0 0 auto;
+}
+.jpa-teacher-name{font-weight:900;color:var(--navy);font-size:14px}
+.jpa-teacher-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.jpa-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:11px}
+.jpa-mini{background:#f8fafc;border-radius:11px;padding:8px}
+.jpa-mini b{display:block;color:var(--navy);font-size:16px}
+.jpa-mini span{font-size:10px;color:var(--muted)}
+.jpa-section-title{
+  margin:17px 0 9px;font-size:14px;font-weight:900;color:var(--navy);
+  display:flex;align-items:center;gap:8px;
+}
+.jpa-section-title span{font-size:11px;font-weight:600;color:var(--muted)}
+@media(max-width:1100px){
+  .jpa-week{grid-template-columns:repeat(7,145px)}
+}
+@media(max-width:680px){
+  .jpa-title{font-size:20px}
+  .jpa-week{grid-template-columns:repeat(7,138px)}
+  .jpa-teachers{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 
@@ -863,16 +933,38 @@
       </section>
 
       <section class="page" id="page-jadwalPengajar">
-        <div class="section-head">
-          <div><h3>Jadwal Pengajar</h3><p>Lihat siapa yang bertugas pada hari tertentu dan jumlah jadwal mengajar masing-masing pengajar.</p></div>
+        <div class="jpa-hero">
+          <div class="jpa-hero-top">
+            <div>
+              <div class="jpa-kicker">Operasional Pengajar</div>
+              <h3 class="jpa-title">Jadwal Pengajar</h3>
+              <p class="jpa-desc">Pantau pembagian jadwal mengajar, beban setiap pengajar, kelas, jam, dan ruang. Data tetap mengambil dari sumber jadwal yang sudah digunakan sistem.</p>
+            </div>
+            <div class="jpa-actions">
+              <button class="btn btn-light" onclick="renderJadwalPengajarAdmin()">↻ Segarkan</button>
+              <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak</button>
+            </div>
+          </div>
+
+          <div class="toolbar" style="margin:15px 0 0">
+            <select id="filterHariPengajarAdmin" onchange="renderJadwalPengajarAdmin()">
+              <option value="Semua">Semua Hari</option>
+              <option>Senin</option><option>Selasa</option><option>Rabu</option>
+              <option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
+            </select>
+            <input id="cariPengajarJadwalAdmin" placeholder="Cari pengajar / kelas / ruang..." oninput="renderJadwalPengajarAdmin()">
+          </div>
         </div>
-        <div class="toolbar" style="margin-bottom:14px">
-          <select id="filterHariPengajarAdmin" onchange="renderJadwalPengajarAdmin()">
-            <option value="Semua">Semua Hari</option><option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
-          </select>
-          <input id="cariPengajarJadwalAdmin" placeholder="Cari nama pengajar / kelas / ruang..." oninput="renderJadwalPengajarAdmin()">
-        </div>
+
         <div id="ringkasanJadwalPengajarAdmin" class="grid grid-4" style="margin-bottom:14px"></div>
+
+        <div class="jpa-section-title">📅 Kalender Mingguan <span>ringkasan cepat jadwal pengajar</span></div>
+        <div id="kalenderJadwalPengajarAdmin" class="jpa-week"></div>
+
+        <div class="jpa-section-title">👩‍🏫 Beban Pengajar <span>jumlah slot dan kelas yang ditangani</span></div>
+        <div id="kartuPengajarJadwalAdmin" class="jpa-teachers"></div>
+
+        <div class="jpa-section-title">📋 Rincian Jadwal <span>detail sesuai filter</span></div>
         <div class="table-wrap" id="jadwalPengajarAdminTable"></div>
       </section>
 
@@ -3200,26 +3292,133 @@ Sanggar Belajar Mam Is Learning Hub`;
   function renderJadwalPengajarAdmin(){
     const target=document.getElementById("jadwalPengajarAdminTable");
     const summary=document.getElementById("ringkasanJadwalPengajarAdmin");
+    const calendar=document.getElementById("kalenderJadwalPengajarAdmin");
+    const teacherCards=document.getElementById("kartuPengajarJadwalAdmin");
     if(!target||!summary)return;
+
     const hari=document.getElementById("filterHariPengajarAdmin")?.value||"Semua";
     const q=String(document.getElementById("cariPengajarJadwalAdmin")?.value||"").trim().toLowerCase();
-    const all=effectiveJadwalAdmin().filter(j=>String(j["Status Jadwal"]||"Aktif").toLowerCase()!=="tidak aktif");
+    const all=effectiveJadwalAdmin()
+      .filter(j=>String(j["Status Jadwal"]||"Aktif").toLowerCase()!=="tidak aktif");
+
+    const matchQuery=j=>{
+      const hay=[
+        j["Nama Pengajar"],j["Nama Kelas"],j["Nama Program"],j["Ruang"],j["Nama Jadwal"],j["Hari"]
+      ].join(" ").toLowerCase();
+      return !q||hay.includes(q);
+    };
+
     const filtered=all.filter(j=>{
       const day=hari==="Semua"||String(j["Hari"]||"").toLowerCase()===hari.toLowerCase();
-      const hay=[j["Nama Pengajar"],j["Nama Kelas"],j["Nama Program"],j["Ruang"],j["Nama Jadwal"]].join(" ").toLowerCase();
-      return day&&(!q||hay.includes(q));
-    }).sort((a,b)=>String(a["Jam Mulai"]||"").localeCompare(String(b["Jam Mulai"]||"")));
-    const guruHari={}; const guruMinggu={};
-    filtered.forEach(j=>{const n=j["Nama Pengajar"]||"Belum ditentukan";guruHari[n]=(guruHari[n]||0)+1;});
-    all.forEach(j=>{const n=j["Nama Pengajar"]||"Belum ditentukan";guruMinggu[n]=(guruMinggu[n]||0)+1;});
-    summary.innerHTML=`<div class="card summary-card"><strong>Slot ${esc(hari)}</strong><b>${filtered.length}</b><small>jadwal mengajar</small></div><div class="card summary-card"><strong>Pengajar Bertugas</strong><b>${Object.keys(guruHari).length}</b><small>orang</small></div><div class="card summary-card"><strong>Total Jadwal Aktif</strong><b>${all.length}</b><small>seluruh hari</small></div><div class="card summary-card"><strong>Filter Hari</strong><b>${esc(hari)}</b><small>hari dipilih</small></div>`;
-    if(!filtered.length){target.innerHTML=empty("Belum ada jadwal pengajar untuk filter tersebut.");return;}
+      return day&&matchQuery(j);
+    }).sort((a,b)=>{
+      const da=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"].indexOf(String(a["Hari"]||""));
+      const db=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"].indexOf(String(b["Hari"]||""));
+      return (da-db)||String(a["Jam Mulai"]||"").localeCompare(String(b["Jam Mulai"]||""));
+    });
+
+    const hariList=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"];
+    const guruHari={};
+    const guruMinggu={};
+    const guruKelas={};
+
+    filtered.forEach(j=>{
+      const n=j["Nama Pengajar"]||"Belum ditentukan";
+      guruHari[n]=(guruHari[n]||0)+1;
+      guruKelas[n]=guruKelas[n]||new Set();
+      guruKelas[n].add(j["Nama Kelas"]||j["Nama Program"]||"-");
+    });
+    all.forEach(j=>{
+      const n=j["Nama Pengajar"]||"Belum ditentukan";
+      guruMinggu[n]=(guruMinggu[n]||0)+1;
+    });
+
+    const jamTotal=all.reduce((sum,j)=>{
+      const a=String(j["Jam Mulai"]||"");
+      const b=String(j["Jam Selesai"]||"");
+      if(!a||!b)return sum;
+      const [ah,am]=a.split(":").map(Number), [bh,bm]=b.split(":").map(Number);
+      if([ah,am,bh,bm].some(Number.isNaN))return sum;
+      return sum+Math.max(0,(bh*60+bm)-(ah*60+am));
+    },0);
+
+    summary.innerHTML=`
+      <div class="card summary-card"><div class="summary-icon b-green">📚</div><div><strong>${filtered.length}</strong><span>slot ${esc(hari==="Semua"?"aktif":hari)}</span></div></div>
+      <div class="card summary-card"><div class="summary-icon b-blue">👩‍🏫</div><div><strong>${Object.keys(guruHari).length}</strong><span>pengajar bertugas</span></div></div>
+      <div class="card summary-card"><div class="summary-icon b-purple">🗓️</div><div><strong>${all.length}</strong><span>total jadwal aktif</span></div></div>
+      <div class="card summary-card"><div class="summary-icon b-orange">⏱️</div><div><strong>${jamTotal ? (Math.round(jamTotal/60*10)/10)+"j" : "—"}</strong><span>durasi jadwal/minggu</span></div></div>`;
+
+    // Kalender mingguan selalu menampilkan 7 hari; pencarian tetap diterapkan.
+    if(calendar){
+      calendar.innerHTML=hariList.map(day=>{
+        const rows=all.filter(j=>String(j["Hari"]||"").toLowerCase()===day.toLowerCase()&&matchQuery(j))
+          .sort((a,b)=>String(a["Jam Mulai"]||"").localeCompare(String(b["Jam Mulai"]||"")));
+        const activeDay=hari==="Semua"||hari===day;
+        return `<div class="jpa-day" style="${activeDay?"":"opacity:.45"}">
+          <div class="jpa-day-head">
+            <div class="jpa-day-name">${day}</div>
+            <div class="jpa-day-count">${rows.length} slot</div>
+          </div>
+          <div class="jpa-day-body">
+            ${rows.length?rows.slice(0,5).map(j=>`
+              <div class="jpa-slot">
+                <div class="jpa-slot-time">${esc(j["Jam Mulai"]||"—")}${j["Jam Selesai"]?`–${esc(j["Jam Selesai"])}`:""}</div>
+                <div class="jpa-slot-class">${esc(j["Nama Kelas"]||j["Nama Program"]||"Kelas")}</div>
+                <div class="jpa-slot-teacher">${esc(j["Nama Pengajar"]||"Belum ditentukan")}</div>
+                ${j["Ruang"]?`<div class="jpa-slot-room">📍 ${esc(j["Ruang"])}</div>`:""}
+              </div>`).join("")+(rows.length>5?`<div class="jpa-empty">+ ${rows.length-5} jadwal lainnya</div>`:"")
+              :`<div class="jpa-empty">Tidak ada jadwal</div>`}
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    // Kartu beban pengajar.
+    if(teacherCards){
+      const teacherNames=Object.keys(guruHari).sort((a,b)=>a.localeCompare(b,"id"));
+      teacherCards.innerHTML=teacherNames.length?teacherNames.map(n=>{
+        const initials=String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"P";
+        return `<div class="jpa-teacher">
+          <div class="jpa-teacher-head">
+            <div class="jpa-avatar">${esc(initials)}</div>
+            <div><div class="jpa-teacher-name">${esc(n)}</div><div class="jpa-teacher-meta">Pengajar Sanggar Mam Is</div></div>
+          </div>
+          <div class="jpa-mini-grid">
+            <div class="jpa-mini"><b>${guruHari[n]||0}</b><span>slot ${esc(hari==="Semua"?"terfilter":hari)}</span></div>
+            <div class="jpa-mini"><b>${guruMinggu[n]||0}</b><span>total/minggu</span></div>
+            <div class="jpa-mini"><b>${guruKelas[n]?.size||0}</b><span>kelas</span></div>
+            <div class="jpa-mini"><b>${guruMinggu[n] ? "Aktif" : "—"}</b><span>status jadwal</span></div>
+          </div>
+        </div>`;
+      }).join(""):`<div class="empty" style="grid-column:1/-1">Belum ada pengajar yang sesuai filter.</div>`;
+    }
+
+    if(!filtered.length){
+      target.innerHTML=empty("Belum ada jadwal pengajar untuk filter tersebut.");
+      return;
+    }
+
     const grouped=Object.keys(guruHari).sort((a,b)=>a.localeCompare(b,"id")).map(n=>{
       const rows=filtered.filter(j=>(j["Nama Pengajar"]||"Belum ditentukan")===n);
-      const detail=rows.map(j=>`<div style="margin:3px 0"><b>${esc(j["Jam Mulai"]||"")}${j["Jam Selesai"]?`–${esc(j["Jam Selesai"])}`:""}</b> · ${esc(j["Nama Kelas"]||j["Nama Program"]||"-")}${j["Ruang"]?` · Ruang ${esc(j["Ruang"])}`:""}</div>`).join("");
-      return `<tr><td><strong>${esc(n)}</strong></td><td><b>${rows.length}</b></td><td><b>${guruMinggu[n]||rows.length}</b></td><td>${detail}</td></tr>`;
+      const detail=rows.map(j=>`
+        <div style="margin:5px 0;padding:6px 8px;border-radius:9px;background:#f8fafc">
+          <b>${esc(j["Jam Mulai"]||"")}${j["Jam Selesai"]?`–${esc(j["Jam Selesai"])}`:""}</b>
+          · ${esc(j["Hari"]||"")}
+          · ${esc(j["Nama Kelas"]||j["Nama Program"]||"-")}
+          ${j["Ruang"]?` · Ruang ${esc(j["Ruang"])}`:""}
+        </div>`).join("");
+      return `<tr>
+        <td><strong>${esc(n)}</strong></td>
+        <td><b>${rows.length}</b></td>
+        <td><b>${guruMinggu[n]||rows.length}</b></td>
+        <td>${detail}</td>
+      </tr>`;
     }).join("");
-    target.innerHTML=`<table><thead><tr><th>Pengajar</th><th>Jumlah Mengajar ${esc(hari)}</th><th>Total Jadwal/Minggu</th><th>Rincian</th></tr></thead><tbody>${grouped}</tbody></table>`;
+
+    target.innerHTML=`<table>
+      <thead><tr><th>Pengajar</th><th>Jumlah Mengajar ${esc(hari)}</th><th>Total Jadwal/Minggu</th><th>Rincian</th></tr></thead>
+      <tbody>${grouped}</tbody>
+    </table>`;
   }
 
   function openPage(page,button){
