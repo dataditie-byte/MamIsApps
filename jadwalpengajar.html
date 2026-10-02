@@ -72,9 +72,22 @@
     overflow:hidden;
   }
 
-  .logo svg{
-    width:37px;
-    height:37px;
+  .logo img{
+    width:100%;
+    height:100%;
+    padding:4px;
+    object-fit:contain;
+    display:block;
+  }
+
+  .fallback-mark{
+    display:none;
+    color:var(--green);
+    font-weight:900;
+    font-size:23px;
+  }
+
+  .logo.logo-fallback .fallback-mark{
     display:block;
   }
 
@@ -117,6 +130,110 @@
   /* =====================================================
      FRAME
      ===================================================== */
+  /* =====================================================
+     KUNCI AKSES
+     ===================================================== */
+  .access-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:linear-gradient(135deg,#07564e,#0b6f63);
+  }
+
+  .access-overlay.hide{
+    display:none;
+  }
+
+  .access-card{
+    width:min(390px,100%);
+    background:#fff;
+    border-radius:22px;
+    padding:28px 24px 24px;
+    box-shadow:0 18px 55px rgba(0,0,0,.25);
+    text-align:center;
+  }
+
+  .access-logo{
+    width:72px;
+    height:72px;
+    margin:0 auto 14px;
+    border-radius:18px;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:0 3px 12px rgba(0,0,0,.12);
+  }
+
+  .access-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    padding:5px;
+  }
+
+  .access-card h1{
+    margin:0;
+    color:var(--text);
+    font-size:21px;
+  }
+
+  .access-card p{
+    margin:7px 0 20px;
+    color:#6b7d79;
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .access-input{
+    width:100%;
+    height:48px;
+    padding:0 15px;
+    border:1px solid #cbded9;
+    border-radius:12px;
+    outline:none;
+    font-size:16px;
+    text-align:center;
+    color:var(--text);
+  }
+
+  .access-input:focus{
+    border-color:var(--green);
+    box-shadow:0 0 0 3px rgba(11,111,99,.10);
+  }
+
+  .access-btn{
+    width:100%;
+    height:48px;
+    margin-top:11px;
+    border:0;
+    border-radius:12px;
+    background:var(--green);
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .access-btn:active{transform:scale(.98)}
+
+  .access-error{
+    min-height:19px;
+    margin-top:10px;
+    color:#c0392b;
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .access-note{
+    margin-top:15px;
+    color:#8a9b97;
+    font-size:10px;
+  }
+
   .frame-shell{
     position:relative;
     flex:1 1 auto;
@@ -224,26 +341,44 @@
 
 <body>
 
+<!-- KUNCI AKSES PENGAJAR -->
+<div id="accessOverlay" class="access-overlay">
+  <div class="access-card">
+    <div class="access-logo">
+      <img src="./logo-mam-is.png" alt="Logo Sanggar Mam Is">
+    </div>
+    <h1>Jadwal Pengajar</h1>
+    <p>Masukkan kode akses untuk membuka jadwal pengajar Sanggar Belajar Mam Is.</p>
+    <form id="accessForm" autocomplete="off">
+      <input
+        id="accessCode"
+        class="access-input"
+        type="password"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="Kode akses"
+        aria-label="Kode akses"
+        required>
+      <button class="access-btn" type="submit">Masuk</button>
+      <div id="accessError" class="access-error" aria-live="polite"></div>
+    </form>
+    <div class="access-note">Khusus pengajar Sanggar Belajar Mam Is</div>
+  </div>
+</div>
+
 <!-- HEADER KHUSUS PENGAJAR -->
 <header class="brandbar">
   <div class="brand">
 
-    <!-- Logo Sanggar Mam Is -->
+    <!-- Logo Sanggar Mam Is dari repository GitHub -->
     <div class="logo" aria-label="Logo Sanggar Mam Is">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img">
-        <rect x="8" y="8" width="84" height="84" rx="22" fill="#f4fbf8"/>
-        <path d="M27 32c0-5 4-9 9-9h34c5 0 9 4 9 9v39H36c-5 0-9-4-9-9V32z"
-              fill="#0b6f63"/>
-        <path d="M36 30h34c5 0 9 4 9 9v30H36c-5 0-9-4-9-9V39c0-5 4-9 9-9z"
-              fill="#19a88f"/>
-        <path d="M36 30v39c0 4 3 7 7 7h36V39c0-5-4-9-9-9H36z"
-              fill="#fff"/>
-        <path d="M43 40h25M43 49h22M43 58h25"
-              stroke="#0b6f63" stroke-width="5" stroke-linecap="round"/>
-        <circle cx="76" cy="25" r="9" fill="#f4b942"/>
-        <path d="M71 25l4 4 7-9" fill="none" stroke="#fff"
-              stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <img
+        src="./logo-mam-is.png"
+        alt="Logo Sanggar Mam Is"
+        onerror="this.style.display='none';this.parentElement.classList.add('logo-fallback')">
+      <span class="fallback-mark">M</span>
     </div>
 
     <div class="brand-text">
@@ -291,7 +426,10 @@
    JANGAN mengubah Code.gs atau jadwal.html untuk file GitHub ini.
    ========================================================== */
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxOXjcYWFL7-xGJygmh9t1I1uTL_xRbohVTFf8ns_BqrbVdgNMQKSc07wSJdW8ho3mejQ/exec';
+const ACCESS_CODE = 'mamis3';
+const ACCESS_STORAGE_KEY = 'mamis_jadwal_pengajar_access';
+
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxOXjcYWFL7-xGJygmh9t1I1uTL_xRbohVTFf8ns_BqrbVdgNMQKSc07wSJdW8ho3mejQ/execs';
 
 const GAS_TOP_CROP = 48;
 
@@ -306,6 +444,53 @@ function showError(message){
       <small>${message}</small>
     </div>
   `;
+}
+
+function unlockJadwal(){
+  const overlay = document.getElementById('accessOverlay');
+  const input = document.getElementById('accessCode');
+  const error = document.getElementById('accessError');
+
+  overlay.classList.add('hide');
+  error.textContent = '';
+  try{
+    sessionStorage.setItem(ACCESS_STORAGE_KEY, '1');
+  }catch(e){}
+
+  loadJadwal();
+}
+
+function initAccess(){
+  const overlay = document.getElementById('accessOverlay');
+  const form = document.getElementById('accessForm');
+  const input = document.getElementById('accessCode');
+  const error = document.getElementById('accessError');
+
+  let alreadyUnlocked = false;
+  try{
+    alreadyUnlocked = sessionStorage.getItem(ACCESS_STORAGE_KEY) === '1';
+  }catch(e){}
+
+  if(alreadyUnlocked){
+    overlay.classList.add('hide');
+    loadJadwal();
+    return;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const code = String(input.value || '').trim();
+
+    if(code === ACCESS_CODE){
+      unlockJadwal();
+    }else{
+      error.textContent = 'Kode akses salah. Silakan coba lagi.';
+      input.value = '';
+      input.focus();
+    }
+  });
+
+  setTimeout(function(){ input.focus(); }, 100);
 }
 
 function loadJadwal(){
@@ -352,7 +537,7 @@ function reloadJadwal(){
   loadJadwal();
 }
 
-window.addEventListener('load', loadJadwal);
+window.addEventListener('load', initAccess);
 </script>
 
 </body>
