@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b6f63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Jadwal Pengajar — Sanggar Belajar Mam Is</title>
+
+<style>
+  :root{
+    --green:#0b6f63;
+    --green-dark:#07564e;
+    --green-light:#e8f5f1;
+    --bg:#f3f8f6;
+    --white:#fff;
+    --text:#173b36;
+  }
+
+  *{box-sizing:border-box}
+
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+  }
+
+  body{
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* =====================================================
+     HEADER KHUSUS GITHUB
+     Header ini berada DI LUAR Apps Script.
+     ===================================================== */
+  .brandbar{
+    position:relative;
+    z-index:100;
+    flex:0 0 auto;
+    height:68px;
+    display:flex;
+    align-items:center;
+    padding:8px 18px;
+    color:#fff;
+    background:linear-gradient(135deg,var(--green-dark),var(--green));
+    box-shadow:0 3px 12px rgba(0,0,0,.18);
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-width:0;
+  }
+
+  /* Logo Sanggar Mam Is — dibuat inline sehingga tidak
+     bergantung pada file gambar eksternal. */
+  .logo{
+    width:45px;
+    height:45px;
+    flex:0 0 45px;
+    border-radius:13px;
+    background:#fff;
+    display:grid;
+    place-items:center;
+    box-shadow:0 2px 7px rgba(0,0,0,.18);
+    overflow:hidden;
+  }
+
+  .logo svg{
+    width:37px;
+    height:37px;
+    display:block;
+  }
+
+  .brand-text{
+    min-width:0;
+  }
+
+  .brand-name{
+    font-size:17px;
+    line-height:1.15;
+    font-weight:800;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .brand-sub{
+    margin-top:3px;
+    font-size:11px;
+    opacity:.88;
+    white-space:nowrap;
+  }
+
+  .reload{
+    margin-left:auto;
+    flex:0 0 auto;
+    border:1px solid rgba(255,255,255,.35);
+    background:rgba(255,255,255,.13);
+    color:#fff;
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .reload:active{transform:scale(.97)}
+
+  /* =====================================================
+     FRAME
+     ===================================================== */
+  .frame-shell{
+    position:relative;
+    flex:1 1 auto;
+    min-height:0;
+    width:100%;
+    overflow:hidden;
+    background:var(--bg);
+  }
+
+  /*
+   * Apps Script menampilkan banner:
+   * "This application was created by a Google Apps Script user"
+   *
+   * Kita tidak mengubah Apps Script.
+   * Iframe digeser ke atas sehingga banner tersebut
+   * berada di luar area terlihat.
+   *
+   * Jika suatu saat tinggi banner Google berubah,
+   * cukup ubah GAS_TOP_CROP.
+   */
+  #gasFrame{
+    position:absolute;
+    left:0;
+    top:-48px;
+    width:100%;
+    height:calc(100% + 48px);
+    border:0;
+    display:block;
+    background:var(--bg);
+    touch-action:manipulation;
+  }
+
+  .loading{
+    position:absolute;
+    inset:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    color:var(--text);
+    transition:opacity .2s ease;
+  }
+
+  .loading.hide{
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .loading-box{
+    text-align:center;
+    padding:25px;
+  }
+
+  .spinner{
+    width:31px;
+    height:31px;
+    margin:0 auto 12px;
+    border:3px solid #cfe4df;
+    border-top-color:var(--green);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+
+  @keyframes spin{
+    to{transform:rotate(360deg)}
+  }
+
+  .error{
+    max-width:500px;
+    padding:22px;
+    margin:20px;
+    background:#fff;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+    text-align:center;
+  }
+
+  .error b{display:block;margin-bottom:7px}
+  .error small{color:#687b77;line-height:1.5}
+
+  @media(max-width:600px){
+    .brandbar{
+      height:62px;
+      padding:7px 10px;
+    }
+
+    .logo{
+      width:42px;
+      height:42px;
+      flex-basis:42px;
+      border-radius:12px;
+    }
+
+    .brand-name{font-size:15px}
+    .brand-sub{font-size:10px}
+
+    .reload{
+      padding:8px 9px;
+      font-size:11px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER KHUSUS PENGAJAR -->
+<header class="brandbar">
+  <div class="brand">
+
+    <!-- Logo Sanggar Mam Is -->
+    <div class="logo" aria-label="Logo Sanggar Mam Is">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img">
+        <rect x="8" y="8" width="84" height="84" rx="22" fill="#f4fbf8"/>
+        <path d="M27 32c0-5 4-9 9-9h34c5 0 9 4 9 9v39H36c-5 0-9-4-9-9V32z"
+              fill="#0b6f63"/>
+        <path d="M36 30h34c5 0 9 4 9 9v30H36c-5 0-9-4-9-9V39c0-5 4-9 9-9z"
+              fill="#19a88f"/>
+        <path d="M36 30v39c0 4 3 7 7 7h36V39c0-5-4-9-9-9H36z"
+              fill="#fff"/>
+        <path d="M43 40h25M43 49h22M43 58h25"
+              stroke="#0b6f63" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="76" cy="25" r="9" fill="#f4b942"/>
+        <path d="M71 25l4 4 7-9" fill="none" stroke="#fff"
+              stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="brand-text">
+      <div class="brand-name">Sanggar Belajar Mam Is</div>
+      <div class="brand-sub">Jadwal Pengajar</div>
+    </div>
+  </div>
+
+  <button class="reload" type="button" onclick="reloadJadwal()">
+    ↻ Muat Ulang
+  </button>
+</header>
+
+<!-- Apps Script tetap menjadi mesin jadwal -->
+<div class="frame-shell">
+
+  <div id="loading" class="loading">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div>Membuka Jadwal Pengajar...</div>
+    </div>
+  </div>
+
+  <iframe
+    id="gasFrame"
+    title="Jadwal Pengajar Sanggar Mam Is"
+    allow="fullscreen"
+    loading="eager">
+  </iframe>
+
+</div>
+
+<script>
+/* ==========================================================
+   KONFIGURASI
+   ==========================================================
+
+   GANTI SATU BARIS INI dengan URL Web App Apps Script
+   JADWAL PENGAJAR yang sekarang sudah berjalan.
+
+   Contoh:
+   const GAS_URL =
+     'https://script.google.com/macros/s/XXXXXXXXXXXX/exec';
+
+   JANGAN mengubah Code.gs atau jadwal.html untuk file GitHub ini.
+   ========================================================== */
+
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxOXjcYWFL7-xGJygmh9t1I1uTL_xRbohVTFf8ns_BqrbVdgNMQKSc07wSJdW8ho3mejQ/exec';
+
+const GAS_TOP_CROP = 48;
+
+const frame = document.getElementById('gasFrame');
+const loading = document.getElementById('loading');
+
+function showError(message){
+  loading.classList.remove('hide');
+  loading.innerHTML = `
+    <div class="error">
+      <b>Jadwal Pengajar belum dapat dibuka</b>
+      <small>${message}</small>
+    </div>
+  `;
+}
+
+function loadJadwal(){
+  if(
+    !GAS_URL ||
+    GAS_URL.indexOf('PASTE_URL_WEB_APP') !== -1
+  ){
+    showError(
+      'Isi URL Web App Apps Script pada variabel GAS_URL di file jadwalpengajar.html.'
+    );
+    return;
+  }
+
+  loading.classList.remove('hide');
+
+  frame.style.top = '-' + GAS_TOP_CROP + 'px';
+  frame.style.height = 'calc(100% + ' + GAS_TOP_CROP + 'px)';
+
+  frame.onload = function(){
+    setTimeout(function(){
+      loading.classList.add('hide');
+    },350);
+  };
+
+  frame.src =
+    GAS_URL +
+    (GAS_URL.indexOf('?') >= 0 ? '&' : '?') +
+    'github=jadwalpengajar&_=' + Date.now();
+}
+
+function reloadJadwal(){
+  loading.classList.remove('hide');
+
+  try{
+    if(frame.contentWindow){
+      frame.contentWindow.location.reload();
+      setTimeout(function(){
+        loading.classList.add('hide');
+      },1000);
+      return;
+    }
+  }catch(e){}
+
+  loadJadwal();
+}
+
+window.addEventListener('load', loadJadwal);
+</script>
+
+</body>
+</html>
