@@ -1053,6 +1053,100 @@
 </div>
 
 <script>
+
+/* ============================================================
+   JADWAL PENGAJAR ADMIN — READ ONLY DARI SHEET JADWAL_MENGAJAR
+   Tidak menulis/mengubah Google Sheet dan tidak mengubah Code.gs.
+   Isi URL CSV publik sheet JADWAL_MENGAJAR pada konstanta di bawah.
+   ============================================================ */
+const JADWAL_MENGAJAR_CSV_URL = window.JADWAL_MENGAJAR_CSV_URL || "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPxKgLEVT5Qf9bZD7MbCzNPRPo2eNDNAcvJ4HrdsqThZY_Slbv4RwoWKR9k1Aossp9XdGndGJTlRDB/pub?gid=187399784&single=true&output=csv";
+
+let __jadwalMengajarSheetRows = [];
+let __jadwalMengajarSheetLoaded = false;
+
+function parseCsvAdmin_(text){
+  const rows=[]; let row=[], cell="", quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"'){
+      if(quoted && n==='"'){ cell+='"'; i++; }
+      else quoted=!quoted;
+    }else if(c===',' && !quoted){ row.push(cell); cell=""; }
+    else if((c==='\n'||c==='\r') && !quoted){
+      if(c==='\r' && n==='\n') i++;
+      row.push(cell); cell="";
+      if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+      row=[];
+    }else cell+=c;
+  }
+  if(cell!=="" || row.length){
+    row.push(cell);
+    if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+  }
+  return rows;
+}
+
+function readJadwalMengajarSheet_(){
+  if(!JADWAL_MENGAJAR_CSV_URL) return Promise.resolve(false);
+
+  return fetch(JADWAL_MENGAJAR_CSV_URL,{cache:"no-store"})
+    .then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
+    .then(text=>{
+      const rows=parseCsvAdmin_(text);
+      if(rows.length<2) return false;
+
+      const headers=rows[0].map(h=>String(h||"").trim());
+      const objects=rows.slice(1).map(r=>{
+        const o={};
+        headers.forEach((h,i)=>o[h]=String(r[i]??"").trim());
+        return o;
+      });
+
+      __jadwalMengajarSheetRows=objects.map(r=>({
+        "ID Jadwal Mengajar":r["ID Jadwal Mengajar"]||"",
+        "Tanggal":r["Tanggal"]||"",
+        "Bulan":r["Bulan"]||"",
+        "ID Pengajar":r["ID Pengajar"]||"",
+        "Nama Pengajar":r["Nama Pengajar"]||"",
+        "ID Kelas":r["ID Kelas"]||"",
+        "Nama Kelas":r["Nama Kelas"]||"",
+        "Kategori":r["Kategori"]||"",
+        "ID Jadwal":r["ID Jadwal"]||"",
+        "Nama Program":r["Nama Program"]||"",
+        "Hari":r["Hari"]||"",
+        "Jam Mulai":r["Jam Mulai"]||"",
+        "Jam Selesai":r["Jam Selesai"]||"",
+        "Ruang":r["Ruang"]||"",
+        "Jumlah Siswa":r["Jumlah Siswa"]||"",
+        "Status":r["Status"]||"AKTIF",
+        "Catatan":r["Catatan"]||"",
+        "Waktu Input":r["Waktu Input"]||""
+      }));
+
+      __jadwalMengajarSheetLoaded=true;
+      return __jadwalMengajarSheetRows.length>0;
+    })
+    .catch(err=>{
+      console.warn("Gagal membaca sheet JADWAL_MENGAJAR:",err);
+      return false;
+    });
+}
+
+function normalizeHariAdmin_(v){
+  const s=String(v||"").trim().toLowerCase();
+  const map={
+    senin:"Senin",monday:"Senin",
+    selasa:"Selasa",tuesday:"Selasa",
+    rabu:"Rabu",wednesday:"Rabu",
+    kamis:"Kamis",thursday:"Kamis",
+    jumat:"Jumat","jum'at":"Jumat",friday:"Jumat",
+    sabtu:"Sabtu",saturday:"Sabtu",
+    minggu:"Minggu",sunday:"Minggu"
+  };
+  return map[s]||String(v||"");
+}
+
+
   const API_URL = "https://script.google.com/macros/s/AKfycbzOhMKxGOv7LZU-QFBEvkm1EdsOX3bXocThOHxSuAnoQ-z2d7ZI-0IKFtpnBdNzIrlC/exec";
   const API_KEY = "MAMIS-2026";
 
@@ -3278,18 +3372,49 @@ Sanggar Belajar Mam Is Learning Hub`;
   }
 
   function effectiveJadwalAdmin(){
+    // PRIORITAS UTAMA: sheet JADWAL_MENGAJAR.
+    if(__jadwalMengajarSheetRows.length){
+      return __jadwalMengajarSheetRows.map(r=>({
+        "ID Jadwal":r["ID Jadwal"]||r["ID Jadwal Mengajar"]||"",
+        "ID Kelas":r["ID Kelas"]||"",
+        "Nama Program":r["Nama Program"]||"",
+        "Nama Jadwal":r["Nama Program"]||r["Nama Kelas"]||"",
+        "Hari":normalizeHariAdmin_(r["Hari"]||""),
+        "Jam Mulai":r["Jam Mulai"]||"",
+        "Jam Selesai":r["Jam Selesai"]||"",
+        "Ruang":r["Ruang"]||"",
+        "Kapasitas":r["Jumlah Siswa"]||"",
+        "ID Pengajar":r["ID Pengajar"]||"",
+        "Nama Pengajar":r["Nama Pengajar"]||"",
+        "Status Jadwal":String(r["Status"]||"AKTIF").toUpperCase()==="AKTIF"?"Aktif":"Tidak Aktif",
+        "Catatan":r["Catatan"]||"",
+        "Tanggal":r["Tanggal"]||"",
+        "Bulan":r["Bulan"]||""
+      }));
+    }
+
+    // Fallback hanya bila URL Sheet belum dikonfigurasi.
+    // Ini menjaga Admin existing tetap hidup sebelum konfigurasi selesai.
     const operational=(db.jadwalKelas||[]).map(j=>{
       const k=(db.kelas||[]).find(x=>String(x["ID Kelas"])===String(j["ID Kelas"]))||{};
-      return Object.assign({},j,{"Nama Program":j["Nama Program"]||k["Nama Kelas"]||"","Nama Kelas":k["Nama Kelas"]||j["Nama Program"]||"","Jenjang":k["Jenjang"]||""});
+      return Object.assign({},j,{
+        "Nama Program":j["Nama Program"]||k["Nama Kelas"]||"",
+        "Nama Kelas":k["Nama Kelas"]||j["Nama Program"]||"",
+        "Jenjang":k["Jenjang"]||""
+      });
     });
-    const covered=new Set(operational.map(j=>String(j["ID Kelas"])));
-    const legacy=(db.kelas||[]).filter(k=>String(k["Status Kelas"]||"").toLowerCase()==="aktif"&&String(k["Jadwal"]||"").trim()&&!covered.has(String(k["ID Kelas"]))).map(k=>({
-      "ID Jadwal":"LEGACY-"+k["ID Kelas"],"ID Kelas":k["ID Kelas"],"Nama Program":k["Nama Kelas"],"Nama Kelas":k["Nama Kelas"],"Jenjang":k["Jenjang"]||"","Nama Jadwal":k["Jadwal"],"Hari":"","Jam Mulai":"","Jam Selesai":"","Ruang":"","Kapasitas":"","ID Pengajar":k["ID Pengajar"]||"","Nama Pengajar":k["Nama Pengajar"]||"","Status Jadwal":"Aktif"
-    }));
-    return operational.concat(legacy);
+    return operational;
   }
 
+
+
   function renderJadwalPengajarAdmin(){
+    if(!window.__JADWAL_MENGAJAR_LOAD_STARTED__){
+      window.__JADWAL_MENGAJAR_LOAD_STARTED__=true;
+      readJadwalMengajarSheet_().then(ok=>{
+        if(ok) renderJadwalPengajarAdmin();
+      });
+    }
     const target=document.getElementById("jadwalPengajarAdminTable");
     const summary=document.getElementById("ringkasanJadwalPengajarAdmin");
     const calendar=document.getElementById("kalenderJadwalPengajarAdmin");
