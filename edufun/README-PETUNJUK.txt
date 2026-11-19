@@ -38,3 +38,15 @@ CATATAN PENTING V1
 INTEGRASI MENU DI WEBSITE UTAMA
 Tambahkan tautan berikut di menu/halaman utama tanpa mengganti file utama:
 <a href="edufun/">EduFun</a>
+
+UPDATE V2 — PERBAIKAN & ASET
+- twibbon.png: frame EduFun dengan area foto tengah diproses transparan.
+- certificate-template.png: desain sertifikat hijau yang diberikan pengelola (template referensi).
+- Halaman pendaftaran menampilkan instruksi Cash/Transfer/QRIS setelah metode dipilih.
+- Admin menggunakan pemilihan peserta melalui tombol data-pick agar aksi Pilih lebih stabil.
+- Admin dapat menyimpan rekening dan QRIS, lalu halaman pendaftaran membaca informasi tersebut.
+- Setelah memperbarui Code.gs, lakukan Deploy > Manage deployments > Edit > New version > Deploy.
+- Setelah memperbarui file HTML/PNG di GitHub Pages, tunggu deployment selesai lalu hard refresh (Ctrl+F5).
+
+CATATAN:
+Template sertifikat PNG saat ini adalah contoh visual yang masih memuat nama contoh Kinanthi Prameswari TJ dan QR contoh. Jangan gunakan langsung untuk peserta lain. Generator sertifikat personal dengan QR verifikasi unik masih perlu tahap implementasi lanjutan.

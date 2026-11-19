@@ -24,13 +24,27 @@ footer{text-align:center;padding:25px;color:#64748b}
 <label>Kelas *</label><input name="kelas" required maxlength="30" placeholder="Contoh: Kelas X">
 <label>Nomor WhatsApp</label><input name="wa" inputmode="tel" placeholder="08xxxxxxxxxx">
 <label>Email</label><input name="email" type="email" placeholder="nama@email.com">
-<label>Metode pembayaran *</label><select name="metode" required><option value="">Pilih metode</option><option value="Cash">Cash / Tunai</option><option value="Transfer">Transfer Bank</option><option value="QRIS">QRIS</option></select>
+<label>Metode pembayaran *</label><select id="metode" name="metode" required><option value="">Pilih metode</option><option value="Cash">Cash / Tunai</option><option value="Transfer">Transfer Bank</option><option value="QRIS">QRIS</option></select>
+<div id="paymentInfo" class="notice">Pilih metode pembayaran untuk melihat petunjuk pembayaran.</div>
 <button class="btn" type="submit">Daftar EduFun</button>
 </form><div id="msg" class="result hide"></div>
 <p class="muted">Pembayaran dikonfirmasi kepada Sanggar Belajar Mam Is. Status lunas ditetapkan setelah verifikasi admin.</p>
 </section></main><footer>© Sanggar Belajar Mam Is • EduFun Outdoor Learning Day</footer>
 <script>
-const API_URL=localStorage.getItem('edufun_api')||'https://script.google.com/macros/s/AKfycbye6QyXh8jA_EGi82oArNAhuY2lPq6kLE07_NVsrdR0moE0mr3eAt_JYNlNBJtPT2ISrw/exec';
+const API_URL=localStorage.getItem('edufun_api')||'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
 function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Alamat backend EduFun belum dikonfigurasi.'));const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const t=setTimeout(()=>{cleanup();reject(Error('Server tidak merespons.'))},20000);function cleanup(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{cleanup();resolve(r)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify(data))+'&callback='+cb; s.onerror=()=>{cleanup();reject(Error('Gagal menghubungi server.'))};document.body.appendChild(s)})}
+
+async function showPaymentInfo(){
+ const m=document.getElementById('metode').value, box=document.getElementById('paymentInfo');
+ if(!m){box.textContent='Pilih metode pembayaran untuk melihat petunjuk pembayaran.';return;}
+ if(m==='Cash'){box.innerHTML='<b>Pembayaran tunai</b><br>Bayar Rp50.000 langsung kepada petugas Sanggar Belajar Mam Is. Pembayaran akan diverifikasi oleh admin.';return;}
+ try{
+  const r=await api('getPaymentInfo');
+  if(!r.status)throw Error(r.message||'Informasi pembayaran belum tersedia');
+  if(m==='Transfer')box.innerHTML='<b>Transfer bank — Rp50.000</b><br>'+(r.bank? r.bank.replace(/</g,'&lt;'):'Informasi rekening belum diatur. Silakan hubungi Sanggar.');
+  if(m==='QRIS')box.innerHTML='<b>Pembayaran QRIS — Rp50.000</b><br>'+(r.qris?'<img src="'+r.qris+'" alt="QRIS EduFun" style="display:block;max-width:230px;width:100%;margin:10px auto;border-radius:8px">':'QRIS belum diunggah. Silakan hubungi Sanggar.')+'<br>Setelah membayar, konfirmasikan kepada Sanggar.';
+ }catch(e){box.textContent=e.message;}
+}
+document.getElementById('metode').addEventListener('change',showPaymentInfo);
 document.getElementById('regForm').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target),d=Object.fromEntries(f.entries());if(!d.wa&&!d.email){alert('Isi nomor WhatsApp atau email minimal salah satu.');return}const b=e.target.querySelector('button');b.disabled=true;b.textContent='Mengirim...';try{const r=await api('register',d);if(!r.status)throw Error(r.message);const m=document.getElementById('msg');m.classList.remove('hide');m.innerHTML='<b>Pendaftaran berhasil!</b><br>Nomor registrasi: <strong>'+r.id+'</strong><br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.';e.target.reset()}catch(err){alert(err.message)}finally{b.disabled=false;b.textContent='Daftar EduFun'}})
 </script></body></html>
