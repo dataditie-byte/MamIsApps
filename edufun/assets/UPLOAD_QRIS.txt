@@ -1,0 +1,11 @@
+EDUFUN - FILE QRIS
+Letakkan file gambar QRIS Sanggar dengan nama persis:
+qris-sanggar.jpg
+
+Path repository:
+MamIsApps/edufun/assets/qris-sanggar.jpg
+
+URL publik setelah GitHub Pages deploy:
+https://sanggarmamis.mytije.com/edufun/assets/qris-sanggar.jpg
+
+Gunakan file gambar QRIS asli (JPG/PNG). Jika format PNG, ubah nama pada PAYMENT_CONFIG di edufun/index.html menjadi assets/qris-sanggar.png.
