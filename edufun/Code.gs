@@ -23,11 +23,27 @@ case'setPaid':efAuth_(d.token);return efUpdate_(d.id,{'Status Bayar':'Lunas'});
 case'checkin':efAuth_(d.token);return efUpdate_(d.id,{'Hadir':'Ya','Waktu Hadir':new Date()});
 case'savePhoto':efAuth_(d.token);return efSavePhoto_(d);
 case'saveSettings':efAuth_(d.token);return efSaveSettings_(d);
+case'saveSettingsChunk':efAuth_(d.token);return efStoreSettingsChunk_(d);
+case'saveSettingsFinalize':efAuth_(d.token);return efFinalizeSettingsUpload_(d);
 case'issueCertificate':efAuth_(d.token);return efCertificate_(d.id);
 case'verify':return efVerify_(d.id);
 default:return {status:false,message:'Action tidak dikenal'};}}
 function efRegister_(d){const nama=String(d.nama||'').trim(),kelas=String(d.kelas||'').trim(),wa=String(d.wa||'').trim(),email=String(d.email||'').trim(),metode=String(d.metode||'');if(!nama||!kelas||(!wa&&!email)||!['Cash','Transfer','QRIS'].includes(metode))throw Error('Data pendaftaran belum lengkap.');if(nama.length>100||kelas.length>30)throw Error('Data terlalu panjang.');const lock=LockService.getScriptLock();lock.waitLock(15000);try{const id='EF26-'+Utilities.formatString('%04d',Math.max(0,efRows_().length)+1);efSheet_('PESERTA').appendRow([id,new Date(),nama,kelas,wa,email,metode,EF_CFG.FEE,'Menunggu Konfirmasi','Tidak','','','','']);return {status:true,id:id,fee:EF_CFG.FEE}}finally{lock.releaseLock()}}
-function efLogin_(d){const p=PropertiesService.getScriptProperties(),u=p.getProperty('EF_ADMIN_USER')||EF_CFG.ADMIN_USER,h=p.getProperty('EF_ADMIN_HASH')||efHash_(EF_CFG.INITIAL_PASSWORD);if(String(d.username)!==u||efHash_(String(d.password||''))!==h)throw Error('Username atau password salah.');const token=Utilities.getUuid()+Utilities.getUuid();CacheService.getScriptCache().put('EF_TOKEN_'+token,'1',EF_CFG.TOKEN_HOURS*3600);return {status:true,token}}
+function efLogin_(d){
+ const p=PropertiesService.getScriptProperties();
+ const u=p.getProperty('EF_ADMIN_USER')||EF_CFG.ADMIN_USER;
+ const plain=p.getProperty('EF_ADMIN_PASSWORD');
+ const hash=p.getProperty('EF_ADMIN_HASH');
+ const supplied=String(d.password||'');
+ let valid=false;
+ if(plain!==null && plain!=='') valid=(supplied===plain);
+ else if(hash) valid=(efHash_(supplied)===hash);
+ else valid=(efHash_(supplied)===efHash_(EF_CFG.INITIAL_PASSWORD));
+ if(String(d.username||'').trim()!==u || !valid) throw Error('Username atau password salah. Periksa EF_ADMIN_USER dan EF_ADMIN_PASSWORD di Script Properties.');
+ const token=Utilities.getUuid()+Utilities.getUuid();
+ CacheService.getScriptCache().put('EF_TOKEN_'+token,'1',EF_CFG.TOKEN_HOURS*3600);
+ return {status:true,token:token};
+}
 function efAuth_(t){if(!t||CacheService.getScriptCache().get('EF_TOKEN_'+t)!=='1')throw Error('Sesi admin tidak valid. Silakan login kembali.')}
 function efHash_(s){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s).map(x=>(x<0?x+256:x).toString(16).padStart(2,'0')).join('')}
 function efSheet_(n){const s=efSS_().getSheetByName(n);if(!s)throw Error('Database belum disiapkan: '+n);return s}
@@ -47,6 +63,29 @@ function efSaveSettings_(d){
  }
  return {status:true,message:'Pengaturan pembayaran tersimpan.'};
 }
+
+function efStoreSettingsChunk_(d){
+ const id=String(d.uploadId||'');
+ const i=Number(d.index), total=Number(d.total), chunk=String(d.chunk||'');
+ if(!/^qris_[A-Za-z0-9_]+$/.test(id)||!Number.isInteger(i)||!Number.isInteger(total)||total<1||total>1200||i<0||i>=total||!chunk||chunk.length>3000)throw Error('Potongan file QRIS tidak valid.');
+ CacheService.getScriptCache().put('EF_QRIS_'+id+'_'+i,chunk,21600);
+ return {status:true,index:i};
+}
+function efFinalizeSettingsUpload_(d){
+ const id=String(d.uploadId||''),total=Number(d.total),bank=String(d.bank||'');
+ if(!/^qris_[A-Za-z0-9_]+$/.test(id)||!Number.isInteger(total)||total<1||total>1200)throw Error('Data unggahan QRIS tidak valid.');
+ const cache=CacheService.getScriptCache(),parts=[];
+ for(let i=0;i<total;i++){
+  const part=cache.get('EF_QRIS_'+id+'_'+i);
+  if(part===null)throw Error('Unggahan QRIS belum lengkap pada bagian '+(i+1)+'. Silakan simpan ulang.');
+  parts.push(part);
+ }
+ const base64=parts.join('');
+ const result=efSaveSettings_({bank:bank,qris:base64});
+ for(let i=0;i<total;i++)cache.remove('EF_QRIS_'+id+'_'+i);
+ return result;
+}
+
 function efGetPaymentInfo_(){
  const v=efSheet_('PENGATURAN').getDataRange().getValues(),o={};
  v.slice(1).forEach(r=>o[r[0]]=r[1]);

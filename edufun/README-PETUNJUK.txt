@@ -50,3 +50,17 @@ UPDATE V2 — PERBAIKAN & ASET
 
 CATATAN:
 Template sertifikat PNG saat ini adalah contoh visual yang masih memuat nama contoh Kinanthi Prameswari TJ dan QR contoh. Jangan gunakan langsung untuk peserta lain. Generator sertifikat personal dengan QR verifikasi unik masih perlu tahap implementasi lanjutan.
+
+
+UPDATE V2.2:
+- API URL sudah diisi dengan Web App URL yang diberikan pengguna.
+- Login mendukung EF_ADMIN_PASSWORD (teks biasa di Script Properties) atau EF_ADMIN_HASH (hash lama).
+- Admin selalu menampilkan form login, tidak melewati login berdasarkan token browser lama.
+- Jika browser menampilkan pesan Web App tidak dapat dimuat, buka URL /exec?action=ping di browser. Deployment harus Execute as Me dan Who has access Anyone, lalu deploy New version.
+
+
+UPDATE V2.3:
+- Upload QRIS memakai potongan kecil (chunked JSONP), menghindari URL terlalu panjang saat gambar dikirim.
+- Tombol Pilih peserta menggunakan onclick langsung pada baris tabel.
+- Backend Code.gs menambah action saveSettingsChunk dan saveSettingsFinalize.
+- Untuk update, ganti folder edufun di GitHub dan perbarui Code.gs di Apps Script, lalu Deploy New version.
