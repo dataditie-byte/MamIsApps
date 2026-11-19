@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduFun! | Sanggar Belajar Mam Is</title>
+<style>
+:root{--navy:#102b4e;--teal:#079b9b;--red:#d9232e;--orange:#f58220;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:#243244}
+header{background:linear-gradient(120deg,var(--navy),#174c70);color:#fff;padding:28px 18px;text-align:center}
+.wrap{max-width:960px;margin:auto;padding:18px}.hero{background:white;border-radius:18px;padding:22px;margin-top:-12px;box-shadow:0 8px 28px #102b4e16}
+h1{margin:0;font-size:38px}h2{color:var(--navy)}.tag{color:#d9f4f1;font-weight:bold;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}.tile{background:#fff;border-radius:14px;padding:17px;border:1px solid #e5ebf2}
+.price{font-size:28px;color:var(--teal);font-weight:800}.btn{border:0;border-radius:10px;padding:12px 17px;background:var(--teal);color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}.btn.alt{background:var(--navy)}.btn.light{background:#eaf2f7;color:var(--navy)}
+label{display:block;font-weight:bold;margin:12px 0 5px}input,select{width:100%;padding:12px;border:1px solid #ccd6e0;border-radius:9px;font-size:16px;background:white}
+form{max-width:600px}.notice{padding:12px;border-radius:10px;background:#eaf5f4;margin:12px 0}.muted{color:#64748b;font-size:13px}.hide{display:none}.result{padding:15px;background:#fff7e8;border:1px solid #f4d69c;border-radius:12px;margin-top:14px;word-break:break-word}
+footer{text-align:center;padding:25px;color:#64748b}
+</style></head><body>
+<header><div class="tag">SANGGAR BELAJAR MAM IS</div><h1>Edu<span style="color:#ffb52e">Fun!</span></h1><div style="font-size:19px;font-weight:bold">OUTDOOR LEARNING DAY</div><p>LEARN • PLAY • GROW</p></header>
+<main class="wrap"><section class="hero">
+<h2>Belajar seru di alam terbuka!</h2><p>Bergabunglah dalam pengalaman belajar di taman melalui permainan edukatif, eksplorasi, dan tantangan kelompok.</p>
+<div class="grid"><div class="tile"><b>📅 Hari/Tanggal</b><p>Minggu, 20 Desember 2026</p></div><div class="tile"><b>📍 Lokasi</b><p>Taman Sukamaju, Cilodong</p></div><div class="tile"><b>💳 Kontribusi peserta</b><div class="price">Rp50.000</div></div></div>
+<div class="grid"><div class="tile"><h3>🌿 Eksplorasi Alam</h3><p>Mengenal lingkungan dan belajar dari sekitar.</p></div><div class="tile"><h3>🤝 Kolaborasi Tim</h3><p>Melatih komunikasi dan kerja sama.</p></div><div class="tile"><h3>💡 Kreativitas & Solusi</h3><p>Berpikir kritis dan memecahkan tantangan.</p></div><div class="tile"><h3>🌱 Refleksi Diri</h3><p>Mengenali potensi dan mengembangkan diri.</p></div></div>
+<h2>Daftar Peserta</h2><div class="notice">Isi data peserta. Nomor WhatsApp atau email wajib diisi minimal salah satu untuk menerima informasi pendaftaran.</div>
+<form id="regForm">
+<label>Nama lengkap peserta *</label><input name="nama" required maxlength="100" placeholder="Nama peserta">
+<label>Kelas *</label><input name="kelas" required maxlength="30" placeholder="Contoh: Kelas X">
+<label>Nomor WhatsApp</label><input name="wa" inputmode="tel" placeholder="08xxxxxxxxxx">
+<label>Email</label><input name="email" type="email" placeholder="nama@email.com">
+<label>Metode pembayaran *</label><select name="metode" required><option value="">Pilih metode</option><option value="Cash">Cash / Tunai</option><option value="Transfer">Transfer Bank</option><option value="QRIS">QRIS</option></select>
+<button class="btn" type="submit">Daftar EduFun</button>
+</form><div id="msg" class="result hide"></div>
+<p class="muted">Pembayaran dikonfirmasi kepada Sanggar Belajar Mam Is. Status lunas ditetapkan setelah verifikasi admin.</p>
+</section></main><footer>© Sanggar Belajar Mam Is • EduFun Outdoor Learning Day</footer>
+<script>
+const API_URL=localStorage.getItem('edufun_api')||'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
+function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Alamat backend EduFun belum dikonfigurasi.'));const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const t=setTimeout(()=>{cleanup();reject(Error('Server tidak merespons.'))},20000);function cleanup(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{cleanup();resolve(r)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify(data))+'&callback='+cb; s.onerror=()=>{cleanup();reject(Error('Gagal menghubungi server.'))};document.body.appendChild(s)})}
+document.getElementById('regForm').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target),d=Object.fromEntries(f.entries());if(!d.wa&&!d.email){alert('Isi nomor WhatsApp atau email minimal salah satu.');return}const b=e.target.querySelector('button');b.disabled=true;b.textContent='Mengirim...';try{const r=await api('register',d);if(!r.status)throw Error(r.message);const m=document.getElementById('msg');m.classList.remove('hide');m.innerHTML='<b>Pendaftaran berhasil!</b><br>Nomor registrasi: <strong>'+r.id+'</strong><br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.';e.target.reset()}catch(err){alert(err.message)}finally{b.disabled=false;b.textContent='Daftar EduFun'}})
+</script></body></html>
