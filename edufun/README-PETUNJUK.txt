@@ -49,3 +49,14 @@ PENTING — PEMISAHAN FILE:
 - Code.gs hanya ditempel ke editor Google Apps Script, file bernama Code.gs.
 - Jangan pernah menempel isi Code.gs ke admin.html atau index.html.
 - Di V2.4 admin tidak lagi memiliki form pengaturan pembayaran. Nama bank dan QRIS dibaca dari konstanta EF_CFG pada Code.gs.
+
+
+UPDATE V2.5 — QRIS & AKSI PESERTA
+- URL QRIS diganti ke endpoint thumbnail Google Drive untuk tampilan gambar.
+- Pastikan file Drive QRIS memiliki akses General access: Anyone with the link / Viewer.
+- Tabel peserta kini memiliki tombol Pilih, Edit, dan Hapus.
+- Edit mengubah Nama, Kelas, WhatsApp, Email, dan Metode Bayar.
+- Hapus menghapus baris peserta dari sheet PESERTA setelah konfirmasi.
+- Backend menambah action editParticipant dan deleteParticipant.
+- Ganti folder edufun di GitHub; perbarui Code.gs di editor Apps Script; Deploy New version.
+- Jangan menempel Code.gs ke file HTML.
