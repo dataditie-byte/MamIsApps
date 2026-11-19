@@ -1,66 +1,51 @@
-EDUFUN — PAKET FONDASI V1
-========================
+EDUFUN V2.4 — PEMBAYARAN STATIS DI CODE.GS
+=============================================
 
-Isi:
-- index.html : halaman pendaftaran peserta
-- admin.html : dashboard admin dasar
-- Code.gs    : backend Google Apps Script mandiri
+ISI PAKET:
+- edufun/index.html : pendaftaran peserta, menampilkan detail transfer dan QRIS
+- edufun/admin.html : dashboard admin; tidak ada form pengaturan pembayaran
+- edufun/Code.gs : backend EduFun; konfigurasi bank dan QRIS sudah ditetapkan di EF_CFG
+- edufun/twibbon.png : frame Twibbon
+- edufun/certificate-template.png : template visual sertifikat
 
-PENTING:
-Paket ini adalah fondasi V1 untuk diuji, belum merupakan deployment aktif. Jangan tempel Code.gs ini ke Code.gs utama MamIsApps. Buat project Apps Script BARU khusus EduFun.
+KONFIGURASI PEMBAYARAN YANG SUDAH DIMASUKKAN:
+Bank: BCA
+No. rekening: 8690929504
+Atas nama: Euis Gartina Ayu Sarie
+QRIS Drive file ID: 1Bl56Wl3X2PbHUeqhBc2s-JNP_ru3_ggJ
+URL QRIS: https://drive.google.com/uc?export=view&id=1Bl56Wl3X2PbHUeqhBc2s-JNP_ru3_ggJ
 
-LANGKAH PEMASANGAN
-1. Buat Google Spreadsheet baru bernama Database EduFun.
-2. Buka Extensions > Apps Script.
-3. Tempel isi file edufun/Code.gs ke project baru.
-4. Jalankan setupEduFun() satu kali.
-5. Jalankan setupAdminEduFun() satu kali. Catat password awal yang ditampilkan, lalu ganti password sebelum dipakai publik.
-6. Deploy > New deployment > Web app; Execute as: Me; Who has access: Anyone.
-7. Salin URL /exec hasil deployment.
-8. Di edufun/index.html dan edufun/admin.html, ganti PASTE_APPS_SCRIPT_WEB_APP_URL_HERE dengan URL /exec.
-9. Commit folder edufun ke repository MamIsApps.
-10. Buka https://sanggarmamis.mytije.com/edufun/ dan /edufun/admin.html
+URL WEB APP:
+https://script.google.com/macros/s/AKfycbye6QyXh8jA_EGi82oArNAhuY2lPq6kLE07_NVsrdR0moE0mr3eAt_JYNlNBJtPT2ISrw/exec
 
-KONFIGURASI YANG BELUM DIISI
-- QRIS Sanggar: upload setelah admin login; untuk versi ini penyimpanan QRIS di Drive dibuat dasar.
-- Rekening transfer: isi melalui menu pengaturan admin.
-- Nomor WhatsApp/email: diisi peserta saat mendaftar (minimal salah satu).
+CARA UPDATE YANG BENAR — PENTING:
+1. Di GitHub repository MamIsApps, buka folder edufun.
+2. Ganti HANYA file edufun/index.html dan edufun/admin.html dengan file yang ada di folder edufun ZIP ini.
+3. Upload edufun/twibbon.png dan edufun/certificate-template.png ke folder edufun bila belum ada.
+4. JANGAN upload Code.gs ke GitHub sebagai admin.html atau index.html.
+5. Buka editor Google Apps Script project "edufun project".
+6. Di panel kiri Apps Script, buka file Code.gs.
+7. Pilih seluruh isi Code.gs lama, ganti dengan isi file edufun/Code.gs dari ZIP ini, lalu Save.
+8. Deploy > Manage deployments > Edit > New version > Deploy.
+9. Tunggu GitHub Pages selesai, lalu hard refresh halaman.
 
-CATATAN PENTING V1
-- Pendaftaran dan status pembayaran dicatat ke Spreadsheet.
-- Pembayaran tidak otomatis terdeteksi dari QRIS statis. Admin wajib verifikasi.
-- Foto Twibbon membutuhkan file twibbon.png transparan di folder edufun. Letakkan frame final yang sudah disetujui dengan nama persis twibbon.png.
-- Foto peserta dan hasil Twibbon tersimpan di Drive setelah proses unggah.
-- Modul sertifikat saat ini menghasilkan HTML dasar; tahap desain berikutnya perlu mengganti template dengan desain sertifikat hijau final dan QR verifikasi visual.
-- Fitur kirim WA/email otomatis belum diaktifkan. Untuk WhatsApp, gunakan link wa.me/manual; email dapat diintegrasikan di tahap berikutnya.
-- Keamanan: ganti password awal, batasi akses spreadsheet/Drive, dan lakukan uji coba dengan data dummy sebelum pendaftaran dibuka.
+JANGAN:
+- Jangan menempel isi Code.gs ke file HTML di GitHub.
+- Jangan mengganti index.html utama root repository.
+- Jangan menghapus Spreadsheet atau tab PESERTA.
+- Jangan mengubah Script Properties admin/EF_SSID.
 
-INTEGRASI MENU DI WEBSITE UTAMA
-Tambahkan tautan berikut di menu/halaman utama tanpa mengganti file utama:
-<a href="edufun/">EduFun</a>
+PENTING UNTUK QRIS:
+File Drive harus disetel General access: Anyone with the link / Viewer agar gambar dapat tampil untuk calon peserta. Jika QRIS tidak muncul, buka link Drive dan pastikan izin berbagi publik sudah aktif.
 
-UPDATE V2 — PERBAIKAN & ASET
-- twibbon.png: frame EduFun dengan area foto tengah diproses transparan.
-- certificate-template.png: desain sertifikat hijau yang diberikan pengelola (template referensi).
-- Halaman pendaftaran menampilkan instruksi Cash/Transfer/QRIS setelah metode dipilih.
-- Admin menggunakan pemilihan peserta melalui tombol data-pick agar aksi Pilih lebih stabil.
-- Admin dapat menyimpan rekening dan QRIS, lalu halaman pendaftaran membaca informasi tersebut.
-- Setelah memperbarui Code.gs, lakukan Deploy > Manage deployments > Edit > New version > Deploy.
-- Setelah memperbarui file HTML/PNG di GitHub Pages, tunggu deployment selesai lalu hard refresh (Ctrl+F5).
+Pembayaran:
+- Cash: peserta membayar langsung ke Sanggar.
+- Transfer: detail BCA ditampilkan saat metode Transfer dipilih.
+- QRIS: gambar QRIS ditampilkan saat metode QRIS dipilih.
+Verifikasi status pembayaran tetap dilakukan admin dari dashboard peserta.
 
-CATATAN:
-Template sertifikat PNG saat ini adalah contoh visual yang masih memuat nama contoh Kinanthi Prameswari TJ dan QR contoh. Jangan gunakan langsung untuk peserta lain. Generator sertifikat personal dengan QR verifikasi unik masih perlu tahap implementasi lanjutan.
-
-
-UPDATE V2.2:
-- API URL sudah diisi dengan Web App URL yang diberikan pengguna.
-- Login mendukung EF_ADMIN_PASSWORD (teks biasa di Script Properties) atau EF_ADMIN_HASH (hash lama).
-- Admin selalu menampilkan form login, tidak melewati login berdasarkan token browser lama.
-- Jika browser menampilkan pesan Web App tidak dapat dimuat, buka URL /exec?action=ping di browser. Deployment harus Execute as Me dan Who has access Anyone, lalu deploy New version.
-
-
-UPDATE V2.3:
-- Upload QRIS memakai potongan kecil (chunked JSONP), menghindari URL terlalu panjang saat gambar dikirim.
-- Tombol Pilih peserta menggunakan onclick langsung pada baris tabel.
-- Backend Code.gs menambah action saveSettingsChunk dan saveSettingsFinalize.
-- Untuk update, ganti folder edufun di GitHub dan perbarui Code.gs di Apps Script, lalu Deploy New version.
+PENTING — PEMISAHAN FILE:
+- admin.html dan index.html hanya untuk folder GitHub MamIsApps/edufun.
+- Code.gs hanya ditempel ke editor Google Apps Script, file bernama Code.gs.
+- Jangan pernah menempel isi Code.gs ke admin.html atau index.html.
+- Di V2.4 admin tidak lagi memiliki form pengaturan pembayaran. Nama bank dan QRIS dibaca dari konstanta EF_CFG pada Code.gs.

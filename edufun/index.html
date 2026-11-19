@@ -41,8 +41,8 @@ async function showPaymentInfo(){
  try{
   const r=await api('getPaymentInfo');
   if(!r.status)throw Error(r.message||'Informasi pembayaran belum tersedia');
-  if(m==='Transfer')box.innerHTML='<b>Transfer bank — Rp50.000</b><br>'+(r.bank? r.bank.replace(/</g,'&lt;'):'Informasi rekening belum diatur. Silakan hubungi Sanggar.');
-  if(m==='QRIS')box.innerHTML='<b>Pembayaran QRIS — Rp50.000</b><br>'+(r.qris?'<img src="'+r.qris+'" alt="QRIS EduFun" style="display:block;max-width:230px;width:100%;margin:10px auto;border-radius:8px">':'QRIS belum diunggah. Silakan hubungi Sanggar.')+'<br>Setelah membayar, konfirmasikan kepada Sanggar.';
+  if(m==='Transfer')box.innerHTML='<b>Transfer bank — Rp50.000</b><br>'+(r.bank? r.bank.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'):'Informasi rekening belum diatur. Silakan hubungi Sanggar.');
+  if(m==='QRIS')box.innerHTML='<b>Pembayaran QRIS — Rp50.000</b><br>'+(r.qris?'<img src="'+r.qris+'" alt="QRIS EduFun" referrerpolicy="no-referrer" style="display:block;max-width:260px;width:100%;margin:10px auto;border-radius:8px">':'QRIS belum diunggah. Silakan hubungi Sanggar.')+'<br>Setelah membayar, konfirmasikan kepada Sanggar.';
  }catch(e){box.textContent=e.message;}
 }
 document.getElementById('metode').addEventListener('change',showPaymentInfo);
