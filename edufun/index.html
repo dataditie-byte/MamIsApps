@@ -40,7 +40,7 @@ const PAYMENT_CONFIG = {
  bank: 'BCA',
  account: '8690929504',
  accountName: 'Euis Gartina Ayu Sarie',
- qrisImage: 'edufun/assets/qris-sanggar.jepg'
+ qrisImage: 'edufun/assets/qris-sanggar.jpeg'
 };
 async function showPaymentInfo(){
  const m=document.getElementById('metode').value, box=document.getElementById('paymentInfo');
@@ -62,7 +62,7 @@ async function showPaymentInfo(){
    '<img src="'+PAYMENT_CONFIG.qrisImage+'" alt="QRIS EduFun" '+
    'style="display:block;max-width:280px;width:100%;height:auto;margin:12px auto;border-radius:8px" '+
    'onerror="this.style.display=\'none\';document.getElementById(\'qrisMissing\').style.display=\'block\'">'+
-   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia. Pastikan assets/qris-sanggar.jpg sudah diunggah ke repository.</div>'+
+   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia..</div>'+
    '<br>Setelah membayar, konfirmasikan kepada Sanggar Belajar Mam Is.';
  }
 }
