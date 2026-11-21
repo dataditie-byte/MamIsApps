@@ -80,13 +80,13 @@ function refreshShareControls(){
 function sharePhotoWhatsApp(){
   const link=getParticipantDriveUrl('foto');
   if(!link) return alert('Link foto Twibbon belum tersedia. Simpan foto terlebih dahulu.');
-  const message='Halo, '+(selected.nama||'peserta')+'! 👋\\n\\nFoto Twibbon EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📸 Lihat dan unduh foto di sini:\\n'+link+'\\n\\nTerima kasih telah berpartisipasi. Salam, Sanggar Belajar Mam Is.';
+  const message='🌿 HALO, '+(selected.nama||'PESERTA').toUpperCase()+'! 🌿\n\n📸 FOTO TWIBBON EDUFUN!\nOutdoor Learning Day\nSanggar Belajar Mam Is\n\nKabar gembira! Foto Twibbon EduFun kamu sudah tersedia. 🥳\n\n👇 KLIK LINK BERIKUT UNTUK MELIHAT DAN MENGUNDUH FOTO:\n\n🔗 '+link+'\n\nTerima kasih telah berpartisipasi dan menjadi bagian dari keseruan EduFun Outdoor Learning Day!\n\nSalam hangat,\nSanggar Belajar Mam Is 💚';
   openWhatsAppForSelected(message);
 }
 function shareCertificateWhatsApp(){
   const link=getParticipantDriveUrl('sertifikat');
   if(!link) return alert('Link sertifikat belum tersedia. Terbitkan sertifikat terlebih dahulu.');
-  const message='Halo, '+(selected.nama||'peserta')+'! 🎓\\n\\nSertifikat partisipasi EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📜 Lihat dan unduh sertifikat di sini:\\n'+link+'\\n\\nSelamat dan terus semangat belajar!\\nSalam, Sanggar Belajar Mam Is.';
+  const message='🎓 HALO, '+(selected.nama||'PESERTA').toUpperCase()+'!\n\nSERTIFIKAT EDUFUN!\nOutdoor Learning Day\nSanggar Belajar Mam Is\n\nSertifikat partisipasi kamu sudah tersedia.\n\n👇 KLIK LINK BERIKUT UNTUK MELIHAT SERTIFIKAT:\n\n🔗 '+link+'\n\nSelamat dan terus semangat belajar!\n\nSalam hangat,\nSanggar Belajar Mam Is 💚';
   openWhatsAppForSelected(message);
 }
 
