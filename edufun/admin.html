@@ -56,8 +56,8 @@ function render(){
  document.getElementById('nHadir').textContent=people.filter(x=>x.hadir==='Ya').length;
  const tbody=document.getElementById('rows');
  const filter=document.getElementById('filterClass')?.value||'';
- const sorted=people.map((x)=>x).filter(x=>!filter||x.kelas===filter).sort((a,b)=>(Number(String(a.kelas||'').replace('Kelas ',''))-Number(String(b.kelas||'').replace('Kelas ','')))||String(a.nama).localeCompare(String(b.nama),'id'));
- tbody.innerHTML=sorted.map((x)=>{const i=people.indexOf(x);return `<tr><td>${esc(x.id)}</td><td>${esc(x.nama)}</td><td>${esc(x.kelas)}</td><td>${esc(x.wa||x.email)}</td><td>${esc(x.metode)}</td><td>${esc(x.statusBayar)}</td><td>${esc(x.hadir)}</td><td>${x.twibbonSent==='Sudah'?'✅ Sudah':'—'}</td><td>${x.certSent==='Sudah'?'✅ Sudah':'—'}</td><td><div class="actions"><button type="button" onclick="pick(${i})">Pilih</button><button type="button" onclick="markPresent('${esc(x.id)}')">${x.hadir==='Ya'?'Hadir ✓':'Hadir'}</button><button type="button" onclick="shareRow(${i},'twibbon')">Kirim Twibbon</button><button type="button" onclick="markSent('twibbon','${esc(x.id)}')">Tandai Twibbon Terkirim</button><button type="button" onclick="shareRow(${i},'certificate')">Kirim Sertifikat</button><button type="button" onclick="markSent('certificate','${esc(x.id)}')">Tandai Sertifikat Terkirim</button><button type="button" onclick="editParticipant(${i})">Edit</button><button type="button" class="danger" onclick="deleteParticipant(${i})">Hapus</button></div></td></tr>`}).join('');
+ const sorted=people.map((x)=>x).filter(x=>!filter||formatClass(x.kelas)===filter).sort((a,b)=>(Number(formatClass(a.kelas).replace(/^Kelas /,''))-Number(formatClass(b.kelas).replace(/^Kelas /,'')))||String(a.nama).localeCompare(String(b.nama),'id'));
+ tbody.innerHTML=sorted.map((x)=>{const i=people.indexOf(x);return `<tr><td>${esc(x.id)}</td><td>${esc(x.nama)}</td><td>${esc(formatClass(x.kelas))}</td><td>${esc(x.wa||x.email)}</td><td>${esc(x.metode)}</td><td>${esc(x.statusBayar)}</td><td>${esc(x.hadir)}</td><td>${x.twibbonSent==='Sudah'?'✅ Sudah':'—'}</td><td>${x.certSent==='Sudah'?'✅ Sudah':'—'}</td><td><div class="actions"><button type="button" onclick="pick(${i})">Pilih</button><button type="button" onclick="markPresent('${esc(x.id)}')">${x.hadir==='Ya'?'Hadir ✓':'Hadir'}</button><button type="button" onclick="shareRow(${i},'twibbon')">Kirim Twibbon</button><button type="button" onclick="markSent('twibbon','${esc(x.id)}')">Tandai Twibbon Terkirim</button><button type="button" onclick="shareRow(${i},'certificate')">Kirim Sertifikat</button><button type="button" onclick="markSent('certificate','${esc(x.id)}')">Tandai Sertifikat Terkirim</button><button type="button" onclick="editParticipant(${i})">Edit</button><button type="button" class="danger" onclick="deleteParticipant(${i})">Hapus</button></div></td></tr>`}).join('');
 }
 function setNotice(message,type='ok'){
  let n=document.getElementById('adminNotice');
@@ -68,18 +68,19 @@ async function markPresent(id){try{const r=await api('checkin',{id});if(!r.statu
 function shareRow(i,kind){pick(i);if(kind==='twibbon')sharePhotoWhatsApp();else shareCertificateWhatsApp();}
 async function markSent(kind,id){const r=await api('markWhatsAppSent',{kind,id});if(!r.status)throw Error(r.message);await load();setNotice('Status pengiriman WhatsApp diperbarui.');}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatClass(v){const raw=String(v??'').trim();if(!raw)return '';return /^kelas\s*/i.test(raw)?'Kelas '+raw.replace(/^kelas\s*/i,'').trim():'Kelas '+raw;}
 function updateCertificatePreview(){
   const name=document.getElementById('certPreviewName');
   const klass=document.getElementById('certPreviewClass');
   const hint=document.getElementById('certPreviewHint');
   if(!name||!klass||!hint)return;
   name.textContent=selected?(selected.nama||''):'';
-  klass.textContent=selected?(selected.kelas||''):'';
+  klass.textContent=selected?formatClass(selected.kelas):'';
   hint.textContent=selected
-    ? 'Pratinjau untuk '+selected.nama+' — '+selected.kelas+'.'
+    ? 'Pratinjau untuk '+selected.nama+' — '+formatClass(selected.kelas)+'.'
     : 'Pilih peserta pada tabel untuk melihat nama dan kelas di pratinjau.';
 }
-function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('originalPhotoInfo').textContent=selected.fotoAsli?'Foto pendaftaran tersedia.':'Foto pendaftaran belum tersedia.';document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;updateCertificatePreview();refreshShareControls();}
+function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+formatClass(selected.kelas);document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('originalPhotoInfo').textContent=selected.fotoAsli?'Foto pendaftaran tersedia.':'Foto pendaftaran belum tersedia.';document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;updateCertificatePreview();refreshShareControls();}
 
 async function useOriginalPhoto(){
  if(!selected||!selected.fotoAsli)return setNotice('Foto asli dari pendaftaran belum tersedia. Periksa kolom URL Foto Asli pada spreadsheet peserta.','error');
