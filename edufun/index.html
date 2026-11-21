@@ -21,7 +21,8 @@ footer{text-align:center;padding:25px;color:#64748b}
 <h2>Daftar Peserta</h2><div class="notice">Isi data peserta. Nomor WhatsApp atau email wajib diisi minimal salah satu untuk menerima informasi pendaftaran.</div>
 <form id="regForm">
 <label>Nama lengkap peserta *</label><input name="nama" required maxlength="100" placeholder="Nama peserta">
-<label>Kelas *</label><input name="kelas" required maxlength="30" placeholder="Contoh: Kelas X">
+<label>Kelas *</label><select name="kelas" required><option value="">Pilih kelas</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option><option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option><option value="Kelas 7">Kelas 7</option><option value="Kelas 8">Kelas 8</option><option value="Kelas 9">Kelas 9</option><option value="Kelas 10">Kelas 10</option><option value="Kelas 11">Kelas 11</option><option value="Kelas 12">Kelas 12</option></select>
+<label>Foto peserta *</label><input name="fotoPeserta" type="file" accept="image/*" required><div class="muted">Unggah foto wajah yang jelas. Foto digunakan untuk pembuatan Twibbon.</div>
 <label>Nomor WhatsApp</label><input name="wa" inputmode="tel" placeholder="08xxxxxxxxxx">
 <label>Email</label><input name="email" type="email" placeholder="nama@email.com">
 <label>Metode pembayaran *</label><select id="metode" name="metode" required><option value="">Pilih metode</option><option value="Cash">Cash / Tunai</option><option value="Transfer">Transfer Bank</option><option value="QRIS">QRIS</option></select>
@@ -31,7 +32,7 @@ footer{text-align:center;padding:25px;color:#64748b}
 <p class="muted">Pembayaran dikonfirmasi kepada Sanggar Belajar Mam Is. Status lunas ditetapkan setelah verifikasi admin.</p>
 </section></main><footer>© Sanggar Belajar Mam Is • EduFun Outdoor Learning Day</footer>
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbye6QyXh8jA_EGi82oArNAhuY2lPq6kLE07_NVsrdR0moE0mr3eAt_JYNlNBJtPT2ISrw/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbx6MBFktfLLXYhkvTRWeK5-FE83F5jjgNvVyVh1BCMkEuBY4D_h-tJpw_jqfKGi8hKwzg/exec';
 function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Alamat backend EduFun belum dikonfigurasi.'));const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const t=setTimeout(()=>{cleanup();reject(Error('Server tidak merespons.'))},20000);function cleanup(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{cleanup();resolve(r)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify(data))+'&callback='+cb+'&_='+Date.now(); s.onerror=()=>{cleanup();reject(Error('Web App EduFun tidak dapat dimuat. Periksa deployment Apps Script dan akses Anyone.'))};document.body.appendChild(s)})}
 
 // Konfigurasi pembayaran statis di frontend agar tampilan rekening dan QRIS
@@ -40,7 +41,7 @@ const PAYMENT_CONFIG = {
  bank: 'BCA',
  account: '8690929504',
  accountName: 'Euis Gartina Ayu Sarie',
- qrisImage: '/edufun/assets/qris-sanggar.png'
+ qrisImage: 'assets/qris-sanggar.jpg'
 };
 async function showPaymentInfo(){
  const m=document.getElementById('metode').value, box=document.getElementById('paymentInfo');
@@ -62,10 +63,30 @@ async function showPaymentInfo(){
    '<img src="'+PAYMENT_CONFIG.qrisImage+'" alt="QRIS EduFun" '+
    'style="display:block;max-width:280px;width:100%;height:auto;margin:12px auto;border-radius:8px" '+
    'onerror="this.style.display=\'none\';document.getElementById(\'qrisMissing\').style.display=\'block\'">'+
-   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia..</div>'+
+   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia. Pastikan assets/qris-sanggar.jpg sudah diunggah ke repository.</div>'+
    '<br>Setelah membayar, konfirmasikan kepada Sanggar Belajar Mam Is.';
  }
 }
 document.getElementById('metode').addEventListener('change',showPaymentInfo);
-document.getElementById('regForm').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target),d=Object.fromEntries(f.entries());if(!d.wa&&!d.email){alert('Isi nomor WhatsApp atau email minimal salah satu.');return}const b=e.target.querySelector('button');b.disabled=true;b.textContent='Mengirim...';try{const r=await api('register',d);if(!r.status)throw Error(r.message);const m=document.getElementById('msg');m.classList.remove('hide');m.innerHTML='<b>Pendaftaran berhasil!</b><br>Nomor registrasi: <strong>'+r.id+'</strong><br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.';e.target.reset()}catch(err){alert(err.message)}finally{b.disabled=false;b.textContent='Daftar EduFun'}})
+async function uploadRegistrationPhoto(file,participantId){
+ const reader=new FileReader(),dataUrl=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+ const base64=String(dataUrl).split(',')[1],chunkSize=5000,total=Math.ceil(base64.length/chunkSize);
+ if(total<1||total>200)throw Error('Foto terlalu besar. Gunakan foto JPG/PNG yang lebih kecil.');
+ const uploadId='regphoto_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+ for(let n=0;n<total;n++){const part=await api('regPhotoChunk',{participantId,uploadId,index:n,total,chunk:base64.slice(n*chunkSize,(n+1)*chunkSize)});if(!part.status)throw Error(part.message||'Gagal mengunggah foto.');}
+ const done=await api('regPhotoFinalize',{participantId,uploadId,total});if(!done.status)throw Error(done.message||'Gagal menyimpan foto asli.');
+}
+document.getElementById('regForm').addEventListener('submit',async e=>{
+ e.preventDefault();const form=e.target,file=form.querySelector('[name="fotoPeserta"]').files[0];
+ const d=Object.fromEntries(new FormData(form).entries());delete d.fotoPeserta;
+ if(!d.wa&&!d.email){alert('Isi nomor WhatsApp atau email minimal salah satu.');return}
+ const b=form.querySelector('button');b.disabled=true;b.textContent='Mendaftarkan...';
+ try{
+  const r=await api('register',d);if(!r.status)throw Error(r.message||'Pendaftaran gagal.');
+  b.textContent='Mengunggah foto...';await uploadRegistrationPhoto(file,r.id);
+  const m=document.getElementById('msg');m.classList.remove('hide');m.innerHTML='<b>Pendaftaran berhasil!</b><br>Nomor registrasi: <strong>'+r.id+'</strong><br>Foto peserta berhasil disimpan.<br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.';
+  form.reset();
+ }catch(err){alert(err.message||String(err));}
+ finally{b.disabled=false;b.textContent='Daftar EduFun';}
+})
 </script></body></html>
