@@ -81,52 +81,37 @@ function updateCertificatePreview(){
 }
 function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('originalPhotoInfo').textContent=selected.fotoAsli?'Foto pendaftaran tersedia.':'Foto pendaftaran belum tersedia.';document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;updateCertificatePreview();refreshShareControls();}
 
-function getDriveImagePreviewUrl(raw){
- const value=String(raw||'').trim();
- if(!value)return '';
- // File.getUrl() menghasilkan halaman Drive. Untuk elemen img, gunakan endpoint thumbnail.
- let id='';
- try{
-  const u=new URL(value);
-  id=u.searchParams.get('id')||'';
-  if(!id){
-   const m=u.pathname.match(/\/file\/d\/([^/]+)/)||u.pathname.match(/\/d\/([^/]+)/);
-   if(m)id=m[1];
-  }
- }catch(e){}
- if(!id){
-  const m=value.match(/[?&]id=([^&]+)/)||value.match(/\/d\/([^/?]+)/);
-  if(m)id=decodeURIComponent(m[1]);
- }
- return id?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w1600':value;
-}
-function useOriginalPhoto(){
+async function useOriginalPhoto(){
  if(!selected||!selected.fotoAsli)return setNotice('Foto asli dari pendaftaran belum tersedia. Periksa kolom URL Foto Asli pada spreadsheet peserta.','error');
- const raw=String(selected.fotoAsli).trim();
- const previewUrl=getDriveImagePreviewUrl(raw);
- const candidates=[previewUrl];
- // Fallback untuk tautan Drive yang format thumbnail-nya tidak dilayani.
- const idMatch=raw.match(/[?&]id=([^&]+)/)||raw.match(/\/d\/([^/?]+)/);
- if(idMatch){
-  const id=decodeURIComponent(idMatch[1]);
-  candidates.push('https://drive.google.com/uc?export=view&id='+encodeURIComponent(id));
- }
- let attempt=0;
- const img=new Image();
- img.crossOrigin='anonymous';
- img.onload=()=>{
+ const button=document.querySelector('button[onclick="useOriginalPhoto()"]');
+ if(button){button.disabled=true;button.textContent='Memuat Foto...';}
+ setNotice('Mengambil foto asli dari Google Drive...');
+ try{
+  // GAS membaca file langsung dari Drive. Base64 lokal menghindari masalah CORS/thumbnail.
+  const result=await api('getOriginalPhoto',{id:selected.id});
+  if(!result||!result.status)throw Error((result&&result.message)||'Foto pendaftaran gagal dibaca dari Drive.');
+  const mime=result.mimeType||'image/jpeg';
+  const dataUrl='data:'+mime+';base64,'+result.image;
+  const img=new Image();
+  await new Promise((resolve,reject)=>{
+   img.onload=resolve;
+   img.onerror=()=>reject(Error('Data foto diterima, tetapi browser gagal membaca gambar.'));
+   img.src=dataUrl;
+  });
+  await loadTwibbonFrame();
   photoImage=img;photoZoom=1;photoX=0;photoY=0;
   document.getElementById('zoomPhoto').value=1;
   renderTwibbon();
+  document.getElementById('photoStatus').textContent='Foto pendaftaran berhasil dimuat. Atur posisi dan ukuran sebelum menyimpan Twibbon.';
   setNotice('Foto pendaftaran berhasil dimuat ke editor Twibbon.');
- };
- img.onerror=()=>{
-  attempt++;
-  if(attempt<candidates.length){img.src=candidates[attempt];return;}
-  setNotice('Tautan foto ditemukan, tetapi gambar tidak dapat dibaca. Pastikan file Drive dapat diakses siapa saja dengan link, lalu muat ulang daftar peserta.','error');
- };
- img.src=candidates[0];
+ }catch(err){
+  setNotice(err.message||String(err),'error');
+  document.getElementById('photoStatus').textContent='Gagal memuat foto pendaftaran: '+(err.message||String(err));
+ }finally{
+  if(button){button.disabled=false;button.textContent='Gunakan Foto Pendaftaran';}
+ }
 }
+
 function normalizeWhatsAppNumber(value){
   let digits=String(value||'').replace(/\D/g,'');
   if(digits.startsWith('0')) digits='62'+digits.slice(1);
