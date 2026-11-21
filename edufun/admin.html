@@ -80,7 +80,22 @@ function refreshShareControls(){
 function sharePhotoWhatsApp(){
   const link=getParticipantDriveUrl('foto');
   if(!link) return alert('Link foto Twibbon belum tersedia. Simpan foto terlebih dahulu.');
-  const message='Halo, '+(selected.nama||'peserta')+'! 👋\\n\\nFoto Twibbon EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📸 Lihat dan unduh foto di sini:\\n'+link+'\\n\\nTerima kasih telah berpartisipasi. Salam, Sanggar Belajar Mam Is.';
+  const message=`🌿 HALO, ${selected.nama||'PESERTA'}! 🌿
+
+📸 FOTO TWIBBON EDUFUN!
+Outdoor Learning Day
+Sanggar Belajar Mam Is
+
+Kabar gembira! Foto Twibbon EduFun kamu sudah tersedia. 🥳
+
+👇 KLIK LINK BERIKUT UNTUK MELIHAT DAN MENGUNDUH FOTO:
+
+🔗 ${link}
+
+Terima kasih telah berpartisipasi dan menjadi bagian dari keseruan EduFun Outdoor Learning Day!
+
+Salam hangat,
+Sanggar Belajar Mam Is 💚`;
   openWhatsAppForSelected(message);
 }
 function shareCertificateWhatsApp(){
