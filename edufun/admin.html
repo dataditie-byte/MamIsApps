@@ -80,22 +80,7 @@ function refreshShareControls(){
 function sharePhotoWhatsApp(){
   const link=getParticipantDriveUrl('foto');
   if(!link) return alert('Link foto Twibbon belum tersedia. Simpan foto terlebih dahulu.');
-  const message=`🌿 HALO, ${selected.nama||'PESERTA'}! 🌿
-
-📸 FOTO TWIBBON EDUFUN!
-Outdoor Learning Day
-Sanggar Belajar Mam Is
-
-Kabar gembira! Foto Twibbon EduFun kamu sudah tersedia. 🥳
-
-👇 KLIK LINK BERIKUT UNTUK MELIHAT DAN MENGUNDUH FOTO:
-
-🔗 ${link}
-
-Terima kasih telah berpartisipasi dan menjadi bagian dari keseruan EduFun Outdoor Learning Day!
-
-Salam hangat,
-Sanggar Belajar Mam Is 💚`;
+  const message='Halo, '+(selected.nama||'peserta')+'! 👋\\n\\nFoto Twibbon EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📸 Lihat dan unduh foto di sini:\\n'+link+'\\n\\nTerima kasih telah berpartisipasi. Salam, Sanggar Belajar Mam Is.';
   openWhatsAppForSelected(message);
 }
 function shareCertificateWhatsApp(){
@@ -267,30 +252,63 @@ async function make() {
   if (!selected) return alert('Pilih peserta dulu');
   if (!photoImage) return alert('Pilih foto peserta dulu');
 
+  const participantId = selected.id;
+
   try {
     renderTwibbon();
 
+    // Kompres sebagai JPEG agar ukuran unggahan lebih ringan.
     const blob = await new Promise(resolve =>
-      photoCanvas.toBlob(resolve, 'image/png')
+      photoCanvas.toBlob(resolve, 'image/jpeg', 0.78)
     );
-
     if (!blob) throw Error('Gagal membuat gambar Twibbon.');
 
     const b64 = await file64(blob);
+    const chunkSize = 5000; // Backend menerima maksimal 6000 karakter per potongan.
+    const total = Math.ceil(b64.length / chunkSize);
 
-    const r = await api('savePhoto', {
-      id: selected.id,
-      image: b64
+    if (total < 1 || total > 200) {
+      throw Error('Ukuran foto masih terlalu besar. Coba gunakan foto dengan ukuran file lebih kecil.');
+    }
+
+    const uploadId = 'photo_' + Date.now() + '_' +
+      Math.random().toString(36).slice(2, 10);
+
+    // Kirim satu per satu agar stabil dan tidak membuat URL JSONP terlalu panjang.
+    for (let i = 0; i < total; i++) {
+      const chunk = b64.slice(i * chunkSize, (i + 1) * chunkSize);
+      document.getElementById('photoStatus').textContent =
+        'Mengunggah foto Twibbon: ' + Math.round(((i + 1) / total) * 100) + '%';
+
+      const part = await api('savePhotoChunk', {
+        id: participantId,
+        uploadId: uploadId,
+        index: i,
+        total: total,
+        chunk: chunk
+      });
+
+      if (!part.status) {
+        throw Error(part.message || 'Gagal mengunggah bagian foto ke-' + (i + 1) + '.');
+      }
+    }
+
+    document.getElementById('photoStatus').textContent =
+      'Unggahan selesai. Menyimpan foto ke Google Drive...';
+
+    const r = await api('savePhotoFinalize', {
+      id: participantId,
+      uploadId: uploadId,
+      total: total
     });
 
     if (!r.status) {
-      throw Error(r.message || 'Gagal menyimpan foto.');
+      throw Error(r.message || 'Gagal menyimpan foto ke Google Drive.');
     }
 
-    const attendance = await api('checkin', {
-      id: selected.id
-    });
-
+    // Backend finalize sudah menandai hadir, tetapi checkin tetap dipanggil
+    // untuk mempertahankan alur absensi Admin sebelumnya.
+    const attendance = await api('checkin', { id: participantId });
     if (!attendance.status) {
       throw Error(attendance.message || 'Foto tersimpan, tetapi absensi gagal.');
     }
@@ -299,13 +317,15 @@ async function make() {
       'Foto Twibbon berhasil disimpan dan kehadiran tercatat.';
 
     await load();
-    selected=people.find(p=>String(p.id)===String(selected.id))||selected;
+    selected = people.find(p => String(p.id) === String(participantId)) || selected;
     refreshShareControls();
 
     alert('Foto Twibbon berhasil disimpan.');
 
   } catch (err) {
-    alert(err.message);
+    document.getElementById('photoStatus').textContent =
+      'Penyimpanan belum berhasil: ' + (err.message || String(err));
+    alert(err.message || String(err));
   }
 }
 async function issueCert(){
