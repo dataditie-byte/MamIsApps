@@ -8,9 +8,11 @@ header{background:linear-gradient(120deg,var(--navy),#174c70);color:#fff;padding
 .wrap{max-width:960px;margin:auto;padding:18px}.hero{background:white;border-radius:18px;padding:22px;margin-top:-12px;box-shadow:0 8px 28px #102b4e16}
 h1{margin:0;font-size:38px}h2{color:var(--navy)}.tag{color:#d9f4f1;font-weight:bold;letter-spacing:2px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}.tile{background:#fff;border-radius:14px;padding:17px;border:1px solid #e5ebf2}
-.price{font-size:28px;color:var(--teal);font-weight:800}.btn{border:0;border-radius:10px;padding:12px 17px;background:var(--teal);color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}.btn.alt{background:var(--navy)}.btn.light{background:#eaf2f7;color:var(--navy)}
+.price{font-size:28px;color:var(--teal);font-weight:800}.btn{border:0;border-radius:10px;padding:12px 17px;background:var(--teal);color:white;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block}.btn.alt{background:var(--navy)}.btn.light{background:#eaf2f7;color:var(--navy)}.btn:disabled{opacity:.6;cursor:not-allowed}
 label{display:block;font-weight:bold;margin:12px 0 5px}input,select{width:100%;padding:12px;border:1px solid #ccd6e0;border-radius:9px;font-size:16px;background:white}
 form{max-width:600px}.notice{padding:12px;border-radius:10px;background:#eaf5f4;margin:12px 0}.muted{color:#64748b;font-size:13px}.hide{display:none}.result{padding:15px;background:#fff7e8;border:1px solid #f4d69c;border-radius:12px;margin-top:14px;word-break:break-word}
+.result.success{background:#eaf8f0;border-color:#9bd7b2;color:#14532d}.result.error{background:#fff1f0;border-color:#f2b8b5;color:#8a211b}
+.progress{height:9px;background:#e5edf2;border-radius:99px;overflow:hidden;margin:10px 0}.progress>div{height:100%;width:0;background:var(--teal);transition:width .2s}
 footer{text-align:center;padding:25px;color:#64748b}
 </style></head><body>
 <header><div class="tag">SANGGAR BELAJAR MAM IS</div><h1>Edu<span style="color:#ffb52e">Fun!</span></h1><div style="font-size:19px;font-weight:bold">OUTDOOR LEARNING DAY</div><p>LEARN • PLAY • GROW</p></header>
@@ -22,18 +24,18 @@ footer{text-align:center;padding:25px;color:#64748b}
 <form id="regForm">
 <label>Nama lengkap peserta *</label><input name="nama" required maxlength="100" placeholder="Nama peserta">
 <label>Kelas *</label><select name="kelas" required><option value="">Pilih kelas</option><option value="Kelas 1">Kelas 1</option><option value="Kelas 2">Kelas 2</option><option value="Kelas 3">Kelas 3</option><option value="Kelas 4">Kelas 4</option><option value="Kelas 5">Kelas 5</option><option value="Kelas 6">Kelas 6</option><option value="Kelas 7">Kelas 7</option><option value="Kelas 8">Kelas 8</option><option value="Kelas 9">Kelas 9</option><option value="Kelas 10">Kelas 10</option><option value="Kelas 11">Kelas 11</option><option value="Kelas 12">Kelas 12</option></select>
-<label>Foto peserta *</label><input name="fotoPeserta" type="file" accept="image/*" required><div class="muted">Unggah foto wajah yang jelas. Foto digunakan untuk pembuatan Twibbon.</div>
+<label>Foto peserta *</label><input name="fotoPeserta" type="file" accept="image/jpeg,image/png,image/webp" required><div class="muted">Unggah foto wajah yang jelas. Foto otomatis dioptimalkan untuk pembuatan Twibbon.</div>
 <label>Nomor WhatsApp</label><input name="wa" inputmode="tel" placeholder="08xxxxxxxxxx">
 <label>Email</label><input name="email" type="email" placeholder="nama@email.com">
 <label>Metode pembayaran *</label><select id="metode" name="metode" required><option value="">Pilih metode</option><option value="Cash">Cash / Tunai</option><option value="Transfer">Transfer Bank</option><option value="QRIS">QRIS</option></select>
 <div id="paymentInfo" class="notice">Pilih metode pembayaran untuk melihat petunjuk pembayaran.</div>
-<button class="btn" type="submit">Daftar EduFun</button>
-</form><div id="msg" class="result hide"></div>
+<button class="btn" type="submit" id="submitBtn">Daftar EduFun</button>
+</form><div id="msg" class="result hide" role="status" aria-live="polite"></div>
 <p class="muted">Pembayaran dikonfirmasi kepada Sanggar Belajar Mam Is. Status lunas ditetapkan setelah verifikasi admin.</p>
 </section></main><footer>© Sanggar Belajar Mam Is • EduFun Outdoor Learning Day</footer>
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbx6MBFktfLLXYhkvTRWeK5-FE83F5jjgNvVyVh1BCMkEuBY4D_h-tJpw_jqfKGi8hKwzg/exec';
-function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Alamat backend EduFun belum dikonfigurasi.'));const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const t=setTimeout(()=>{cleanup();reject(Error('Server tidak merespons.'))},20000);function cleanup(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{cleanup();resolve(r)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify(data))+'&callback='+cb+'&_='+Date.now(); s.onerror=()=>{cleanup();reject(Error('Web App EduFun tidak dapat dimuat. Periksa deployment Apps Script dan akses Anyone.'))};document.body.appendChild(s)})}
+function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Alamat backend EduFun belum dikonfigurasi.'));const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const t=setTimeout(()=>{cleanup();reject(Error('Server tidak merespons. Periksa koneksi lalu coba kembali.'))},30000);function cleanup(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{cleanup();resolve(r)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify(data))+'&callback='+cb+'&_='+Date.now();s.onerror=()=>{cleanup();reject(Error('Web App EduFun tidak dapat dimuat. Periksa deployment Apps Script dan akses Anyone.'))};document.body.appendChild(s)})}
 
 // Konfigurasi pembayaran statis di frontend agar tampilan rekening dan QRIS
 // tidak bergantung pada Apps Script maupun Google Drive.
@@ -63,30 +65,115 @@ async function showPaymentInfo(){
    '<img src="'+PAYMENT_CONFIG.qrisImage+'" alt="QRIS EduFun" '+
    'style="display:block;max-width:280px;width:100%;height:auto;margin:12px auto;border-radius:8px" '+
    'onerror="this.style.display=\'none\';document.getElementById(\'qrisMissing\').style.display=\'block\'">'+
-   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia. Pastikan assets/qris-sanggar.jpg sudah diunggah ke repository.</div>'+
+   '<div id="qrisMissing" style="display:none;color:#b42318;font-weight:bold">File QRIS belum tersedia. Pastikan assets/qris-sanggar.jpeg sudah diunggah ke repository.</div>'+
    '<br>Setelah membayar, konfirmasikan kepada Sanggar Belajar Mam Is.';
  }
 }
 document.getElementById('metode').addEventListener('change',showPaymentInfo);
+
+const msgBox=document.getElementById('msg');
+function showMessage(html,type='success'){
+ msgBox.className='result '+type;
+ msgBox.innerHTML=html;
+ msgBox.classList.remove('hide');
+ msgBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function escapeHtml(value){
+ return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Ubah foto apa pun yang didukung browser menjadi JPEG terkompresi.
+// Ini memastikan backend yang menyimpan MIME image/jpeg menerima isi file JPEG yang benar.
+async function compressPhoto(file){
+ if(!file||!file.type.startsWith('image/'))throw Error('Pilih file foto JPG, PNG, atau WebP yang valid.');
+ if(file.size>12*1024*1024)throw Error('Ukuran foto asli maksimal 12 MB. Pilih foto yang lebih kecil.');
+ let bitmap;
+ try{
+  if('createImageBitmap' in window) bitmap=await createImageBitmap(file);
+  else bitmap=await new Promise((resolve,reject)=>{
+   const img=new Image(),url=URL.createObjectURL(file);
+   img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+   img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Foto tidak dapat dibaca. Coba gunakan foto JPG atau PNG.'))};
+   img.src=url;
+  });
+  const w=bitmap.width,h=bitmap.height,max=1400,scale=Math.min(1,max/Math.max(w,h));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(w*scale));canvas.height=Math.max(1,Math.round(h*scale));
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.82));
+  if(!blob)throw Error('Foto gagal dikompres. Coba pilih foto lain.');
+  return blob;
+ }finally{if(bitmap&&typeof bitmap.close==='function')bitmap.close();}
+}
+function blobToBase64(blob){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();
+  reader.onload=()=>{const result=String(reader.result||'');const comma=result.indexOf(',');if(comma<0)return reject(Error('Format foto tidak terbaca.'));resolve(result.slice(comma+1));};
+  reader.onerror=()=>reject(Error('Gagal membaca foto.'));
+  reader.readAsDataURL(blob);
+ });
+}
 async function uploadRegistrationPhoto(file,participantId){
- const reader=new FileReader(),dataUrl=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
- const base64=String(dataUrl).split(',')[1],chunkSize=5000,total=Math.ceil(base64.length/chunkSize);
- if(total<1||total>200)throw Error('Foto terlalu besar. Gunakan foto JPG/PNG yang lebih kecil.');
+ const jpeg=await compressPhoto(file);
+ const base64=await blobToBase64(jpeg),chunkSize=5000,total=Math.ceil(base64.length/chunkSize);
+ if(total<1||total>200)throw Error('Foto masih terlalu besar setelah dikompres. Pilih foto dengan ukuran lebih kecil.');
  const uploadId='regphoto_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
- for(let n=0;n<total;n++){const part=await api('regPhotoChunk',{participantId,uploadId,index:n,total,chunk:base64.slice(n*chunkSize,(n+1)*chunkSize)});if(!part.status)throw Error(part.message||'Gagal mengunggah foto.');}
- const done=await api('regPhotoFinalize',{participantId,uploadId,total});if(!done.status)throw Error(done.message||'Gagal menyimpan foto asli.');
+ for(let n=0;n<total;n++){
+  const part=await api('regPhotoChunk',{participantId,uploadId,index:n,total,chunk:base64.slice(n*chunkSize,(n+1)*chunkSize)});
+  if(!part||!part.status)throw Error((part&&part.message)||'Gagal mengunggah bagian foto '+(n+1)+'.');
+  const pct=Math.round(((n+1)/total)*90);
+  showMessage('<b>Data pendaftaran sudah diterima.</b><br>Nomor registrasi: <strong>'+escapeHtml(participantId)+'</strong><br>Foto sedang diunggah: '+pct+'%<div class="progress"><div style="width:'+pct+'%"></div></div><span class="muted">Mohon tunggu dan jangan tutup halaman ini.</span>','success');
+ }
+ const done=await api('regPhotoFinalize',{participantId,uploadId,total});
+ if(!done||!done.status)throw Error((done&&done.message)||'Foto belum berhasil disimpan ke Drive.');
+}
+let savedRegistration=null;
+async function retryPhotoUpload(){
+ if(!savedRegistration)return;
+ const retryBtn=document.getElementById('retryPhotoBtn');
+ if(retryBtn){retryBtn.disabled=true;retryBtn.textContent='Mengunggah ulang...';}
+ try{
+  await uploadRegistrationPhoto(savedRegistration.file,savedRegistration.id);
+  showMessage('<b>Pendaftaran dan foto berhasil diterima!</b><br>Nomor registrasi: <strong>'+escapeHtml(savedRegistration.id)+'</strong><br>Foto peserta berhasil disimpan.<br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar Belajar Mam Is.','success');
+  document.getElementById('regForm').reset();
+  savedRegistration=null;
+ }catch(err){
+  showMessage('<b>Data pendaftaran sudah tersimpan.</b><br>Nomor registrasi: <strong>'+escapeHtml(savedRegistration.id)+'</strong><br>Namun foto belum berhasil diunggah: '+escapeHtml(err.message||String(err))+'<br><br>Jangan daftar ulang. Periksa koneksi lalu tekan tombol di bawah untuk mencoba mengunggah foto kembali.<br><button class="btn" id="retryPhotoBtn" type="button" style="margin-top:12px">Coba unggah foto lagi</button>','error');
+  document.getElementById('retryPhotoBtn').addEventListener('click',retryPhotoUpload);
+ }finally{
+  const submit=document.getElementById('submitBtn');
+  if(savedRegistration){submit.disabled=true;submit.textContent='Data sudah terdaftar';}
+  else{submit.disabled=false;submit.textContent='Daftar EduFun';}
+ }
 }
 document.getElementById('regForm').addEventListener('submit',async e=>{
- e.preventDefault();const form=e.target,file=form.querySelector('[name="fotoPeserta"]').files[0];
+ e.preventDefault();
+ if(savedRegistration){showMessage('Data peserta sudah tersimpan. Silakan selesaikan unggah foto melalui tombol coba lagi.','error');return;}
+ const form=e.target,file=form.querySelector('[name="fotoPeserta"]').files[0];
  const d=Object.fromEntries(new FormData(form).entries());delete d.fotoPeserta;
- if(!d.wa&&!d.email){alert('Isi nomor WhatsApp atau email minimal salah satu.');return}
- const b=form.querySelector('button');b.disabled=true;b.textContent='Mendaftarkan...';
+ if(!d.wa&&!d.email){showMessage('Isi nomor WhatsApp atau email minimal salah satu.','error');return;}
+ if(!file){showMessage('Pilih foto peserta terlebih dahulu.','error');return;}
+ const b=document.getElementById('submitBtn');b.disabled=true;b.textContent='Menyimpan pendaftaran...';
+ msgBox.classList.add('hide');
  try{
-  const r=await api('register',d);if(!r.status)throw Error(r.message||'Pendaftaran gagal.');
-  b.textContent='Mengunggah foto...';await uploadRegistrationPhoto(file,r.id);
-  const m=document.getElementById('msg');m.classList.remove('hide');m.innerHTML='<b>Pendaftaran berhasil!</b><br>Nomor registrasi: <strong>'+r.id+'</strong><br>Foto peserta berhasil disimpan.<br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.';
-  form.reset();
- }catch(err){alert(err.message||String(err));}
- finally{b.disabled=false;b.textContent='Daftar EduFun';}
-})
+  const r=await api('register',d);
+  if(!r||!r.status)throw Error((r&&r.message)||'Pendaftaran gagal.');
+  savedRegistration={id:r.id,file};
+  showMessage('<b>Data pendaftaran berhasil diterima.</b><br>Nomor registrasi: <strong>'+escapeHtml(r.id)+'</strong><br>Foto sedang disiapkan untuk diunggah ke Drive...','success');
+  b.textContent='Mengunggah foto...';
+  await uploadRegistrationPhoto(file,r.id);
+  showMessage('<b>Pendaftaran dan foto berhasil diterima!</b><br>Nomor registrasi: <strong>'+escapeHtml(r.id)+'</strong><br>Foto peserta berhasil disimpan.<br>Biaya: Rp50.000<br>Silakan konfirmasi pembayaran kepada Sanggar.','success');
+  form.reset();savedRegistration=null;
+ }catch(err){
+  if(savedRegistration){
+   showMessage('<b>Data pendaftaran sudah tersimpan.</b><br>Nomor registrasi: <strong>'+escapeHtml(savedRegistration.id)+'</strong><br>Namun foto belum berhasil diunggah: '+escapeHtml(err.message||String(err))+'<br><br><b>Jangan mengisi formulir atau mendaftar ulang.</b> Periksa koneksi lalu coba unggah foto kembali.<br><button class="btn" id="retryPhotoBtn" type="button" style="margin-top:12px">Coba unggah foto lagi</button>','error');
+   document.getElementById('retryPhotoBtn').addEventListener('click',retryPhotoUpload);
+  }else{
+   showMessage('<b>Pendaftaran belum dapat dipastikan tersimpan.</b><br>'+escapeHtml(err.message||String(err))+'<br>Periksa daftar peserta di Admin sebelum mencoba mendaftar ulang.','error');
+  }
+ }finally{
+  if(savedRegistration){b.disabled=true;b.textContent='Data sudah terdaftar';}
+  else{b.disabled=false;b.textContent='Daftar EduFun';}
+ }
+});
 </script></body></html>
