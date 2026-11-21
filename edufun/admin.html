@@ -29,7 +29,8 @@ body{margin:0;background:#f3f6fa;font-family:Arial;color:#263445}header{backgrou
 </div></div>
 <div class="card"><h2>Sertifikat EduFun</h2><p>Pratinjau sertifikat akan menampilkan nama dan kelas peserta yang dipilih.</p>
 <div id="certificatePreview" style="position:relative;width:100%;max-width:650px;line-height:0;border:1px solid #dbe3e8;border-radius:8px;overflow:hidden">
-  <img src="/edufun/assets/certificate-template-empty.png" style="display:block;width:100%;height:auto" alt="Template sertifikat EduFun kosong">
+  <img src="/edufun/assets/certificate-template.png" style="display:block;width:100%;height:auto" alt="Template sertifikat EduFun kosong" onerror="this.style.display='none';document.getElementById('certTemplateError').style.display='block';">
+  <div id="certTemplateError" style="display:none;position:absolute;inset:0;background:#fff;color:#9b1c1c;text-align:center;padding:24px;line-height:1.4;font-size:14px">Gambar template belum ditemukan. Pastikan file certificate-template.png berada di folder edufun/assets/.</div>
   <div id="certPreviewName" style="position:absolute;left:18%;right:18%;top:35.1%;text-align:center;font-size:clamp(13px,3.2vw,29px);line-height:1.15;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
   <div id="certPreviewClass" style="position:absolute;left:40%;right:40%;top:43.0%;text-align:center;font-size:clamp(11px,2.2vw,20px);line-height:1.15;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
 </div>
