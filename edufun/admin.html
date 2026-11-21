@@ -34,7 +34,7 @@ body{margin:0;background:#f3f6fa;font-family:Arial;color:#263445}header{backgrou
   <img src="/edufun/assets/certificate-template.png" style="display:block;width:100%;height:auto" alt="Template sertifikat EduFun kosong" onerror="this.style.display='none';document.getElementById('certTemplateError').style.display='block';">
   <div id="certTemplateError" style="display:none;position:absolute;inset:0;background:#fff;color:#9b1c1c;text-align:center;padding:24px;line-height:1.4;font-size:14px">Gambar template belum ditemukan. Pastikan file certificate-template.png berada di folder edufun/assets/.</div>
   <div id="certPreviewName" style="position:absolute;left:18%;right:18%;top:35.0%;text-align:center;font-size:clamp(13px,3.0vw,28px);line-height:1.12;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-  <div id="certPreviewClass" style="position:absolute;left:32.5%;width:35%;top:42.35%;height:4.9%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:rgba(211,239,187,.98);border-radius:999px;text-align:center;font-size:clamp(12px,2.3vw,21px);line-height:1;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px"></div>
+  <div id="certPreviewClass" style="position:absolute;left:32.5%;width:35%;top:44.1%;height:3.5%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:rgba(211,239,187,.98);border-radius:999px;text-align:center;font-size:clamp(12px,2.1vw,19px);line-height:1;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px"></div>
 </div>
 <p id="certPreviewHint" style="font-size:13px;color:#64748b">Pilih peserta pada tabel untuk melihat nama dan kelas di pratinjau.</p>
 <button type="button" onclick="issueCert()">Terbitkan sertifikat peserta terpilih</button>
@@ -74,7 +74,7 @@ function updateCertificatePreview(){
   const hint=document.getElementById('certPreviewHint');
   if(!name||!klass||!hint)return;
   name.textContent=selected?(selected.nama||''):'';
-  klass.textContent=selected?(selected.kelas?'Kelas '+selected.kelas:''):'';
+  klass.textContent=selected?(selected.kelas||''):'';
   hint.textContent=selected
     ? 'Pratinjau untuk '+selected.nama+' — '+selected.kelas+'.'
     : 'Pilih peserta pada tabel untuk melihat nama dan kelas di pratinjau.';
