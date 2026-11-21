@@ -27,7 +27,14 @@ body{margin:0;background:#f3f6fa;font-family:Arial;color:#263445}header{backgrou
   <button type="button" onclick="sharePhotoWhatsApp()">Bagikan Link Foto via WhatsApp</button>
   <a id="photoDriveLink" href="#" target="_blank" rel="noopener" style="margin-left:8px">Lihat file Drive</a>
 </div></div>
-<div class="card"><h2>Sertifikat EduFun</h2><p>Template sertifikat hijau dari Sanggar Belajar Mam Is telah disiapkan. Penerbitan PDF dinamis dengan nama peserta dan QR unik diselesaikan pada tahap berikutnya.</p><img src="/edufun/assets/certificate-template.png" style="width:100%;max-width:650px;border-radius:8px;border:1px solid #dbe3e8" alt="Template sertifikat EduFun"><button type="button" onclick="issueCert()">Terbitkan sertifikat peserta terpilih</button>
+<div class="card"><h2>Sertifikat EduFun</h2><p>Pratinjau sertifikat akan menampilkan nama dan kelas peserta yang dipilih.</p>
+<div id="certificatePreview" style="position:relative;width:100%;max-width:650px;line-height:0;border:1px solid #dbe3e8;border-radius:8px;overflow:hidden">
+  <img src="/edufun/assets/certificate-template-empty.png" style="display:block;width:100%;height:auto" alt="Template sertifikat EduFun kosong">
+  <div id="certPreviewName" style="position:absolute;left:18%;right:18%;top:35.1%;text-align:center;font-size:clamp(13px,3.2vw,29px);line-height:1.15;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+  <div id="certPreviewClass" style="position:absolute;left:40%;right:40%;top:43.0%;text-align:center;font-size:clamp(11px,2.2vw,20px);line-height:1.15;font-weight:800;color:#064b2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+</div>
+<p id="certPreviewHint" style="font-size:13px;color:#64748b">Pilih peserta pada tabel untuk melihat nama dan kelas di pratinjau.</p>
+<button type="button" onclick="issueCert()">Terbitkan sertifikat peserta terpilih</button>
 <div id="certResult"></div>
 <div id="certShare" class="hidden" style="margin-top:12px">
   <button type="button" onclick="shareCertificateWhatsApp()">Bagikan Link Sertifikat via WhatsApp</button>
@@ -38,7 +45,7 @@ body{margin:0;background:#f3f6fa;font-family:Arial;color:#263445}header{backgrou
 const API_URL='https://script.google.com/macros/s/AKfycbx6MBFktfLLXYhkvTRWeK5-FE83F5jjgNvVyVh1BCMkEuBY4D_h-tJpw_jqfKGi8hKwzg/exec';let token='',people=[],selected=null;
 function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Konfigurasikan URL backend Apps Script.'));let cb='cb'+Date.now()+Math.random().toString(36).slice(2),s=document.createElement('script'),t=setTimeout(()=>{clean();reject(Error('Timeout'))},20000);function clean(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=x=>{clean();resolve(x)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify({...data,token}))+'&callback='+cb+'&_='+Date.now();s.onerror=()=>{clean();reject(Error('Web App tidak dapat dimuat. Pastikan deployment Apps Script aktif dan akses Who has access = Anyone.'))};document.body.append(s)})}
 async function login(){try{let r=await api('adminLogin',{username:document.getElementById('user').value,password:document.getElementById('pass').value});if(!r.status)throw Error(r.message);token=r.token;localStorage.setItem('edufun_admin_token',token);document.getElementById('login').classList.add('hidden');document.getElementById('panel').classList.remove('hidden');load()}catch(e){alert(e.message)}}
-async function load(){try{let r=await api('adminList');if(!r.status)throw Error(r.message);people=r.data;render();if(selected){selected=people.find(p=>String(p.id)===String(selected.id))||selected;refreshShareControls();}}catch(e){alert(e.message)}}
+async function load(){try{let r=await api('adminList');if(!r.status)throw Error(r.message);people=r.data;render();if(selected){selected=people.find(p=>String(p.id)===String(selected.id))||selected;updateCertificatePreview();refreshShareControls();}}catch(e){alert(e.message)}}
 function render(){
  document.getElementById('nPeserta').textContent=people.length;
  document.getElementById('nPending').textContent=people.filter(x=>x.statusBayar!=='Lunas').length;
@@ -48,7 +55,18 @@ function render(){
  tbody.innerHTML=people.map((x,i)=>`<tr><td>${x.id}</td><td>${esc(x.nama)}</td><td>${esc(x.kelas)}</td><td>${esc(x.wa||x.email)}</td><td>${esc(x.metode)}</td><td>${esc(x.statusBayar)}</td><td>${esc(x.hadir)}</td><td><div class="actions"><button type="button" onclick="pick(${i})">Pilih</button> <button type="button" onclick="editParticipant(${i})">Edit</button> <button type="button" class="danger" onclick="deleteParticipant(${i})">Hapus</button></div></td></tr>`).join('');
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;refreshShareControls();}
+function updateCertificatePreview(){
+  const name=document.getElementById('certPreviewName');
+  const klass=document.getElementById('certPreviewClass');
+  const hint=document.getElementById('certPreviewHint');
+  if(!name||!klass||!hint)return;
+  name.textContent=selected?(selected.nama||''):'';
+  klass.textContent=selected?(selected.kelas?'Kelas '+selected.kelas:''):'';
+  hint.textContent=selected
+    ? 'Pratinjau untuk '+selected.nama+' — '+selected.kelas+'.'
+    : 'Pilih peserta pada tabel untuk melihat nama dan kelas di pratinjau.';
+}
+function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;updateCertificatePreview();refreshShareControls();}
 
 function normalizeWhatsAppNumber(value){
   let digits=String(value||'').replace(/\D/g,'');
