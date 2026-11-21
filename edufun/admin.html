@@ -197,48 +197,59 @@ function stopPhotoDrag() {
 photoCanvas.addEventListener('pointerup', stopPhotoDrag);
 photoCanvas.addEventListener('pointercancel', stopPhotoDrag);
 
-// Simpan hasil akhir setelah posisi foto sesuai
+// Unggah gambar dalam potongan kecil agar URL JSONP tidak terlalu panjang.
+async function uploadPhotoInChunks(id, base64) {
+  const chunkSize = 6000;
+  const total = Math.ceil(base64.length / chunkSize);
+  const uploadId = 'photo_' + Date.now() + '_' +
+    Math.random().toString(36).slice(2, 10);
+
+  for (let index = 0; index < total; index++) {
+    const chunk = base64.slice(index * chunkSize, (index + 1) * chunkSize);
+    const part = await api('savePhotoChunk', {
+      id, uploadId, index, total, chunk
+    });
+    if (!part.status) {
+      throw Error(part.message || 'Gagal mengunggah bagian foto ' + (index + 1));
+    }
+    document.getElementById('photoStatus').textContent =
+      'Mengunggah foto: ' + Math.round((index + 1) / total * 100) + '%';
+  }
+
+  return await api('savePhotoFinalize', { id, uploadId, total });
+}
+
+// Simpan hasil akhir setelah posisi foto sesuai.
 async function make() {
   if (!selected) return alert('Pilih peserta dulu');
   if (!photoImage) return alert('Pilih foto peserta dulu');
 
+  const button = document.querySelector('button[onclick="make()"]');
+  if (button) { button.disabled = true; button.textContent = 'Menyimpan...'; }
+
   try {
     renderTwibbon();
 
+    // Kompres hasil akhir agar unggahan lebih ringan.
     const blob = await new Promise(resolve =>
-      photoCanvas.toBlob(resolve, 'image/png')
+      photoCanvas.toBlob(resolve, 'image/jpeg', 0.88)
     );
-
     if (!blob) throw Error('Gagal membuat gambar Twibbon.');
 
-    const b64 = await file64(blob);
-
-    const r = await api('savePhoto', {
-      id: selected.id,
-      image: b64
-    });
-
-    if (!r.status) {
-      throw Error(r.message || 'Gagal menyimpan foto.');
-    }
-
-    const attendance = await api('checkin', {
-      id: selected.id
-    });
-
-    if (!attendance.status) {
-      throw Error(attendance.message || 'Foto tersimpan, tetapi absensi gagal.');
-    }
+    const base64 = await file64(blob);
+    const result = await uploadPhotoInChunks(selected.id, base64);
+    if (!result.status) throw Error(result.message || 'Gagal menyimpan foto.');
 
     document.getElementById('photoStatus').textContent =
-      'Foto Twibbon berhasil disimpan dan kehadiran tercatat.';
-
+      'Foto Twibbon tersimpan. Kehadiran tercatat.';
     await load();
-
-    alert('Foto Twibbon berhasil disimpan.');
-
+    alert('Foto Twibbon berhasil disimpan dan kehadiran tercatat.');
   } catch (err) {
-    alert(err.message);
+    alert(err.message || String(err));
+    document.getElementById('photoStatus').textContent =
+      'Penyimpanan gagal: ' + (err.message || String(err));
+  } finally {
+    if (button) { button.disabled = false; button.textContent = 'Buat & Simpan Foto Twibbon'; }
   }
 }
 async function issueCert(){if(!selected)return alert('Pilih peserta');let r=await api('issueCertificate',{id:selected.id});if(!r.status)return alert(r.message);certResult.innerHTML=`Sertifikat terbit: <a href="${r.url}" target="_blank">Buka sertifikat</a>`;await load()}
