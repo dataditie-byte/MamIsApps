@@ -22,14 +22,23 @@ body{margin:0;background:#f3f6fa;font-family:Arial;color:#263445}header{backgrou
     style="width:100%;max-width:360px;display:block;
     border:1px solid #ddd;touch-action:none;cursor:move">
   </canvas>
-</div><div id="photoStatus"></div></div>
-<div class="card"><h2>Sertifikat EduFun</h2><p>Template sertifikat hijau dari Sanggar Belajar Mam Is telah disiapkan. Penerbitan PDF dinamis dengan nama peserta dan QR unik diselesaikan pada tahap berikutnya.</p><img src="/edufun/assets/certificate-template.png" style="width:100%;max-width:650px;border-radius:8px;border:1px solid #dbe3e8" alt="Template sertifikat EduFun"><button type="button" onclick="issueCert()">Terbitkan sertifikat peserta terpilih</button><div id="certResult"></div></div>
+</div><div id="photoStatus"></div>
+<div id="photoShare" class="hidden" style="margin-top:12px">
+  <button type="button" onclick="sharePhotoWhatsApp()">Bagikan Link Foto via WhatsApp</button>
+  <a id="photoDriveLink" href="#" target="_blank" rel="noopener" style="margin-left:8px">Lihat file Drive</a>
+</div></div>
+<div class="card"><h2>Sertifikat EduFun</h2><p>Template sertifikat hijau dari Sanggar Belajar Mam Is telah disiapkan. Penerbitan PDF dinamis dengan nama peserta dan QR unik diselesaikan pada tahap berikutnya.</p><img src="/edufun/assets/certificate-template.png" style="width:100%;max-width:650px;border-radius:8px;border:1px solid #dbe3e8" alt="Template sertifikat EduFun"><button type="button" onclick="issueCert()">Terbitkan sertifikat peserta terpilih</button>
+<div id="certResult"></div>
+<div id="certShare" class="hidden" style="margin-top:12px">
+  <button type="button" onclick="shareCertificateWhatsApp()">Bagikan Link Sertifikat via WhatsApp</button>
+  <a id="certDriveLink" href="#" target="_blank" rel="noopener" style="margin-left:8px">Lihat file Drive</a>
+</div></div>
 </section></main>
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbx6MBFktfLLXYhkvTRWeK5-FE83F5jjgNvVyVh1BCMkEuBY4D_h-tJpw_jqfKGi8hKwzg/exec';let token='',people=[],selected=null;
 function api(action,data={}){return new Promise((resolve,reject)=>{if(!API_URL.startsWith('http'))return reject(Error('Konfigurasikan URL backend Apps Script.'));let cb='cb'+Date.now()+Math.random().toString(36).slice(2),s=document.createElement('script'),t=setTimeout(()=>{clean();reject(Error('Timeout'))},20000);function clean(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=x=>{clean();resolve(x)};s.src=API_URL+'?action='+encodeURIComponent(action)+'&data='+encodeURIComponent(JSON.stringify({...data,token}))+'&callback='+cb+'&_='+Date.now();s.onerror=()=>{clean();reject(Error('Web App tidak dapat dimuat. Pastikan deployment Apps Script aktif dan akses Who has access = Anyone.'))};document.body.append(s)})}
 async function login(){try{let r=await api('adminLogin',{username:document.getElementById('user').value,password:document.getElementById('pass').value});if(!r.status)throw Error(r.message);token=r.token;localStorage.setItem('edufun_admin_token',token);document.getElementById('login').classList.add('hidden');document.getElementById('panel').classList.remove('hidden');load()}catch(e){alert(e.message)}}
-async function load(){try{let r=await api('adminList');if(!r.status)throw Error(r.message);people=r.data;render();}catch(e){alert(e.message)}}
+async function load(){try{let r=await api('adminList');if(!r.status)throw Error(r.message);people=r.data;render();if(selected){selected=people.find(p=>String(p.id)===String(selected.id))||selected;refreshShareControls();}}catch(e){alert(e.message)}}
 function render(){
  document.getElementById('nPeserta').textContent=people.length;
  document.getElementById('nPending').textContent=people.filter(x=>x.statusBayar!=='Lunas').length;
@@ -39,7 +48,48 @@ function render(){
  tbody.innerHTML=people.map((x,i)=>`<tr><td>${x.id}</td><td>${esc(x.nama)}</td><td>${esc(x.kelas)}</td><td>${esc(x.wa||x.email)}</td><td>${esc(x.metode)}</td><td>${esc(x.statusBayar)}</td><td>${esc(x.hadir)}</td><td><div class="actions"><button type="button" onclick="pick(${i})">Pilih</button> <button type="button" onclick="editParticipant(${i})">Edit</button> <button type="button" class="danger" onclick="deleteParticipant(${i})">Hapus</button></div></td></tr>`).join('');
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;}
+function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;refreshShareControls();}
+
+function normalizeWhatsAppNumber(value){
+  let digits=String(value||'').replace(/\D/g,'');
+  if(digits.startsWith('0')) digits='62'+digits.slice(1);
+  if(digits.startsWith('8')) digits='62'+digits;
+  return digits;
+}
+function openWhatsAppForSelected(message){
+  if(!selected) return alert('Pilih peserta terlebih dahulu.');
+  const phone=normalizeWhatsAppNumber(selected.wa);
+  if(!phone) return alert('Nomor WhatsApp peserta belum tersedia. Perbarui data peserta terlebih dahulu.');
+  const url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+  window.open(url,'_blank','noopener');
+}
+function getParticipantDriveUrl(field){
+  if(!selected) return '';
+  return String(selected[field]||'').trim();
+}
+function refreshShareControls(){
+  const photoUrl=getParticipantDriveUrl('foto');
+  const certUrl=getParticipantDriveUrl('sertifikat');
+  const photoBox=document.getElementById('photoShare');
+  const certBox=document.getElementById('certShare');
+  photoBox.classList.toggle('hidden',!photoUrl);
+  certBox.classList.toggle('hidden',!certUrl);
+  if(photoUrl) document.getElementById('photoDriveLink').href=photoUrl;
+  if(certUrl) document.getElementById('certDriveLink').href=certUrl;
+}
+function sharePhotoWhatsApp(){
+  const link=getParticipantDriveUrl('foto');
+  if(!link) return alert('Link foto Twibbon belum tersedia. Simpan foto terlebih dahulu.');
+  const message='Halo, '+(selected.nama||'peserta')+'! 👋\\n\\nFoto Twibbon EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📸 Lihat dan unduh foto di sini:\\n'+link+'\\n\\nTerima kasih telah berpartisipasi. Salam, Sanggar Belajar Mam Is.';
+  openWhatsAppForSelected(message);
+}
+function shareCertificateWhatsApp(){
+  const link=getParticipantDriveUrl('sertifikat');
+  if(!link) return alert('Link sertifikat belum tersedia. Terbitkan sertifikat terlebih dahulu.');
+  const message='Halo, '+(selected.nama||'peserta')+'! 🎓\\n\\nSertifikat partisipasi EduFun! Outdoor Learning Day dari Sanggar Belajar Mam Is sudah tersedia.\\n\\n📜 Lihat dan unduh sertifikat di sini:\\n'+link+'\\n\\nSelamat dan terus semangat belajar!\\nSalam, Sanggar Belajar Mam Is.';
+  openWhatsAppForSelected(message);
+}
+
 
 async function editParticipant(i){
  const x=people[i];if(!x)return;
@@ -197,61 +247,62 @@ function stopPhotoDrag() {
 photoCanvas.addEventListener('pointerup', stopPhotoDrag);
 photoCanvas.addEventListener('pointercancel', stopPhotoDrag);
 
-// Unggah gambar dalam potongan kecil agar URL JSONP tidak terlalu panjang.
-async function uploadPhotoInChunks(id, base64) {
-  const chunkSize = 6000;
-  const total = Math.ceil(base64.length / chunkSize);
-  const uploadId = 'photo_' + Date.now() + '_' +
-    Math.random().toString(36).slice(2, 10);
-
-  for (let index = 0; index < total; index++) {
-    const chunk = base64.slice(index * chunkSize, (index + 1) * chunkSize);
-    const part = await api('savePhotoChunk', {
-      id, uploadId, index, total, chunk
-    });
-    if (!part.status) {
-      throw Error(part.message || 'Gagal mengunggah bagian foto ' + (index + 1));
-    }
-    document.getElementById('photoStatus').textContent =
-      'Mengunggah foto: ' + Math.round((index + 1) / total * 100) + '%';
-  }
-
-  return await api('savePhotoFinalize', { id, uploadId, total });
-}
-
-// Simpan hasil akhir setelah posisi foto sesuai.
+// Simpan hasil akhir setelah posisi foto sesuai
 async function make() {
   if (!selected) return alert('Pilih peserta dulu');
   if (!photoImage) return alert('Pilih foto peserta dulu');
 
-  const button = document.querySelector('button[onclick="make()"]');
-  if (button) { button.disabled = true; button.textContent = 'Menyimpan...'; }
-
   try {
     renderTwibbon();
 
-    // Kompres hasil akhir agar unggahan lebih ringan.
     const blob = await new Promise(resolve =>
-      photoCanvas.toBlob(resolve, 'image/jpeg', 0.88)
+      photoCanvas.toBlob(resolve, 'image/png')
     );
+
     if (!blob) throw Error('Gagal membuat gambar Twibbon.');
 
-    const base64 = await file64(blob);
-    const result = await uploadPhotoInChunks(selected.id, base64);
-    if (!result.status) throw Error(result.message || 'Gagal menyimpan foto.');
+    const b64 = await file64(blob);
+
+    const r = await api('savePhoto', {
+      id: selected.id,
+      image: b64
+    });
+
+    if (!r.status) {
+      throw Error(r.message || 'Gagal menyimpan foto.');
+    }
+
+    const attendance = await api('checkin', {
+      id: selected.id
+    });
+
+    if (!attendance.status) {
+      throw Error(attendance.message || 'Foto tersimpan, tetapi absensi gagal.');
+    }
 
     document.getElementById('photoStatus').textContent =
-      'Foto Twibbon tersimpan. Kehadiran tercatat.';
+      'Foto Twibbon berhasil disimpan dan kehadiran tercatat.';
+
     await load();
-    alert('Foto Twibbon berhasil disimpan dan kehadiran tercatat.');
+    selected=people.find(p=>String(p.id)===String(selected.id))||selected;
+    refreshShareControls();
+
+    alert('Foto Twibbon berhasil disimpan.');
+
   } catch (err) {
-    alert(err.message || String(err));
-    document.getElementById('photoStatus').textContent =
-      'Penyimpanan gagal: ' + (err.message || String(err));
-  } finally {
-    if (button) { button.disabled = false; button.textContent = 'Buat & Simpan Foto Twibbon'; }
+    alert(err.message);
   }
 }
-async function issueCert(){if(!selected)return alert('Pilih peserta');let r=await api('issueCertificate',{id:selected.id});if(!r.status)return alert(r.message);certResult.innerHTML=`Sertifikat terbit: <a href="${r.url}" target="_blank">Buka sertifikat</a>`;await load()}
+async function issueCert(){
+  if(!selected)return alert('Pilih peserta');
+  try{
+    const r=await api('issueCertificate',{id:selected.id});
+    if(!r.status)throw Error(r.message||'Gagal menerbitkan sertifikat.');
+    await load();
+    selected=people.find(p=>String(p.id)===String(selected.id))||selected;
+    document.getElementById('certResult').innerHTML='Sertifikat berhasil dibuat: <a href="'+esc(r.url)+'" target="_blank" rel="noopener">Buka sertifikat</a>';
+    refreshShareControls();
+  }catch(err){alert(err.message||String(err));}
+}
 window.addEventListener('load',()=>{localStorage.removeItem('edufun_admin_token');token='';document.getElementById('login').classList.remove('hidden');document.getElementById('panel').classList.add('hidden');});
 </script></body></html>
