@@ -81,12 +81,51 @@ function updateCertificatePreview(){
 }
 function pick(i){selected=people[i]||null;if(!selected)return;document.getElementById('selected').textContent=selected.id+' — '+selected.nama+' / '+selected.kelas;document.getElementById('photoStatus').textContent='Peserta dipilih: '+selected.nama;document.getElementById('originalPhotoInfo').textContent=selected.fotoAsli?'Foto pendaftaran tersedia.':'Foto pendaftaran belum tersedia.';document.getElementById('certResult').textContent='Peserta dipilih: '+selected.nama;updateCertificatePreview();refreshShareControls();}
 
+function getDriveImagePreviewUrl(raw){
+ const value=String(raw||'').trim();
+ if(!value)return '';
+ // File.getUrl() menghasilkan halaman Drive. Untuk elemen img, gunakan endpoint thumbnail.
+ let id='';
+ try{
+  const u=new URL(value);
+  id=u.searchParams.get('id')||'';
+  if(!id){
+   const m=u.pathname.match(/\/file\/d\/([^/]+)/)||u.pathname.match(/\/d\/([^/]+)/);
+   if(m)id=m[1];
+  }
+ }catch(e){}
+ if(!id){
+  const m=value.match(/[?&]id=([^&]+)/)||value.match(/\/d\/([^/?]+)/);
+  if(m)id=decodeURIComponent(m[1]);
+ }
+ return id?'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w1600':value;
+}
 function useOriginalPhoto(){
- if(!selected||!selected.fotoAsli)return setNotice('Foto asli dari pendaftaran belum tersedia.','error');
- const img=new Image();img.crossOrigin='anonymous';
- img.onload=()=>{photoImage=img;photoZoom=1;photoX=0;photoY=0;document.getElementById('zoomPhoto').value=1;renderTwibbon();setNotice('Foto pendaftaran dimuat ke editor Twibbon.');};
- img.onerror=()=>setNotice('Foto pendaftaran tidak dapat dimuat.','error');
- img.src=selected.fotoAsli;
+ if(!selected||!selected.fotoAsli)return setNotice('Foto asli dari pendaftaran belum tersedia. Periksa kolom URL Foto Asli pada spreadsheet peserta.','error');
+ const raw=String(selected.fotoAsli).trim();
+ const previewUrl=getDriveImagePreviewUrl(raw);
+ const candidates=[previewUrl];
+ // Fallback untuk tautan Drive yang format thumbnail-nya tidak dilayani.
+ const idMatch=raw.match(/[?&]id=([^&]+)/)||raw.match(/\/d\/([^/?]+)/);
+ if(idMatch){
+  const id=decodeURIComponent(idMatch[1]);
+  candidates.push('https://drive.google.com/uc?export=view&id='+encodeURIComponent(id));
+ }
+ let attempt=0;
+ const img=new Image();
+ img.crossOrigin='anonymous';
+ img.onload=()=>{
+  photoImage=img;photoZoom=1;photoX=0;photoY=0;
+  document.getElementById('zoomPhoto').value=1;
+  renderTwibbon();
+  setNotice('Foto pendaftaran berhasil dimuat ke editor Twibbon.');
+ };
+ img.onerror=()=>{
+  attempt++;
+  if(attempt<candidates.length){img.src=candidates[attempt];return;}
+  setNotice('Tautan foto ditemukan, tetapi gambar tidak dapat dibaca. Pastikan file Drive dapat diakses siapa saja dengan link, lalu muat ulang daftar peserta.','error');
+ };
+ img.src=candidates[0];
 }
 function normalizeWhatsAppNumber(value){
   let digits=String(value||'').replace(/\D/g,'');
